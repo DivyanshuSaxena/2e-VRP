@@ -9,6 +9,8 @@ class Main {
     static int nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
+    // route only contains the index of each carpark that is visited by the first level vehicle
+    static Vector<Integer> route = new Vector<Integer>();
 
     public static void main(String args[]) throws IOException {
         // The Method reads the inputs from a file and initializes the data structures
@@ -47,7 +49,8 @@ class Main {
 
         // Initialization of the customer array 
         sc.nextLine(); // Demand Section
-        for(int i = 0; i < numNodes; i++) {
+        for(int i = 1; i < numNodes; i++) {
+            // i = 0 is reserved for the main depot
             if (i <= numCarpark) {
                 carparks[i] = new Carpark();
                 carparks[i].setId(i);
@@ -64,6 +67,6 @@ class Main {
     }
 
     public static void getInitialSoln() {
-        
+        // Finds the initial solution and places it in the static variable route.
     }
 }
