@@ -6,6 +6,7 @@ import java.io.*;
 class Main {
     static int numCustomers, numNodes, numCarpark;
     static int numVehicles1, numVehicles2;
+    static int l1cap, l2cap;
     static int nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
@@ -27,7 +28,8 @@ class Main {
         numCustomers = Integer.parseInt(sc.nextLine().split(" ")[2]); // Customers
 
         sc.nextLine(); // Edge Weight Type
-        sc.nextLine(); // L1Cap
+        sc.nextLine(); // Fleet Section
+        l1cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // Customers
         sc.nextLine(); // L1Cap
         sc.nextLine(); // L2Cap
 
@@ -90,9 +92,10 @@ class Main {
         return initial;
     }
 
-    public static Vector<Route> savingSolution(Vector<Customer> customers, int depot) {
+    public static Vector<Route> savingSolution(Vector<Customer> customers, int depot, int capacity) {
+        // This function implements the Clarke and Wright's Saving Algortihm
         Vector<Route> routes = new Vector<Route>();
-        Vector<Route> list = new Vector<Route>();
+        Vector<Route> savingsList = new Vector<Route>(); //  To hold all the two location routes
         for(int i = 0; i < customers.size()-1; i++) {
             Route single = new Route();
             single.addCustomer(depot);
@@ -105,10 +108,10 @@ class Main {
                 r.addCustomer(customers.elementAt(i).id);
                 r.addCustomer(customers.elementAt(j).id);
                 r.addCustomer(depot);
-                list.add(r);
+                savingsList.add(r);
             }
         }
-        list.sort(new Comparator<Route>() {
+        savingsList.sort(new Comparator<Route>() {
             @Override
             public int compare(Route o1, Route o2) {
                 int firsto1 = o1.route.elementAt(1);
@@ -126,13 +129,33 @@ class Main {
             }
         });
         // Now we have the sorted list, arranged in descending order as per the savings
-        for(int i = 0; i < list.size(); i++) {
-            Route bestSavings = list.elementAt(i); // This is the yet best merge for two delivery locations
+        for(int i = 0; i < savingsList.size(); i++) {
+            Route bestSavings = savingsList.elementAt(i); // This is the yet best merge for two delivery locations
+            int bestStart = bestSavings.route.elementAt(1);
+            int bestEnd = bestSavings.route.elementAt(2);
+            Route newRoute = new Route();
+            // routeIndex keeps track of the index at which the new route is to kept and mergedIndex removes the merged route.
+            int routeIndex = -1, mergedIndex = -1;
             for(int j = 0; j < routes.size(); j++) {
+                // routes contains all routes, and bestsavings may be merged with any of them.
                 Route currRoute = routes.elementAt(j);
-                
-                if(currRoute.route.firstElement() == bestSavings.route.firstElement())
+                int positionOfStart = currRoute.positionOf(bestStart);
+                int positionOfEnd = currRoute.positionOf(bestEnd);
+                // Now check if the positions are valid for merging or not
+                if ((positionOfStart == -2 && positionOfEnd == -1) || (positionOfStart == -1 && positionOfEnd == -2)) {
+                    if (newRoute.route.size() == 0 && (bestSavings.demand + currRoute.demand) <= capacity) {
+                        newRoute = currRoute.mergeRoute(bestSavings);
+                        routeIndex = j;
+                    } else if ((newRoute.demand + currRoute.demand) <= capacity) {
+                        newRoute = newRoute.mergeRoute(currRoute);
+                        mergedIndex = j;
+                    }
+                } else if (positionOfStart >= 0 || positionOfEnd >= 0) {
+                    break;                    
+                }
             }
+            if (routeIndex != -1)  routes.set(routeIndex, newRoute);
+            if (mergedIndex != -1)  routes.remove(mergedIndex);
         } 
         return routes;
     }
