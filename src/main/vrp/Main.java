@@ -29,9 +29,8 @@ class Main {
 
         sc.nextLine(); // Edge Weight Type
         sc.nextLine(); // Fleet Section
-        l1cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // Customers
-        sc.nextLine(); // L1Cap
-        sc.nextLine(); // L2Cap
+        l1cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L1 Cap
+        l2cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L2 Cap
 
         numVehicles1 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L1 Fleet
         numVehicles2 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L2 Fleet
@@ -87,26 +86,41 @@ class Main {
             carparks[assigned-1].addCustomer(customers[i]); // The carpark also holds the customer now.
         }
 
-        // Now apply Clarke and Wright's Savings Algorithm for the first level
+        // Add the required Carparks to the initial solution
+        Vector<Integer> carparksLevel1 = new Vector<Integer>();
+        for (Carpark cp : carparks) {
+            if (cp.customers.size() > 0) {
+                // Apply Clarke and Wright's Savings Algorithm for the second level routes (carparks)
+                Vector<Integer> carparkCustomers = new Vector<Integer>();
+                for (Customer customer : cp.customers) {
+                    carparkCustomers.add(customer.id); // To get the vector of indices of customers assigned to the carpark.
+                }
+                cp.routes = savingSolution(carparkCustomers, cp.id, l2cap);
+                initial.firstLevel.add(cp);
+                carparksLevel1.add(cp.id);
+            }
+        }
 
+        // Apply Clarke and Wright's Savings Algorithm for the first level
+        initial.routes = savingSolution(carparksLevel1, 0, l1cap);
         return initial;
     }
 
-    public static Vector<Route> savingSolution(Vector<Customer> customers, int depot, int capacity) {
+    public static Vector<Route> savingSolution(Vector<Integer> customers, int depot, int capacity) {
         // This function implements the Clarke and Wright's Saving Algortihm
         Vector<Route> routes = new Vector<Route>();
         Vector<Route> savingsList = new Vector<Route>(); //  To hold all the two location routes
         for(int i = 0; i < customers.size()-1; i++) {
             Route single = new Route();
             single.addCustomer(depot);
-            single.addCustomer(customers.elementAt(i).id);
+            single.addCustomer(customers.elementAt(i));
             single.addCustomer(depot);        
             routes.add(single); // For adding the single customer routes
             for(int j = i+1; j < customers.size(); j++) {
                 Route r = new Route();
                 r.addCustomer(depot);
-                r.addCustomer(customers.elementAt(i).id);
-                r.addCustomer(customers.elementAt(j).id);
+                r.addCustomer(customers.elementAt(i));
+                r.addCustomer(customers.elementAt(j));
                 r.addCustomer(depot);
                 savingsList.add(r);
             }
@@ -121,11 +135,11 @@ class Main {
                 int savings1 = nodesDistance[depot][firsto1] + nodesDistance[depot][secondo1] - nodesDistance[firsto1][secondo1];
                 int savings2 = nodesDistance[depot][firsto2] + nodesDistance[depot][secondo2] - nodesDistance[firsto2][secondo2];
                 if (savings1 > savings2 ) {
-                    return 1;
+                    return -1;
                 } else if (savings1 == savings2 && o1.demand < o2.demand) {
-                    return 1;
+                    return -1;
                 }
-                return -1;
+                return 1;
             }
         });
         // Now we have the sorted list, arranged in descending order as per the savings

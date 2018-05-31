@@ -101,6 +101,10 @@ class Route {
 class Solution {
     Vector<Carpark> firstLevel;
     Vector<Route> routes;
+    Solution() {
+        firstLevel = new Vector<Carpark>();
+        routes = new Vector<Route>();
+    }
     public void updateRoutes() {
         // Function to update the routes for the first level routes
     }
