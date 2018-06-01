@@ -2,8 +2,6 @@ package vrp;
 
 import java.util.Vector;
 
-import javax.sound.midi.VoiceStatus;
-
 // Class for the representation of the customers
 class Customer {
     int id; // This id is the id of the customer as in the overall nodes (This must be used for getting the distances).        
@@ -19,7 +17,8 @@ class Customer {
 }
 
 class Carpark {
-    int id; // This id is the id of the car park as in the overall nodes (This must be used for getting the distances)
+    // This id is the id of the car park as in the overall nodes (This must be used for getting the distances)
+    int id; 
     Vector<Customer> customers;
     Vector<Route> routes; 
     int totalDemand;
@@ -28,6 +27,13 @@ class Carpark {
         this.totalDemand = 0;
         customers = new Vector<Customer>();
         routes = new Vector<Route>();
+    }
+    public String toString() {
+        String cp = this.id + " : ";
+        for (Route r : this.routes) {
+            cp = cp + "[" + r + "],\n";
+        }
+        return cp;
     }
     public void setId(int id) {
         this.id = id;
@@ -40,11 +46,6 @@ class Carpark {
         customers.remove(c);
         totalDemand = totalDemand - c.demand;
     }
-    public void getInitialRoutes() {
-        // Function to get the initial routes for the current carpark object based on the customers vector
-        // Using Clarke and Wright's Savings Algorithm
-
-    }
 }
 
 class Route {
@@ -56,13 +57,30 @@ class Route {
         routeCost = 0;
         demand = 0;
     }
+    public String toString() {
+        // Give the string representation for the Route object
+        String route = "";
+        for (int cust : this.route) {
+            route = route + cust + ", ";
+        }
+        return route;
+    }
     public void addCustomer(int id) {
         route.add(id);
         demand += Main.customers[id-Main.numCarpark-1].demand;
         routeCost += Main.nodesDistance[route.elementAt(route.size()-2)][route.elementAt(route.size()-1)];
     }
     public void addAllCustomers(Vector<Integer> v, int index) {
-
+        // Add the vector v at index 'index' in the route vector
+        int insertIndex = index;
+        for (int cust : v) {
+            this.route.add(insertIndex, cust);;
+            demand += Main.customers[cust-Main.numCarpark-1].demand;
+            routeCost = routeCost - Main.nodesDistance[route.elementAt(insertIndex-1)][route.elementAt(insertIndex+1)] 
+                        + Main.nodesDistance[route.elementAt(insertIndex)][route.elementAt(insertIndex+1)]
+                        + Main.nodesDistance[route.elementAt(insertIndex-1)][route.elementAt(insertIndex)];         
+            insertIndex++;
+        }
     }
     public int positionOf(int customer) {
         // This function gives the position of the customer in the route.
@@ -104,6 +122,13 @@ class Solution {
     Solution() {
         firstLevel = new Vector<Carpark>();
         routes = new Vector<Route>();
+    }
+    public String toString() {
+        String sol = "";
+        for (Carpark cp : firstLevel) {
+            System.out.println(cp);
+        }
+        return sol;
     }
     public void updateRoutes() {
         // Function to update the routes for the first level routes

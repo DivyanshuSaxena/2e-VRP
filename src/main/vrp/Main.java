@@ -64,7 +64,8 @@ class Main {
         }
 
         Solution initsol = getInitialSoln();
-        // Use initsol to develop the further solutions.
+        // Use initsol to develop the further solutions here.
+        System.out.println(initsol);
         sc.close();
     }
 
