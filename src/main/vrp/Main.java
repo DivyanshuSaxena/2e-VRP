@@ -42,24 +42,26 @@ class Main {
 
         // Creation of distances matrix from the input file
         for (int i = 0; i < numNodes; i++) {
-            for (int j = i; j < numNodes; j++) {
+            for (int j = 0; j < numNodes; j++) {
                 nodesDistance[i][j] = sc.nextInt();
-                nodesDistance[j][i] = nodesDistance[i][j];
             }
         }
 
         // Initialization of the customer array 
         sc.nextLine(); // Demand Section
+        sc.nextLine(); // Demand of Main Depot
         for(int i = 1; i < numNodes; i++) {
             // i = 0 is reserved for the main depot
             if (i <= numCarpark) {
-                carparks[i] = new Carpark();
-                carparks[i].setId(i);
+                sc.nextLine(); // Demand of ith carpark                  
+                carparks[i-1] = new Carpark();
+                carparks[i-1].setId(i);
             } else {
-                customers[i] = new Customer();
-                customers[i].setId(i);
+                int offset = numCarpark + 1;
+                customers[i-offset] = new Customer();
+                customers[i-offset].setId(i);
                 int demand = Integer.parseInt(sc.nextLine().split(" ")[1]);
-                customers[i].setDemand(demand);            
+                customers[i-offset].setDemand(demand);            
             }
         }
 

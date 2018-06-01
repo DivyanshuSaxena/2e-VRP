@@ -67,15 +67,19 @@ class Route {
     }
     public void addCustomer(int id) {
         route.add(id);
-        demand += Main.customers[id-Main.numCarpark-1].demand;
-        routeCost += Main.nodesDistance[route.elementAt(route.size()-2)][route.elementAt(route.size()-1)];
+        // Add the demand if the added node is a customer 
+        if (id > Main.numCarpark) demand += Main.customers[id-Main.numCarpark-1].demand;
+        if (route.size() > 1) routeCost += Main.nodesDistance[route.elementAt(route.size()-2)][route.elementAt(route.size()-1)];
     }
     public void addAllCustomers(Vector<Integer> v, int index) {
         // Add the vector v at index 'index' in the route vector
         int insertIndex = index;
         for (int cust : v) {
             this.route.add(insertIndex, cust);;
-            demand += Main.customers[cust-Main.numCarpark-1].demand;
+            if (cust > Main.numCarpark) demand += Main.customers[cust-Main.numCarpark-1].demand;
+            // Conditions on whether there is a node after insert index or not
+            if (insertIndex >= route.size() -1) routeCost = routeCost + Main.nodesDistance[route.elementAt(insertIndex-1)][route.elementAt(insertIndex)];
+            if (insertIndex == 0) routeCost = routeCost + Main.nodesDistance[route.elementAt(insertIndex)][route.elementAt(insertIndex+1)];
             routeCost = routeCost - Main.nodesDistance[route.elementAt(insertIndex-1)][route.elementAt(insertIndex+1)] 
                         + Main.nodesDistance[route.elementAt(insertIndex)][route.elementAt(insertIndex+1)]
                         + Main.nodesDistance[route.elementAt(insertIndex-1)][route.elementAt(insertIndex)];         
