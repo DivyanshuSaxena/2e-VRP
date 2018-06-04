@@ -121,6 +121,7 @@ class Route {
             return (this.mergeRoute(r));
         } else if (endCust == r.route.elementAt(r.route.size()-2)) {
             Collections.reverse(r.route);
+            System.out.println(r.route);
             return (this.mergeRoute(r));            
         }
         return merged;
@@ -140,7 +141,8 @@ class Solution {
             System.out.println(cp);
         }
         return sol;
-    }
+
+        }
     public void updateRoutes() {
         // Function to update the routes for the first level routes
     }

@@ -109,16 +109,13 @@ class Main {
         return initial;
     }
 
-    public static Vector<Route> savingSolution(Vector<Integer> customers, int depot, int capacity) {
+    public static Vector<Route> savingSolution(Vector<Integer> customers, final int depot, int capacity) {
         // This function implements the Clarke and Wright's Saving Algortihm
+    	System.out.println("Applying C&W for " + depot + " with customers: " + customers.size()); // Debug
         Vector<Route> routes = new Vector<Route>();
         Vector<Route> savingsList = new Vector<Route>(); //  To hold all the two location routes
         for(int i = 0; i < customers.size()-1; i++) {
-            Route single = new Route();
-            single.addCustomer(depot);
-            single.addCustomer(customers.elementAt(i));
-            single.addCustomer(depot);        
-            routes.add(single); // For adding the single customer routes
+        	// Single routes shall be added after all other routes have been added
             for(int j = i+1; j < customers.size(); j++) {
                 Route r = new Route();
                 r.addCustomer(depot);
@@ -148,32 +145,87 @@ class Main {
         // Now we have the sorted list, arranged in descending order as per the savings
         for(int i = 0; i < savingsList.size(); i++) {
             Route bestSavings = savingsList.elementAt(i); // This is the yet best merge for two delivery locations
+            System.out.println("Best Savings Route: " + bestSavings); // Debug
             int bestStart = bestSavings.route.elementAt(1);
             int bestEnd = bestSavings.route.elementAt(2);
+            if (routes.size() == 0) {
+            	routes.add(bestSavings);
+            	continue;
+            }
             Route newRoute = new Route();
             // routeIndex keeps track of the index at which the new route is to kept and mergedIndex removes the merged route.
             int routeIndex = -1, mergedIndex = -1;
+            // added keeps track whether the bestSavings Route was added in any route or not. discard shows if the route is to be discarded
+            boolean added = false, discard = false;
             for(int j = 0; j < routes.size(); j++) {
                 // routes contains all routes, and bestsavings may be merged with any of them.
                 Route currRoute = routes.elementAt(j);
+                System.out.println(j + " " + currRoute); // Debug
                 int positionOfStart = currRoute.positionOf(bestStart);
                 int positionOfEnd = currRoute.positionOf(bestEnd);
                 // Now check if the positions are valid for merging or not
-                if ((positionOfStart == -2 && positionOfEnd == -1) || (positionOfStart == -1 && positionOfEnd == -2)) {
-                    if (newRoute.route.size() == 0 && (bestSavings.demand + currRoute.demand) <= capacity) {
-                        newRoute = currRoute.mergeRoute(bestSavings);
-                        routeIndex = j;
-                    } else if ((newRoute.demand + currRoute.demand) <= capacity) {
-                        newRoute = newRoute.mergeRoute(currRoute);
-                        mergedIndex = j;
-                    }
-                } else if (positionOfStart >= 0 || positionOfEnd >= 0) {
+                if (positionOfStart >= 0 || positionOfEnd >= 0) {
+                	routeIndex = -1;
+                	discard = true;
                     break;                    
+                } else if ((positionOfStart == -2 && positionOfEnd == -1) || (positionOfStart == -1 && positionOfEnd == -2)) {
+                	System.out.println("One at terminal other not present"); // Debug
+                	// Remove the demand of the common customer
+                	int commonDemand = ((positionOfStart == -2)? Main.customers[bestStart-numCarpark-1].demand : Main.customers[bestEnd-numCarpark-1].demand);
+                	if (newRoute.route.size() == 0) {
+                		if ((bestSavings.demand + currRoute.demand - commonDemand) <= capacity) {
+                			System.out.println("Demand: " + (bestSavings.demand + currRoute.demand - commonDemand));
+                			added = true;
+                			discard = false;
+                			newRoute = currRoute.mergeRoute(bestSavings);
+                        	routeIndex = j;
+                		} else {
+                			discard = true;
+                			break;
+                		}
+                    } else if (newRoute.route.size() > 0) {
+                    	if ((newRoute.demand + currRoute.demand - commonDemand) <= capacity) {
+                    		added = true;
+                			discard = false;
+                    		newRoute = newRoute.mergeRoute(currRoute);
+                    		mergedIndex = j;
+                    	} else break;
+                    }
+                } else if (positionOfStart == -2 || positionOfEnd == -2) {
+                	routeIndex = -1;
+                	discard = true;
+                    break;
                 }
             }
-            if (routeIndex != -1)  routes.set(routeIndex, newRoute);
+            if (routeIndex != -1)  {
+            	System.out.println("New Route: " + newRoute); // Debug
+            	routes.set(routeIndex, newRoute);
+            }
             if (mergedIndex != -1)  routes.remove(mergedIndex);
-        } 
+            if (!added && !discard)	{
+            	System.out.println("No suitable route found, adding: " + bestSavings); // Debug
+            	routes.add(bestSavings);
+            }
+        }
+        // All routes in savings list that could be incorporated in an existing route have been taken. Now include single routes.
+        for (int cust : customers) {
+            boolean present = false;
+            for (Route r : routes) {
+                if (r.route.contains(cust)) {
+                    present = true;
+                    break;
+                }
+            }
+            if (!present) {
+                Route single = new Route();
+                single.addCustomer(depot);
+                single.addCustomer(cust);
+                single.addCustomer(depot);        
+                routes.add(single); // For adding the single customer routes
+            }
+        }
+        System.out.println("Clarke and Wrights Algorithm Over"); // Debug
+        System.out.println(routes); // Debug
         return routes;
     }
 }
