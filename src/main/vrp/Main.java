@@ -65,7 +65,6 @@ class Main {
                 customers[i-offset] = new Customer();
                 customers[i-offset].setId(i);
                 int demand = Integer.parseInt(sc.nextLine().split(" ")[1]);
-                System.out.println(demand+" "+i+" index: "+(i-offset)); // Debug
                 customers[i-offset].setDemand(demand);            
             }
         }
@@ -116,7 +115,7 @@ class Main {
 
     public static Vector<Route> savingSolution(Vector<Integer> customers, final int depot, int capacity) {
         // This function implements the Clarke and Wright's Saving Algortihm
-    	System.out.println("Applying C&W for " + depot + " with customers: " + customers.size()); // Debug
+    	// System.out.println("Applying C&W for " + depot + " with customers: " + customers.size()); // Debug
         Vector<Route> routes = new Vector<Route>();
         Vector<Route> savingsList = new Vector<Route>(); //  To hold all the two location routes
         for(int i = 0; i < customers.size()-1; i++) {
@@ -150,7 +149,7 @@ class Main {
         // Now we have the sorted list, arranged in descending order as per the savings
         for(int i = 0; i < savingsList.size(); i++) {
             Route bestSavings = savingsList.elementAt(i); // This is the yet best merge for two delivery locations
-            System.out.println("Best Savings Route: " + bestSavings); // Debug
+            // System.out.println("Best Savings Route: " + bestSavings); // Debug
             int bestStart = bestSavings.route.elementAt(1);
             int bestEnd = bestSavings.route.elementAt(2);
             if (routes.size() == 0) {
@@ -165,7 +164,7 @@ class Main {
             for(int j = 0; j < routes.size(); j++) {
                 // routes contains all routes, and bestsavings may be merged with any of them.
                 Route currRoute = routes.elementAt(j);
-                System.out.println(j + " " + currRoute); // Debug
+                // System.out.println(j + " " + currRoute); // Debug
                 int positionOfStart = currRoute.positionOf(bestStart);
                 int positionOfEnd = currRoute.positionOf(bestEnd);
                 // Now check if the positions are valid for merging or not
@@ -174,13 +173,10 @@ class Main {
                 	discard = true;
                     break;                    
                 } else if ((positionOfStart == -2 && positionOfEnd == -1) || (positionOfStart == -1 && positionOfEnd == -2)) {
-                	System.out.println("One at terminal other not present"); // Debug
                 	// Remove the demand of the common customer
                 	int commonDemand = ((positionOfStart == -2)? Main.customers[bestStart-numCarpark-1].demand : Main.customers[bestEnd-numCarpark-1].demand);
-                	System.out.println(commonDemand+" "+positionOfStart+" "+positionOfEnd+" "+bestStart+" "+bestEnd); // Debug
                 	if (newRoute.route.size() == 0) {
                 		if ((bestSavings.demand + currRoute.demand - commonDemand) <= capacity) {
-                			System.out.println("Demand: " + (bestSavings.demand + currRoute.demand - commonDemand)); // Debug
                 			added = true;
                 			discard = false;
                 			newRoute = currRoute.mergeRoute(bestSavings);
@@ -204,12 +200,12 @@ class Main {
                 }
             }
             if (routeIndex != -1)  {
-            	System.out.println("New Route: " + newRoute); // Debug
+            	// System.out.println("New Route: " + newRoute); // Debug
             	routes.set(routeIndex, newRoute);
             }
             if (mergedIndex != -1)  routes.remove(mergedIndex);
             if (!added && !discard)	{
-            	System.out.println("No suitable route found, adding: " + bestSavings); // Debug
+            	// System.out.println("No suitable route found, adding: " + bestSavings); // Debug
             	routes.add(bestSavings);
             }
         }
@@ -230,8 +226,7 @@ class Main {
                 routes.add(single); // For adding the single customer routes
             }
         }
-        System.out.println("Clarke and Wrights Algorithm Over"); // Debug
-        System.out.println(routes); // Debug
+        // System.out.println(routes); // Debug
         return routes;
     }
 }
