@@ -46,6 +46,18 @@ class Carpark {
         customers.remove(c);
         totalDemand = totalDemand - c.demand;
     }
+    public int getTotalCost() {
+        int cost = 0;
+        for (Route route : this.routes) {
+            cost += route.getCost();
+        }
+        return cost;
+    }
+}
+
+class RouteCarpark extends Carpark {
+    int cpindex; // The index of the actual carpark
+    Route route;
 }
 
 class Solution {
@@ -66,7 +78,14 @@ class Solution {
         // Function to evaluate the total costs of the solution.
         // Note :- This function should include the infeasibility costs
         // Presently, no infeasibility costs are taken into account
-        
-        return 0;
+        int cost = 0;
+        for (Route route : this.routes) {
+            cost += route.getCost();
+        }
+        for (Carpark cp : firstLevel) {
+            cost += cp.getTotalCost();
+        }
+        // Add the infeasibility costs here.
+        return cost;
     }
 }

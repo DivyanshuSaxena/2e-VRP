@@ -72,6 +72,7 @@ class Main {
         Solution initsol = getInitialSoln();
         // Use initsol to develop the further solutions here.
         System.out.println(initsol);
+        System.out.println("Cost of Solution: " + initsol.getCost());
         sc.close();
     }
 
@@ -103,11 +104,13 @@ class Main {
                     carparkCustomers.add(customer.id); // To get the vector of indices of customers assigned to the carpark.
                 }
                 cp.routes = savingSolution(carparkCustomers, cp.id, l2cap);
+                // We now have the routes for each carpark.
                 initial.firstLevel.add(cp);
                 carparksLevel1.add(cp.id);
             }
         }
 
+        
         // Apply Clarke and Wright's Savings Algorithm for the first level
         initial.routes = savingSolution(carparksLevel1, 0, l1cap);
         return initial;

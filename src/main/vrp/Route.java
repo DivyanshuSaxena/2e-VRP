@@ -80,10 +80,19 @@ class Route {
         return merged;
     }
     public int getCost() {
-        // Function to evaluate the total costs of the solution.
-        // Note :- This function should include the infeasibility costs
+        // Function to evaluate the total costs of the solution, including the infeasibility costs
         // Presently, no infeasibility costs are taken into account
-           
-        return 0;
+        int cost = 0, prevIndex = -1;
+        for (int index : this.route) {
+            if (prevIndex == -1) {
+                prevIndex = index;
+                continue;
+            }
+            cost += Main.nodesDistance[prevIndex][index];
+            prevIndex = index;
+        }
+        // Add the infeasibility costs here.
+        // System.out.println(cost); // Debug
+        return cost;
     }
 }
