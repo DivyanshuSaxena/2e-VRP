@@ -47,13 +47,17 @@ class Main {
             }
         }
 
+        // Empty Lines
+        sc.nextLine();
+        sc.nextLine();
+        
         // Initialization of the customer array 
         sc.nextLine(); // Demand Section
-        sc.nextLine(); // Demand of Main Depot
+        sc.nextLine(); // Demand of Main Depot	
         for(int i = 1; i < numNodes; i++) {
             // i = 0 is reserved for the main depot
             if (i <= numCarpark) {
-                sc.nextLine(); // Demand of ith carpark                  
+            	sc.nextLine(); // Demand of ith carpark 
                 carparks[i-1] = new Carpark();
                 carparks[i-1].setId(i);
             } else {
@@ -61,6 +65,7 @@ class Main {
                 customers[i-offset] = new Customer();
                 customers[i-offset].setId(i);
                 int demand = Integer.parseInt(sc.nextLine().split(" ")[1]);
+                System.out.println(demand+" "+i+" index: "+(i-offset)); // Debug
                 customers[i-offset].setDemand(demand);            
             }
         }
@@ -172,9 +177,10 @@ class Main {
                 	System.out.println("One at terminal other not present"); // Debug
                 	// Remove the demand of the common customer
                 	int commonDemand = ((positionOfStart == -2)? Main.customers[bestStart-numCarpark-1].demand : Main.customers[bestEnd-numCarpark-1].demand);
+                	System.out.println(commonDemand+" "+positionOfStart+" "+positionOfEnd+" "+bestStart+" "+bestEnd); // Debug
                 	if (newRoute.route.size() == 0) {
                 		if ((bestSavings.demand + currRoute.demand - commonDemand) <= capacity) {
-                			System.out.println("Demand: " + (bestSavings.demand + currRoute.demand - commonDemand));
+                			System.out.println("Demand: " + (bestSavings.demand + currRoute.demand - commonDemand)); // Debug
                 			added = true;
                 			discard = false;
                 			newRoute = currRoute.mergeRoute(bestSavings);

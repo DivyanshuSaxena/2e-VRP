@@ -137,7 +137,7 @@ class Solution {
     public String toString() {
         String sol = "";
         for (Carpark cp : firstLevel) {
-            System.out.println(cp);
+            System.out.print(cp);
         }
         return sol;
     }
