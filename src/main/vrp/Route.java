@@ -83,18 +83,19 @@ class Route {
         Route merged = new Route();
         int startCust = this.route.elementAt(1);
         int endCust = this.route.elementAt(this.route.size()-2);
+        Vector<Integer> thisRoute = (Vector) this.route.clone();
         if (endCust == r.route.elementAt(1)) {
-            this.route.remove(this.route.size()-1);
-            merged.addAllCustomers(this.route, 0); // Add the current route
+            thisRoute.remove(thisRoute.size()-1);
+            merged.addAllCustomers(thisRoute, 0); // Add the current route
             r.route.remove(0);
             r.route.remove(0); // Trim the new route
-            merged.addAllCustomers(r.route,this.route.size()); // Merge them
+            merged.addAllCustomers(r.route,thisRoute.size()); // Merge them
         } else if (startCust == r.route.elementAt(r.route.size()-2)) {
             r.route.remove(r.route.size()-1);   
             merged.addAllCustomers(r.route, 0);
-            this.route.remove(0);   
-            this.route.remove(0);   
-            merged.addAllCustomers(this.route, r.route.size());
+            thisRoute.remove(0);   
+            thisRoute.remove(0);   
+            merged.addAllCustomers(thisRoute, r.route.size());
         } else if (startCust == r.route.elementAt(1)) {
             Collections.reverse(r.route);
             return (this.mergeRoute(r));
@@ -102,6 +103,7 @@ class Route {
             Collections.reverse(r.route);
             return (this.mergeRoute(r));            
         }
+        // System.out.println("Merged Route: " + merged); // Debug
         return merged;
     }
     public int getCost() {
