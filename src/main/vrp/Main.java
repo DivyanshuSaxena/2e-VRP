@@ -198,7 +198,12 @@ class Main {
                     break;                    
                 } else if ((positionOfStart == -2 && positionOfEnd == -1) || (positionOfStart == -1 && positionOfEnd == -2)) {
                 	// Remove the demand of the common customer
-                	int commonDemand = ((positionOfStart == -2)? Main.customers[bestStart-numCarpark-1].demand : Main.customers[bestEnd-numCarpark-1].demand);
+                    int commonDemand = 0;
+                    if (positionOfStart == -2) {
+                        commonDemand = ((bestStart >= Main.numNodes)? Main.routedCarparks.elementAt(bestStart-Main.numNodes).route.demand : Main.customers[bestStart-numCarpark-1].demand);
+                    } else {
+                        commonDemand = ((bestEnd >= Main.numNodes)? Main.routedCarparks.elementAt(bestEnd-Main.numNodes).route.demand : Main.customers[bestEnd-numCarpark-1].demand);                        
+                    }
                 	if (newRoute.route.size() == 0) {
                 		if ((bestSavings.demand + currRoute.demand - commonDemand) <= capacity) {
                 			added = true;

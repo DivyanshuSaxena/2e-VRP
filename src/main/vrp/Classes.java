@@ -76,7 +76,7 @@ class Solution {
         // Change this function
         String sol = "";
         for (Route route : this.routes) {
-            sol += "[\n\t";
+            sol += "[";
             int prevcp = -1;
             for (int cp : route.route) {                    
                 if (cp >= Main.numNodes) {
@@ -89,10 +89,10 @@ class Solution {
                         prevcp = originalcp;                        
                     }
                 } else {
-                    sol = sol + cp + ",\n\t";
+                    sol = sol + "\n\t" + cp + ",";
                 }
             }
-            sol += "],\n";
+            sol += "\n],\n";
         }
         return sol;
     }

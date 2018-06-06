@@ -37,14 +37,32 @@ class Route {
         // Add the vector v at index 'index' in the route vector
         int insertIndex = index;
         for (int cust : v) {
-            this.route.add(insertIndex, cust);;
-            if (cust > Main.numCarpark) demand += Main.customers[cust-Main.numCarpark-1].demand;
+            this.route.add(insertIndex, cust);
+            if (cust > Main.numCarpark && cust < Main.numNodes) demand += Main.customers[cust-Main.numCarpark-1].demand;
+            else if (cust >= Main.numNodes) demand += Main.routedCarparks.elementAt(cust-Main.numNodes).route.demand;
             // Conditions on whether there is a node after insert index or not, and what is the route size
-            if (insertIndex >= route.size() -1 && insertIndex != 0) routeCost = routeCost + Main.nodesDistance[route.elementAt(insertIndex-1)][route.elementAt(insertIndex)];
-            else if (insertIndex == 0 && insertIndex < route.size() - 1) routeCost = routeCost + Main.nodesDistance[route.elementAt(insertIndex)][route.elementAt(insertIndex+1)];
-            else if (insertIndex > 0 && insertIndex < route.size() - 1) routeCost = routeCost - Main.nodesDistance[route.elementAt(insertIndex-1)][route.elementAt(insertIndex+1)] 
-                        + Main.nodesDistance[route.elementAt(insertIndex)][route.elementAt(insertIndex+1)]
-                        + Main.nodesDistance[route.elementAt(insertIndex-1)][route.elementAt(insertIndex)];         
+            // Also, accordingly change the elements at insertIndex
+            if (insertIndex >= route.size() -1 && insertIndex != 0) {
+                int prevNode = route.elementAt(insertIndex-1);
+                int currNode = route.elementAt(insertIndex);
+                if (prevNode >= Main.numNodes)  prevNode = Main.routedCarparks.elementAt(prevNode-Main.numNodes).cpindex;
+                if (currNode >= Main.numNodes)  currNode = Main.routedCarparks.elementAt(currNode-Main.numNodes).cpindex;
+                routeCost = routeCost + Main.nodesDistance[prevNode][currNode];
+            } else if (insertIndex == 0 && insertIndex < route.size() - 1) {
+                int currNode = route.elementAt(insertIndex);
+                int nextNode = route.elementAt(insertIndex+1);
+                if (currNode >= Main.numNodes)  currNode = Main.routedCarparks.elementAt(currNode-Main.numNodes).cpindex;
+                if (nextNode >= Main.numNodes)  nextNode = Main.routedCarparks.elementAt(nextNode-Main.numNodes).cpindex;                
+                routeCost = routeCost + Main.nodesDistance[currNode][nextNode];
+            } else if (insertIndex > 0 && insertIndex < route.size() - 1) {
+                int prevNode = route.elementAt(insertIndex-1);
+                int currNode = route.elementAt(insertIndex);
+                int nextNode = route.elementAt(insertIndex+1);
+                if (prevNode >= Main.numNodes)  prevNode = Main.routedCarparks.elementAt(prevNode-Main.numNodes).cpindex;
+                if (currNode >= Main.numNodes)  currNode = Main.routedCarparks.elementAt(currNode-Main.numNodes).cpindex;
+                if (nextNode >= Main.numNodes)  nextNode = Main.routedCarparks.elementAt(nextNode-Main.numNodes).cpindex;                                
+                routeCost = routeCost - Main.nodesDistance[prevNode][nextNode] + Main.nodesDistance[currNode][nextNode] + Main.nodesDistance[prevNode][currNode];         
+            } 
             insertIndex++;
         }
     }
@@ -95,7 +113,9 @@ class Route {
                 prevIndex = index;
                 continue;
             }
-            cost += Main.nodesDistance[prevIndex][index];
+            prevIndex = prevIndex>=Main.numNodes ? Main.routedCarparks.elementAt(prevIndex-Main.numNodes).cpindex : prevIndex;
+            int tempIndex = index>=Main.numNodes ? Main.routedCarparks.elementAt(index-Main.numNodes).cpindex : index;
+            cost += Main.nodesDistance[prevIndex][tempIndex];
             prevIndex = index;
         }
         // Add the infeasibility costs here.
