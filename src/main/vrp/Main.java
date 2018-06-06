@@ -10,6 +10,7 @@ class Main {
     static int nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
+    static Vector<RouteCarpark> routedCarparks;
     // route only contains the index of each carpark that is visited by the first level vehicle
     static Vector<Integer> route = new Vector<Integer>();
 
@@ -43,7 +44,11 @@ class Main {
         // Creation of distances matrix from the input file
         for (int i = 0; i < numNodes; i++) {
             for (int j = 0; j < numNodes; j++) {
-                nodesDistance[i][j] = sc.nextInt();
+                if (i != j) nodesDistance[i][j] = sc.nextInt();
+                else {
+                    sc.nextInt();
+                    nodesDistance[i][j] = 0;
+                }
             }
         }
 
@@ -105,14 +110,25 @@ class Main {
                 }
                 cp.routes = savingSolution(carparkCustomers, cp.id, l2cap);
                 // We now have the routes for each carpark.
-                initial.firstLevel.add(cp);
+                // initial.firstLevel.add(cp); Remove
                 carparksLevel1.add(cp.id);
             }
         }
 
-        
-        // Apply Clarke and Wright's Savings Algorithm for the first level
-        initial.routes = savingSolution(carparksLevel1, 0, l1cap);
+        // Decompose the carparks into RouteCarparks for each route
+        Vector<Integer> routeCarparks = new Vector<Integer>();
+        Main.routedCarparks = new Vector<RouteCarpark>();
+        int temp = Main.numNodes;
+        for (int id : carparksLevel1) {
+            for (Route route : carparks[id-1].routes) {
+                RouteCarpark rc = new RouteCarpark(id, route);
+                routeCarparks.add(temp);
+                Main.routedCarparks.add(rc);
+                temp++;
+            }
+        }
+        // Apply Clarke and Wright's Savings Algorithm for the first level RouteCarparks
+        initial.routes = savingSolution(routeCarparks, 0, l1cap);
         return initial;
     }
 
@@ -139,6 +155,11 @@ class Main {
                 int firsto2 = o2.route.elementAt(1);
                 int secondo1 = o1.route.elementAt(2);
                 int secondo2 = o2.route.elementAt(2);
+                // Watch out for temporary carparks
+                if (firsto1 >= Main.numNodes) firsto1 = Main.routedCarparks.elementAt(firsto1-Main.numNodes).cpindex;
+                if (secondo1 >= Main.numNodes) secondo1 = Main.routedCarparks.elementAt(secondo1-Main.numNodes).cpindex;
+                if (firsto2 >= Main.numNodes) firsto2 = Main.routedCarparks.elementAt(firsto2-Main.numNodes).cpindex;
+                if (secondo2 >= Main.numNodes) secondo2 = Main.routedCarparks.elementAt(secondo2-Main.numNodes).cpindex;
                 int savings1 = nodesDistance[depot][firsto1] + nodesDistance[depot][secondo1] - nodesDistance[firsto1][secondo1];
                 int savings2 = nodesDistance[depot][firsto2] + nodesDistance[depot][secondo2] - nodesDistance[firsto2][secondo2];
                 if (savings1 > savings2 ) {

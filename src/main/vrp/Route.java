@@ -22,9 +22,16 @@ class Route {
     }
     public void addCustomer(int id) {
         route.add(id);
-        // Add the demand if the added node is a customer 
-        if (id > Main.numCarpark) demand += Main.customers[id-Main.numCarpark-1].demand;
-        if (route.size() > 1) routeCost += Main.nodesDistance[route.elementAt(route.size()-2)][route.elementAt(route.size()-1)];
+        // Add the demand accordingly, whether the added node is a customer or a carpark 
+        if (id > Main.numCarpark && id < Main.numNodes) demand += Main.customers[id-Main.numCarpark-1].demand;
+        else if (id >= Main.numNodes) demand += Main.routedCarparks.elementAt(id-Main.numNodes).route.demand;
+        if (route.size() > 1) {
+            int prevNode = route.elementAt(route.size()-2);
+            int newNode = route.elementAt(route.size()-1);
+            if (prevNode >= Main.numNodes)  prevNode = Main.routedCarparks.elementAt(prevNode-Main.numNodes).cpindex;
+            if (newNode >= Main.numNodes)  newNode = Main.routedCarparks.elementAt(newNode-Main.numNodes).cpindex;
+            routeCost += Main.nodesDistance[prevNode][newNode];
+        }
     }
     public void addAllCustomers(Vector<Integer> v, int index) {
         // Add the vector v at index 'index' in the route vector

@@ -7,7 +7,7 @@ class Customer {
     int id; // This id is the id of the customer as in the overall nodes (This must be used for getting the distances).        
     int demand;
     int assignedPark; // This is the id of the carpark object that is assigned to this customer.
-    boolean hasCar;
+    boolean hasCar;  // Has not been used yet
     public void setId(int id) {
         this.id = id;
     }
@@ -46,31 +46,53 @@ class Carpark {
         customers.remove(c);
         totalDemand = totalDemand - c.demand;
     }
-    public int getTotalCost() {
-        int cost = 0;
-        for (Route route : this.routes) {
-            cost += route.getCost();
+    public void addRoute(Route route) {
+        for (int cust : route.route) {
+            addCustomer(Main.customers[cust-Main.numCarpark-1]);
         }
-        return cost;
+        this.routes.add(route);
     }
 }
 
-class RouteCarpark extends Carpark {
+class RouteCarpark {
     int cpindex; // The index of the actual carpark
     Route route;
+    RouteCarpark() {
+        cpindex = 0;
+        route = new Route();
+    }
+    RouteCarpark(int index, Route route) {
+        cpindex = index;
+        this.route = route;
+    }
 }
 
 class Solution {
-    Vector<Carpark> firstLevel;
     Vector<Route> routes;
     Solution() {
-        firstLevel = new Vector<Carpark>();
         routes = new Vector<Route>();
     }
     public String toString() {
-        String sol = "First Level: " + this.routes + "\n";
-        for (Carpark cp : firstLevel) {
-            sol += cp;
+        // Change this function
+        String sol = "";
+        for (Route route : this.routes) {
+            sol += "[\n\t";
+            int prevcp = -1;
+            for (int cp : route.route) {                    
+                if (cp >= Main.numNodes) {
+                    int originalcp = Main.routedCarparks.elementAt(cp-Main.numNodes).cpindex;
+                    if (prevcp == originalcp) {
+                        sol += ("{" + Main.routedCarparks.elementAt(cp-Main.numNodes).route + "}, ");
+                    } else {
+                        sol = sol + "\n\t" + originalcp + " : ";
+                        sol += ("{" + Main.routedCarparks.elementAt(cp-Main.numNodes).route + "}, ");
+                        prevcp = originalcp;                        
+                    }
+                } else {
+                    sol = sol + cp + ",\n\t";
+                }
+            }
+            sol += "],\n";
         }
         return sol;
     }
@@ -82,8 +104,8 @@ class Solution {
         for (Route route : this.routes) {
             cost += route.getCost();
         }
-        for (Carpark cp : firstLevel) {
-            cost += cp.getTotalCost();
+        for (RouteCarpark cp : Main.routedCarparks) {
+            cost += cp.route.getCost();
         }
         // Add the infeasibility costs here.
         return cost;
