@@ -3,6 +3,8 @@ package vrp;
 import java.util.Vector;
 import java.util.Collections;
 
+// Class to represent a Route.
+// All routes are defined as a vector of integers, and hence, all customers are to be accessed from the Main.nodes array
 class Route {
     Vector<Integer> route;
     int routeCost;
@@ -33,38 +35,48 @@ class Route {
             routeCost += Main.nodesDistance[prevNode][newNode];
         }
     }
+    public void addCustomer(int id, int index) {
+        this.route.add(index, id);
+        if (id > Main.numCarpark && id < Main.numNodes) demand += Main.customers[id-Main.numCarpark-1].demand;
+        else if (id >= Main.numNodes) demand += Main.routedCarparks.elementAt(id-Main.numNodes).route.demand;
+        // Conditions on whether there is a node after insert index or not, and what is the route size
+        // Also, accordingly change the elements at index
+        if (index >= route.size() -1 && index != 0) {
+            int prevNode = route.elementAt(index-1);
+            int currNode = route.elementAt(index);
+            if (prevNode >= Main.numNodes)  prevNode = Main.routedCarparks.elementAt(prevNode-Main.numNodes).cpindex;
+            if (currNode >= Main.numNodes)  currNode = Main.routedCarparks.elementAt(currNode-Main.numNodes).cpindex;
+            routeCost = routeCost + Main.nodesDistance[prevNode][currNode];
+        } else if (index == 0 && index < route.size() - 1) {
+            int currNode = route.elementAt(index);
+            int nextNode = route.elementAt(index+1);
+            if (currNode >= Main.numNodes)  currNode = Main.routedCarparks.elementAt(currNode-Main.numNodes).cpindex;
+            if (nextNode >= Main.numNodes)  nextNode = Main.routedCarparks.elementAt(nextNode-Main.numNodes).cpindex;                
+            routeCost = routeCost + Main.nodesDistance[currNode][nextNode];
+        } else if (index > 0 && index < route.size() - 1) {
+            int prevNode = route.elementAt(index-1);
+            int currNode = route.elementAt(index);
+            int nextNode = route.elementAt(index+1);
+            if (prevNode >= Main.numNodes)  prevNode = Main.routedCarparks.elementAt(prevNode-Main.numNodes).cpindex;
+            if (currNode >= Main.numNodes)  currNode = Main.routedCarparks.elementAt(currNode-Main.numNodes).cpindex;
+            if (nextNode >= Main.numNodes)  nextNode = Main.routedCarparks.elementAt(nextNode-Main.numNodes).cpindex;                                
+            routeCost = routeCost - Main.nodesDistance[prevNode][nextNode] + Main.nodesDistance[currNode][nextNode] + Main.nodesDistance[prevNode][currNode];         
+        } 
+    }
     public void addAllCustomers(Vector<Integer> v, int index) {
         // Add the vector v at index 'index' in the route vector
         int insertIndex = index;
         for (int cust : v) {
-            this.route.add(insertIndex, cust);
-            if (cust > Main.numCarpark && cust < Main.numNodes) demand += Main.customers[cust-Main.numCarpark-1].demand;
-            else if (cust >= Main.numNodes) demand += Main.routedCarparks.elementAt(cust-Main.numNodes).route.demand;
-            // Conditions on whether there is a node after insert index or not, and what is the route size
-            // Also, accordingly change the elements at insertIndex
-            if (insertIndex >= route.size() -1 && insertIndex != 0) {
-                int prevNode = route.elementAt(insertIndex-1);
-                int currNode = route.elementAt(insertIndex);
-                if (prevNode >= Main.numNodes)  prevNode = Main.routedCarparks.elementAt(prevNode-Main.numNodes).cpindex;
-                if (currNode >= Main.numNodes)  currNode = Main.routedCarparks.elementAt(currNode-Main.numNodes).cpindex;
-                routeCost = routeCost + Main.nodesDistance[prevNode][currNode];
-            } else if (insertIndex == 0 && insertIndex < route.size() - 1) {
-                int currNode = route.elementAt(insertIndex);
-                int nextNode = route.elementAt(insertIndex+1);
-                if (currNode >= Main.numNodes)  currNode = Main.routedCarparks.elementAt(currNode-Main.numNodes).cpindex;
-                if (nextNode >= Main.numNodes)  nextNode = Main.routedCarparks.elementAt(nextNode-Main.numNodes).cpindex;                
-                routeCost = routeCost + Main.nodesDistance[currNode][nextNode];
-            } else if (insertIndex > 0 && insertIndex < route.size() - 1) {
-                int prevNode = route.elementAt(insertIndex-1);
-                int currNode = route.elementAt(insertIndex);
-                int nextNode = route.elementAt(insertIndex+1);
-                if (prevNode >= Main.numNodes)  prevNode = Main.routedCarparks.elementAt(prevNode-Main.numNodes).cpindex;
-                if (currNode >= Main.numNodes)  currNode = Main.routedCarparks.elementAt(currNode-Main.numNodes).cpindex;
-                if (nextNode >= Main.numNodes)  nextNode = Main.routedCarparks.elementAt(nextNode-Main.numNodes).cpindex;                                
-                routeCost = routeCost - Main.nodesDistance[prevNode][nextNode] + Main.nodesDistance[currNode][nextNode] + Main.nodesDistance[prevNode][currNode];         
-            } 
+            this.addCustomer(cust, insertIndex);
             insertIndex++;
         }
+    }
+    public void removeCustomer(int custIndex) {
+        // This function shall be required only for customers and not for depots
+        int cust = this.route.elementAt(custIndex);
+        this.routeCost = routeCost - Main.nodesDistance[cust][route.elementAt(custIndex-1)] - Main.nodesDistance[cust][route.elementAt(custIndex+1)] + Main.nodesDistance[route.elementAt(custIndex-1)][route.elementAt(custIndex+1)];
+        this.demand -= (Main.customers[cust-Main.numCarpark-1].demand);
+        this.route.remove(custIndex);
     }
     public int positionOf(int customer) {
         // This function gives the position of the customer in the route.
@@ -83,7 +95,7 @@ class Route {
         Route merged = new Route();
         int startCust = this.route.elementAt(1);
         int endCust = this.route.elementAt(this.route.size()-2);
-        Vector<Integer> thisRoute = (Vector) this.route.clone();
+        Vector<Integer> thisRoute = (Vector<Integer>) this.route.clone();
         if (endCust == r.route.elementAt(1)) {
             thisRoute.remove(thisRoute.size()-1);
             merged.addAllCustomers(thisRoute, 0); // Add the current route

@@ -7,12 +7,11 @@ class Main {
     static int numCustomers, numNodes, numCarpark;
     static int numVehicles1, numVehicles2;
     static int l1cap, l2cap;
+    static int numIterations;
     static int nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
     static Vector<RouteCarpark> routedCarparks;
-    // route only contains the index of each carpark that is visited by the first level vehicle
-    static Vector<Integer> route = new Vector<Integer>();
 
     public static void main(String args[]) throws IOException {
         // The Method reads the inputs from a file and initializes the data structures
@@ -75,9 +74,16 @@ class Main {
         }
 
         Solution initsol = getInitialSoln();
-        // Use initsol to develop the further solutions here.
         System.out.println(initsol);
         System.out.println("Cost of Solution: " + initsol.getCost());
+        // Use initsol to develop the further solutions here.
+        numIterations = 10; // The number of iterations for which improvement will happen
+        int iterations = 0;
+        Solution bestFoundSoln = initsol;
+        while (iterations < numIterations) {
+            Vector<Solution> neighbourhood = bestFoundSoln.getNeighborhood();
+            // Find the best solution of the generated neighborhood, and proceed with it further 
+        }
         sc.close();
     }
 

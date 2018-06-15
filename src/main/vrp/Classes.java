@@ -20,7 +20,8 @@ class Carpark {
     // This id is the id of the car park as in the overall nodes (This must be used for getting the distances)
     int id; 
     Vector<Customer> customers;
-    Vector<Route> routes; 
+    Vector<Route> routes; // Can be removed
+    Vector<Integer> routeCarparks;
     int totalDemand;
     public Carpark() {
         this.id = 0;
@@ -46,6 +47,7 @@ class Carpark {
         customers.remove(c);
         totalDemand = totalDemand - c.demand;
     }
+    // Can be removed
     public void addRoute(Route route) {
         for (int cust : route.route) {
             addCustomer(Main.customers[cust-Main.numCarpark-1]);
@@ -67,47 +69,8 @@ class RouteCarpark {
     }
 }
 
-class Solution {
-    Vector<Route> routes;
-    Solution() {
-        routes = new Vector<Route>();
-    }
-    public String toString() {
-        // Change this function
-        String sol = "";
-        for (Route route : this.routes) {
-            sol += "[";
-            int prevcp = -1;
-            for (int cp : route.route) {                    
-                if (cp >= Main.numNodes) {
-                    int originalcp = Main.routedCarparks.elementAt(cp-Main.numNodes).cpindex;
-                    if (prevcp == originalcp) {
-                        sol += ("{" + Main.routedCarparks.elementAt(cp-Main.numNodes).route + "}, ");
-                    } else {
-                        sol = sol + "\n\t" + originalcp + " : ";
-                        sol += ("{" + Main.routedCarparks.elementAt(cp-Main.numNodes).route + "}, ");
-                        prevcp = originalcp;                        
-                    }
-                } else {
-                    sol = sol + "\n\t" + cp + ",";
-                }
-            }
-            sol += "\n],\n";
-        }
-        return sol;
-    }
-    public int getCost() {
-        // Function to evaluate the total costs of the solution.
-        // Note :- This function should include the infeasibility costs
-        // Presently, no infeasibility costs are taken into account
-        int cost = 0;
-        for (Route route : this.routes) {
-            cost += route.getCost();
-        }
-        for (RouteCarpark cp : Main.routedCarparks) {
-            cost += cp.route.getCost();
-        }
-        // Add the infeasibility costs here.
-        return cost;
-    }
+class CustomerIndex {
+    int route;
+    int routecp;
+    int index;
 }
