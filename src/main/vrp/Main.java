@@ -81,7 +81,7 @@ class Main {
         int iterations = 0;
         Solution bestFoundSoln = initsol;
         while (iterations < numIterations) {
-            Vector<Solution> neighbourhood = bestFoundSoln.getNeighborhood();
+            Solution newSolution = bestFoundSoln.getBestNeighbor();
             // Find the best solution of the generated neighborhood, and proceed with it further 
         }
         sc.close();

@@ -49,6 +49,21 @@ class Solution {
         this.solutionCost = cost;
         return cost;
     }
+    public int getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
+        Route swapRoute1 = Main.routedCarparks.elementAt(this.routes.elementAt(ci1.route).route.elementAt(ci1.routecp)-Main.numNodes).route;
+        Route swapRoute2 = Main.routedCarparks.elementAt(this.routes.elementAt(ci2.route).route.elementAt(ci2.routecp)-Main.numNodes).route;
+        int customer1 = swapRoute1.route.elementAt(ci1.index);
+        int customer1prev = swapRoute1.route.elementAt(ci1.index);
+        int customer1next = swapRoute1.route.elementAt(ci1.index);
+        int customer2 = swapRoute2.route.elementAt(ci2.index);
+        int customer2prev = swapRoute2.route.elementAt(ci2.index);
+        int customer2next = swapRoute2.route.elementAt(ci2.index);
+        int subtractCost1 = Main.nodesDistance[customer1][customer1next] + Main.nodesDistance[customer1prev][customer1];
+        int subtractCost2 = Main.nodesDistance[customer2][customer2next] + Main.nodesDistance[customer2prev][customer2];
+        int addCost1 = Main.nodesDistance[customer2][customer1next] + Main.nodesDistance[customer1prev][customer2];
+        int addCost2 = Main.nodesDistance[customer1][customer2next] + Main.nodesDistance[customer2prev][customer1];
+        return (this.solutionCost - subtractCost1 - subtractCost2 + addCost1 + addCost2);
+    }
     public CustomerIndex getRandomCustomer() {
         // Function to get a random customer from the solution.
         // ***Remove zero choose options
@@ -74,19 +89,17 @@ class Solution {
         cIndex.index = chosenCarpark.route.route.elementAt((int)Math.random() * chosenCarpark.route.route.size()); // Index of the randomly chosen customer in the route 
         return cIndex; 
     }
-    public Vector<Solution> getNeighborhood() {
-        Vector<Solution> neighbors = new Vector<Solution>();
+    public Solution getBestNeighbor() {
         // Generate Neighborhood logic here
-
-        // Now, apply the move operator on the Solution to get to a better solution
+        Solution bestSolution = new Solution();
+        // Apply the move operator on the Solution to get to a better solution
         boolean improved = false, change = false;
         int iterations = 0, maxMoveIterations = 100; // Hyper-Parameter
         int routeIndex = 0;
         Route changedRoute = new Route();
         while (!improved) {
-            Solution s = this;
             CustomerIndex ci = getRandomCustomer();
-            changedRoute = (Route) Main.routedCarparks.elementAt(this.routes.elementAt(ci.route).route.elementAt(ci.routecp)).route.clone(); // Index of the selected routecarpark
+            changedRoute = Main.routedCarparks.elementAt(this.routes.elementAt(ci.route).route.elementAt(ci.routecp)).route.clone(); // Index of the selected routecarpark
             int customer = changedRoute.route.elementAt(ci.index); // Index of the selected random customer
             // This customer is to be placed in the best location, in the route of the given RouteCarpark
             int prevCustomer = changedRoute.route.elementAt(ci.index-1);
@@ -111,15 +124,33 @@ class Solution {
                 changedRoute.addCustomer(customer,bestIndex);
                 improved = true;
                 change = true;
+            } else {
+                iterations++;
             }
             // Random customer relocated to the best location in the route
-            iterations++;
             if (iterations == maxMoveIterations) break;
         }
         if (change) this.routes.set(routeIndex, changedRoute);
         System.out.println("Cost after improved move : " + this.getCost());
 
         // Iterated Swap Procedure
-        return neighbors;
+        improved = false;
+        while(!improved) {
+            CustomerIndex ci1 = getRandomCustomer();
+            CustomerIndex ci2 = getRandomCustomer();
+            if (solutionCost > getSwapCost(ci1, ci2)) {
+                // Swap the two customers
+                Route swapRoute1 = Main.routedCarparks.elementAt(this.routes.elementAt(ci1.route).route.elementAt(ci1.routecp)-Main.numNodes).route;
+                Route swapRoute2 = Main.routedCarparks.elementAt(this.routes.elementAt(ci2.route).route.elementAt(ci2.routecp)-Main.numNodes).route;
+                int customer1 = swapRoute1.route.elementAt(ci1.index);
+                int customer2 = swapRoute2.route.elementAt(ci2.index);
+                swapRoute1.setCustomer(customer2, ci1.index);
+                swapRoute2.setCustomer(customer1, ci2.index);
+                improved = true;
+            }
+        }
+        System.out.println("Cost after iterated swap procedure : " + this.getCost());
+        
+        return bestSolution;
     }
 }

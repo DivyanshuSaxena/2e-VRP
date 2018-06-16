@@ -22,6 +22,13 @@ class Route {
         }
         return route;
     }
+    public Route clone() {
+        Route clonedRoute = new Route();
+        clonedRoute.routeCost = this.routeCost;
+        clonedRoute.demand = this.demand;
+        clonedRoute.route = (Vector<Integer>) this.route.clone();
+        return clonedRoute;
+    }
     public void addCustomer(int id) {
         route.add(id);
         // Add the demand accordingly, whether the added node is a customer or a carpark 
@@ -77,6 +84,14 @@ class Route {
         this.routeCost = routeCost - Main.nodesDistance[cust][route.elementAt(custIndex-1)] - Main.nodesDistance[cust][route.elementAt(custIndex+1)] + Main.nodesDistance[route.elementAt(custIndex-1)][route.elementAt(custIndex+1)];
         this.demand -= (Main.customers[cust-Main.numCarpark-1].demand);
         this.route.remove(custIndex);
+    }
+    public void setCustomer(int id, int index) {
+        int offset = Main.numCarpark+1;
+        int removedCost = Main.nodesDistance[route.elementAt(index)][route.elementAt(index+1)] + Main.nodesDistance[route.elementAt(index-1)][route.elementAt(index)];
+        int addedCost = Main.nodesDistance[id][route.elementAt(index+1)] + Main.nodesDistance[route.elementAt(index-1)][id];
+        this.demand = this.demand - Main.customers[this.route.elementAt(index)-offset].demand + Main.customers[id-offset].demand;
+        this.routeCost = this.routeCost - removedCost + addedCost; 
+        this.route.set(index, id);
     }
     public int positionOf(int customer) {
         // This function gives the position of the customer in the route.
