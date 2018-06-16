@@ -84,9 +84,9 @@ class Solution {
             sum += this.routes.elementAt(i).route.size();
         }
         // chosen holds the Route from which the random customer is to be taken, choose the routeCarpark
-        cIndex.routecp = chosen.route.elementAt((int)Math.random() * chosen.route.size()); // Index of the selected routecarpark
+        cIndex.routecp = chosen.route.elementAt(1 + ((int)Math.random() * (chosen.route.size()-2))); // Index of the selected routecarpark
         RouteCarpark chosenCarpark = Main.routedCarparks.elementAt(cIndex.routecp);
-        cIndex.index = chosenCarpark.route.route.elementAt((int)Math.random() * chosenCarpark.route.route.size()); // Index of the randomly chosen customer in the route 
+        cIndex.index = chosenCarpark.route.route.elementAt(1 + ((int)Math.random() * (chosenCarpark.route.route.size()-2))); // Index of the randomly chosen customer in the route 
         return cIndex; 
     }
     public Solution getBestNeighbor() {
