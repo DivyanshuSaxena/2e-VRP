@@ -73,6 +73,7 @@ class Main {
             }
         }
 
+        long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
         System.out.println(initsol);
         System.out.println("Cost of Solution: " + initsol.getCost());
@@ -81,10 +82,13 @@ class Main {
         int iterations = 0;
         Solution bestFoundSoln = initsol;
         while (iterations < numIterations) {
-            Solution newSolution = bestFoundSoln.getBestNeighbor();
+            bestFoundSoln.updateBestNeighbor();
             // Find the best solution of the generated neighborhood, and proceed with it further 
             iterations++;
         }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Running time : " + (endTime-startTime));
+        
         sc.close();
     }
 
@@ -137,6 +141,7 @@ class Main {
         // Apply Clarke and Wright's Savings Algorithm for the first level RouteCarparks
         initial.routes = savingSolution(routeCarparks, 0, l1cap);
         // System.out.println("Final Routes: " + initial.routes); // Debug
+        initial.updateCost();
         return initial;
     }
 
