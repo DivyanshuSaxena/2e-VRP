@@ -85,12 +85,12 @@ class Solution {
         }
         // chosen holds the Route from which the random customer is to be taken, choose the routeCarpark
         int in = (int)(Math.random() * (chosen.route.size()-2));
-        System.out.println(in + " at " + chosen); // Debug
+        // System.out.println(in + " at " + chosen); // Debug
         cIndex.routecp = chosen.route.elementAt(1 + in); // Index of the selected routecarpark
         RouteCarpark chosenCarpark = Main.routedCarparks.elementAt(cIndex.routecp-Main.numNodes);
         in = (int)(Math.random() * (chosenCarpark.route.route.size()-2));
         cIndex.index = (1 + in); // Index of the randomly chosen customer in the route 
-        System.out.println(in + " at " + chosenCarpark.route); // Debug
+        // System.out.println(in + " at " + chosenCarpark.route); // Debug
         return cIndex; 
     }
     public Solution getBestNeighbor() {
@@ -98,7 +98,7 @@ class Solution {
         Solution bestSolution = new Solution();
         // Apply the move operator on the Solution to get to a better solution
         int iterations = 0, maxMoveIterations = 100; // Hyper-Parameter
-        int maxIspIterations = 100; // Hyper-Parameter
+        int maxIspIterations = 10; // Hyper-Parameter
         int routeCarparkIndex = 0;
         Route clonedRoute = new Route();
         while (iterations < maxMoveIterations) {
@@ -107,18 +107,18 @@ class Solution {
             int customer = clonedRoute.route.elementAt(ci.index); // Index of the selected random customer
             // This customer is to be placed in the best location, in the route of the given RouteCarpark
             int prevCustomer = clonedRoute.route.elementAt(ci.index-1);
-            int nextCustomer = clonedRoute.route.elementAt(ci.index);
-            System.out.println("For route: "+ clonedRoute + " " + clonedRoute.getCost() + " " + customer + " " + prevCustomer + " " + nextCustomer); // Debug
+            int nextCustomer = clonedRoute.route.elementAt(ci.index+1);
+            // System.out.println("For route: "+ clonedRoute + " " + clonedRoute.getCost() + " " + customer + " " + prevCustomer + " " + nextCustomer); // Debug
             int sameCost = solutionCost - Main.nodesDistance[prevCustomer][customer] - Main.nodesDistance[customer][nextCustomer] + Main.nodesDistance[prevCustomer][nextCustomer];
             int bestIndex = ci.index, bestCost = this.solutionCost;
             for (int i = 1; i < clonedRoute.route.size()-1; i++) {
                 // Loop to iterate over the places in the current route
-                if (i == ci.index) continue;
+                if (i == ci.index || i == ci.index+1) continue;
                 int prev = clonedRoute.route.elementAt(i-1);
                 int next = clonedRoute.route.elementAt(i);
                 int newCost = sameCost + Main.nodesDistance[prev][customer] + Main.nodesDistance[customer][next] - Main.nodesDistance[prev][next];
                 if (bestCost > newCost) {
-                	System.out.println(bestCost + " " + newCost); // Debug
+                	// System.out.println(bestCost + " " + newCost); // Debug
                     bestCost = newCost;
                     bestIndex = i;
                 }
@@ -127,20 +127,20 @@ class Solution {
             if (bestIndex != ci.index) {
                 routeCarparkIndex = ci.routecp;
                 clonedRoute.addCustomer(customer,bestIndex);
-                System.out.println("Updated Route: " + clonedRoute + " " + clonedRoute.getCost()); // Debug
+                // System.out.println("Updated Route: " + clonedRoute + " " + clonedRoute.getCost()); // Debug
                 Main.routedCarparks.elementAt(routeCarparkIndex-Main.numNodes).route = clonedRoute;
             } else {
                 iterations++;
             }
             // Random customer relocated to the best location in the route
         }
-        System.out.println("After improved move : " + this.toString() + " with cost: " + this.getCost()); // Debug
+        System.out.println("After improved move, solution : " + this.toString() + " with cost: " + this.getCost()); // Debug
 
         // Iterated Swap Procedure
         boolean improved = false;
         iterations = 0;
         while(!improved) {
-            System.out.println(this.routes + " at " + iterations); // Debug
+            // System.out.println(this.routes + " at " + iterations); // Debug
             CustomerIndex ci1 = getRandomCustomer();
             CustomerIndex ci2 = getRandomCustomer();
             if (solutionCost > getSwapCost(ci1, ci2)) {
