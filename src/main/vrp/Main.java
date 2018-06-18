@@ -77,12 +77,13 @@ class Main {
         System.out.println(initsol);
         System.out.println("Cost of Solution: " + initsol.getCost());
         // Use initsol to develop the further solutions here.
-        numIterations = 10; // The number of iterations for which improvement will happen
+        numIterations = 1; // Hyper-Parameter
         int iterations = 0;
         Solution bestFoundSoln = initsol;
         while (iterations < numIterations) {
             Solution newSolution = bestFoundSoln.getBestNeighbor();
             // Find the best solution of the generated neighborhood, and proceed with it further 
+            iterations++;
         }
         sc.close();
     }
