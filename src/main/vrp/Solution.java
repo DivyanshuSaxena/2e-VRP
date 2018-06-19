@@ -10,6 +10,7 @@ class Solution {
         routes = new Vector<Route>();
         solutionCost = 0;
     }
+    
     public String toString() {
         // Change this function
         String sol = "";
@@ -34,9 +35,11 @@ class Solution {
         }
         return sol;
     }
+
     public int getCost() {
         return this.solutionCost;
     }
+
     public int updateCost() {
         // Function to evaluate the total costs of the solution.
         // Note :- This function should include the infeasibility costs
@@ -52,32 +55,68 @@ class Solution {
         this.solutionCost = cost;
         return cost;
     }
+
     public int getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
         Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
         Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
+        int swapCost = 0, type = 1, bestCost = 0;
+        int customer1nextnext = -1, customer2nextnext = -1, customer1prevprev = -1, customer2prevprev = -1;
         
         int customer1 = swapRoute1.route.elementAt(ci1.index);
         int customer1prev = swapRoute1.route.elementAt(ci1.index-1);
         int customer1next = swapRoute1.route.elementAt(ci1.index+1);
+        if (ci1.index < swapRoute1.route.size()-2)  customer1nextnext = swapRoute1.route.elementAt(ci1.index+2);
+        if (ci1.index > 1)  customer1prevprev = swapRoute1.route.elementAt(ci1.index-2);
         
         int customer2 = swapRoute2.route.elementAt(ci2.index);
         int customer2prev = swapRoute2.route.elementAt(ci2.index-1);
         int customer2next = swapRoute2.route.elementAt(ci2.index+1);
+        if (ci2.index < swapRoute2.route.size()-2)  customer2nextnext = swapRoute2.route.elementAt(ci2.index+2);
+        if (ci2.index > 1)  customer2prevprev = swapRoute2.route.elementAt(ci2.index-2);
         // System.out.println("Swapping " + customer1 + " in " + swapRoute1 + " with " + customer2 + " in " + swapRoute2); // Debug
         int subtractCost1 = Main.nodesDistance[customer1][customer1next] + Main.nodesDistance[customer1prev][customer1];
         int subtractCost2 = Main.nodesDistance[customer2][customer2next] + Main.nodesDistance[customer2prev][customer2];
         int addCost1 = Main.nodesDistance[customer2][customer1next] + Main.nodesDistance[customer1prev][customer2];
         int addCost2 = Main.nodesDistance[customer1][customer2next] + Main.nodesDistance[customer2prev][customer1];
-        int swapCost = (this.solutionCost - subtractCost1 - subtractCost2 + addCost1 + addCost2);
-        
+        swapCost = (this.solutionCost - subtractCost1 - subtractCost2 + addCost1 + addCost2);
         if (ci1.index-ci2.index == 1 || ci1.index-ci2.index == -1) {
         	swapCost = swapCost + 2*Main.nodesDistance[customer1][customer2];
         }
-        return swapCost;
+        // Checkout alternatives
+        int costType2 = 0, costType3 = 0, costType4 = 0, costType5 = 0;
+        // Type 2
+        if (customer1nextnext != -1)    costType2 = Main.nodesDistance[customer1prev][customer1next] + Main.nodesDistance[customer2][customer1nextnext] - Main.nodesDistance[customer1prev][customer2] - Main.nodesDistance[customer1next][customer1nextnext];
+        else  costType2 = Main.nodesDistance[customer1prev][customer1next] - Main.nodesDistance[customer1prev][customer2];
+        if (costType2 < bestCost) {
+            bestCost = costType2;
+            type = 2;
+        }  
+        // Type 3
+        if (customer1prevprev != -1)    costType3 = Main.nodesDistance[customer1prev][customer1next] + Main.nodesDistance[customer1prevprev][customer2] - Main.nodesDistance[customer1prev][customer2] - Main.nodesDistance[customer1prevprev][customer1prev];
+        else    costType3 = Main.nodesDistance[customer1prev][customer1next] - Main.nodesDistance[customer1prev][customer2];
+        if (costType3 < bestCost) {
+            bestCost = costType3;
+            type = 3;
+        }  
+        // Type 4
+        if (customer2prevprev != -1)    costType4 = Main.nodesDistance[customer2prev][customer2next] + Main.nodesDistance[customer2prevprev][customer1] - Main.nodesDistance[customer2prev][customer1] - Main.nodesDistance[customer2prevprev][customer2prev];
+        else  costType4 = Main.nodesDistance[customer2prev][customer2next] - Main.nodesDistance[customer2prev][customer1];
+        if (costType4 < bestCost) {
+            bestCost = costType4;
+            type = 4;
+        }  
+        // Type 5
+        if (customer2nextnext != -1)    costType5 = Main.nodesDistance[customer2prev][customer2next] + Main.nodesDistance[customer1][customer2nextnext] - Main.nodesDistance[customer2prev][customer1] - Main.nodesDistance[customer2next][customer2nextnext];
+        else    costType5 = Main.nodesDistance[customer2prev][customer2next] - Main.nodesDistance[customer2prev][customer1];
+        if (costType5 < bestCost) {
+            bestCost = costType5;
+            type = 5;
+        }  
+        return ((swapCost + bestCost)*10 + type);
     }
+
     public CustomerIndex getRandomCustomer() {
         // Function to get a random customer from the solution.
-        // ***Remove zero choose options
         CustomerIndex cIndex = new CustomerIndex();
         int totalRouteCarparks = 0;
         for (Route route : this.routes) {
@@ -104,6 +143,7 @@ class Solution {
         // System.out.println(in + " at " + chosenCarpark.route); // Debug
         return cIndex; 
     }
+
     public void updateBestNeighbor() {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
@@ -153,10 +193,12 @@ class Solution {
             // System.out.println(this.routes + " at " + iterations); // Debug
             CustomerIndex ci1 = getRandomCustomer();
             CustomerIndex ci2 = getRandomCustomer();
-            int swapCost = getSwapCost(ci1,ci2);
+            int swapCostType = getSwapCost(ci1,ci2);
+            int swapCost = swapCostType/10;
+            int type = swapCostType%10;
             if (this.solutionCost > swapCost) {
                 // Swap the two customers
-            	System.out.println("Found lower cost : " + swapCost); // Debug
+            	System.out.println("Found lower cost : " + swapCost + " and type : " + type); // Debug
                 Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
                 Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
                 int customer1 = swapRoute1.route.elementAt(ci1.index);
@@ -164,6 +206,19 @@ class Solution {
                 swapRoute1.setCustomer(customer2, ci1.index);
                 swapRoute2.setCustomer(customer1, ci2.index);
                 
+                if (type == 2) {
+                    swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index+1), ci1.index);
+                    swapRoute1.setCustomer(customer2, ci1.index+1);
+                } else if (type == 3) {
+                    swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index-1), ci1.index);
+                    swapRoute1.setCustomer(customer2, ci1.index-1);                    
+                } else if (type == 4) {
+                    swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index-1), ci2.index);
+                    swapRoute2.setCustomer(customer1, ci2.index-1);                    
+                } else if (type == 5) {
+                    swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index+1), ci2.index);
+                    swapRoute2.setCustomer(customer1, ci2.index+1);
+                }
                 this.updateCost();
                 System.out.println("Updated Solution Cost : " + this.getCost()); // Debug
             } else {
@@ -172,6 +227,7 @@ class Solution {
         }
         System.out.println("After iterated swap procedure, solution : " + this.toString() + " with cost: " + this.getCost());
     }
+
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether
     	Solution perturbSoln = new Solution();
