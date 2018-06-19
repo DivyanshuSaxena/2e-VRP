@@ -73,6 +73,13 @@ class Solution {
         int customer2next = swapRoute2.route.elementAt(ci2.index+1);
         if (ci2.index < swapRoute2.route.size()-2)  customer2nextnext = swapRoute2.route.elementAt(ci2.index+2);
         if (ci2.index > 1)  customer2prevprev = swapRoute2.route.elementAt(ci2.index-2);
+        if (ci1.isSameRoute(ci2) && ci2.index-ci1.index==2) {
+            customer1nextnext = customer1;
+            customer2prevprev = customer2;
+        } else if (ci1.isSameRoute(ci2) && ci1.index-ci2.index==2) {
+            customer1prevprev = customer1;
+            customer2nextnext = customer2;
+        }
         // System.out.println("Swapping " + customer1 + " in " + swapRoute1 + " with " + customer2 + " in " + swapRoute2); // Debug
         int subtractCost1 = Main.nodesDistance[customer1][customer1next] + Main.nodesDistance[customer1prev][customer1];
         int subtractCost2 = Main.nodesDistance[customer2][customer2next] + Main.nodesDistance[customer2prev][customer2];
@@ -82,25 +89,29 @@ class Solution {
         if (ci1.index-ci2.index == 1 || ci1.index-ci2.index == -1) {
         	swapCost = swapCost + 2*Main.nodesDistance[customer1][customer2];
         }
+        // System.out.println("Cost of swapping " + customer1 + " and " + customer2 + " : " + swapCost); // Debug
         // Checkout alternatives
         int costType2 = 0, costType3 = 0, costType4 = 0, costType5 = 0;
         // Type 2
         if (customer1nextnext != -1)    costType2 = Main.nodesDistance[customer1prev][customer1next] + Main.nodesDistance[customer2][customer1nextnext] - Main.nodesDistance[customer1prev][customer2] - Main.nodesDistance[customer1next][customer1nextnext];
         else  costType2 = Main.nodesDistance[customer1prev][customer1next] - Main.nodesDistance[customer1prev][customer2];
+        // System.out.println("Cost of change, type 2 : " + costType2); // Debug
         if (costType2 < bestCost) {
             bestCost = costType2;
             type = 2;
         }  
         // Type 3
-        if (customer1prevprev != -1)    costType3 = Main.nodesDistance[customer1prev][customer1next] + Main.nodesDistance[customer1prevprev][customer2] - Main.nodesDistance[customer1prev][customer2] - Main.nodesDistance[customer1prevprev][customer1prev];
-        else    costType3 = Main.nodesDistance[customer1prev][customer1next] - Main.nodesDistance[customer1prev][customer2];
+        if (customer1prevprev != -1)    costType3 = Main.nodesDistance[customer1prev][customer1next] + Main.nodesDistance[customer1prevprev][customer2] - Main.nodesDistance[customer2][customer1next] - Main.nodesDistance[customer1prevprev][customer1prev];
+        else    costType3 = Main.nodesDistance[customer1prev][customer1next] - Main.nodesDistance[customer2][customer1next];
+        // System.out.println("Cost of change, type 3 : " + costType2); // Debug
         if (costType3 < bestCost) {
             bestCost = costType3;
             type = 3;
         }  
         // Type 4
-        if (customer2prevprev != -1)    costType4 = Main.nodesDistance[customer2prev][customer2next] + Main.nodesDistance[customer2prevprev][customer1] - Main.nodesDistance[customer2prev][customer1] - Main.nodesDistance[customer2prevprev][customer2prev];
-        else  costType4 = Main.nodesDistance[customer2prev][customer2next] - Main.nodesDistance[customer2prev][customer1];
+        if (customer2prevprev != -1)    costType4 = Main.nodesDistance[customer2prev][customer2next] + Main.nodesDistance[customer2prevprev][customer1] - Main.nodesDistance[customer1][customer2next] - Main.nodesDistance[customer2prevprev][customer2prev];
+        else  costType4 = Main.nodesDistance[customer2prev][customer2next] - Main.nodesDistance[customer1][customer2next];
+        // System.out.println("Cost of change, type 4 : " + costType2); // Debug
         if (costType4 < bestCost) {
             bestCost = costType4;
             type = 4;
@@ -108,11 +119,14 @@ class Solution {
         // Type 5
         if (customer2nextnext != -1)    costType5 = Main.nodesDistance[customer2prev][customer2next] + Main.nodesDistance[customer1][customer2nextnext] - Main.nodesDistance[customer2prev][customer1] - Main.nodesDistance[customer2next][customer2nextnext];
         else    costType5 = Main.nodesDistance[customer2prev][customer2next] - Main.nodesDistance[customer2prev][customer1];
+        // System.out.println("Cost of change, type 5 : " + costType2); // Debug
         if (costType5 < bestCost) {
             bestCost = costType5;
             type = 5;
         }  
-        return ((swapCost + bestCost)*10 + type);
+        int returnCost = (swapCost + bestCost)*10 + type;
+        // System.out.println("Returned swap cost type : " + returnCost); // Debug
+        return returnCost;
     }
 
     public CustomerIndex getRandomCustomer() {
@@ -148,7 +162,7 @@ class Solution {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
         int iterations = 0, maxMoveIterations = 100; // Hyper-Parameter
-        int maxIspIterations = 100; // Hyper-Parameter
+        int maxIspIterations = 10 * Main.numCustomers; // Hyper-Parameter
         int routeCarparkIndex = 0;
         Route clonedRoute = new Route();
         while (iterations < maxMoveIterations) {

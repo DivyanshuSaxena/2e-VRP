@@ -73,4 +73,7 @@ class CustomerIndex {
     int route;
     int routecp;
     int index;
+    public boolean isSameRoute(CustomerIndex ci) {
+        return (ci.route==this.route && ci.routecp==this.routecp);
+    }
 }
