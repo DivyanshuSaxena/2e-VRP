@@ -161,7 +161,7 @@ class Solution {
     public void updateBestNeighbor() {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
-        int iterations = 0, maxMoveIterations = 100; // Hyper-Parameter
+        int iterations = 0, maxMoveIterations = Main.numCustomers; // Hyper-Parameter
         int maxIspIterations = 10 * Main.numCustomers; // Hyper-Parameter
         int routeCarparkIndex = 0;
         Route clonedRoute = new Route();
@@ -217,24 +217,29 @@ class Solution {
                 Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
                 int customer1 = swapRoute1.route.elementAt(ci1.index);
                 int customer2 = swapRoute2.route.elementAt(ci2.index);
-                swapRoute1.setCustomer(customer2, ci1.index);
-                swapRoute2.setCustomer(customer1, ci2.index);
-                
-                if (type == 2) {
-                    swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index+1), ci1.index);
-                    swapRoute1.setCustomer(customer2, ci1.index+1);
-                } else if (type == 3) {
-                    swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index-1), ci1.index);
-                    swapRoute1.setCustomer(customer2, ci1.index-1);                    
-                } else if (type == 4) {
-                    swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index-1), ci2.index);
-                    swapRoute2.setCustomer(customer1, ci2.index-1);                    
-                } else if (type == 5) {
-                    swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index+1), ci2.index);
-                    swapRoute2.setCustomer(customer1, ci2.index+1);
+                if (swapRoute1.isFeasible(customer1, customer2) && swapRoute2.isFeasible(customer2, customer1)) {
+                    swapRoute1.setCustomer(customer2, ci1.index);
+                    swapRoute2.setCustomer(customer1, ci2.index);
+                    
+                    if (type == 2) {
+                        swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index+1), ci1.index);
+                        swapRoute1.setCustomer(customer2, ci1.index+1);
+                    } else if (type == 3) {
+                        swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index-1), ci1.index);
+                        swapRoute1.setCustomer(customer2, ci1.index-1);                    
+                    } else if (type == 4) {
+                        swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index-1), ci2.index);
+                        swapRoute2.setCustomer(customer1, ci2.index-1);                    
+                    } else if (type == 5) {
+                        swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index+1), ci2.index);
+                        swapRoute2.setCustomer(customer1, ci2.index+1);
+                    }
+                    this.updateCost();
+                    System.out.println("Updated Solution Cost : " + this.getCost()); // Debug
+                } else {
+                    // All infeasible but good quality solutions are received here
+                    System.out.println("Infeasible Solution");
                 }
-                this.updateCost();
-                System.out.println("Updated Solution Cost : " + this.getCost()); // Debug
             } else {
                 iterations++;
             }
@@ -244,7 +249,8 @@ class Solution {
 
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether
-    	Solution perturbSoln = new Solution();
+        Solution perturbSoln = new Solution();
+        
     	return perturbSoln;        
     }
 }

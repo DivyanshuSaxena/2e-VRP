@@ -105,6 +105,13 @@ class Route {
         }
         return index;
     }
+
+    public boolean isFeasible(int removeCustomer, int newCustomer) {
+        int removeDemand = Main.customers[removeCustomer-Main.numCarpark-1].demand;
+        int addDemand = Main.customers[newCustomer-Main.numCarpark-1].demand;
+        return (this.demand-removeDemand+addDemand <= Main.l2cap);
+    }
+
     public Route mergeRoute(Route r) {
         // Function to return the merged rotue with the current route
         Route merged = new Route();
