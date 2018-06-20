@@ -50,11 +50,9 @@ class Main {
                 }
             }
         }
-
         // Empty Lines
         sc.nextLine();
         sc.nextLine();
-        
         // Initialization of the customer array 
         sc.nextLine(); // Demand Section
         sc.nextLine(); // Demand of Main Depot	

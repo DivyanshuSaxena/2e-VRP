@@ -86,6 +86,7 @@ class Route {
         this.route.remove(custIndex);
     }
     public void setCustomer(int id, int index) {
+    	System.out.println("Setting customer " + id + " in " + this.toString() + " at " + index); // Debug
         int offset = Main.numCarpark+1;
         int removedCost = Main.nodesDistance[route.elementAt(index)][route.elementAt(index+1)] + Main.nodesDistance[route.elementAt(index-1)][route.elementAt(index)];
         int addedCost = Main.nodesDistance[id][route.elementAt(index+1)] + Main.nodesDistance[route.elementAt(index-1)][id];
