@@ -10,7 +10,6 @@ class Solution {
         routes = new Vector<Route>();
         solutionCost = 0;
     }
-    
     public String toString() {
         // Change this function
         String sol = "";
@@ -35,11 +34,9 @@ class Solution {
         }
         return sol;
     }
-
     public int getCost() {
         return this.solutionCost;
     }
-
     public int updateCost() {
         // Function to evaluate the total costs of the solution.
         // Note :- This function should include the infeasibility costs
@@ -55,7 +52,6 @@ class Solution {
         this.solutionCost = cost;
         return cost;
     }
-
     public int getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
         Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
         Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
@@ -132,7 +128,6 @@ class Solution {
         // System.out.println("Returned swap cost type : " + returnCost); // Debug
         return returnCost;
     }
-
     public CustomerIndex getRandomCustomer() {
         // Function to get a random customer from the solution.
         CustomerIndex cIndex = new CustomerIndex();
@@ -161,15 +156,15 @@ class Solution {
         // System.out.println(in + " at " + chosenCarpark.route); // Debug
         return cIndex; 
     }
-
     public void updateBestNeighbor() {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
-        int iterations = 0, maxMoveIterations = Main.numCustomers; // Hyper-Parameter
-        int maxIspIterations = 10 * Main.numCustomers; // Hyper-Parameter
+        int iterations = 0; // Hyper-Parameter
+        int ispIterations = 10 * Main.numCustomers, moveIterations = Main.numCustomers; // Hyper-Parameters
+        int exchangeIterations = 10 * Main.numCustomers;
         int routeCarparkIndex = 0;
         Route clonedRoute = new Route();
-        while (iterations < maxMoveIterations) {
+        while (iterations < moveIterations) {
             CustomerIndex ci = getRandomCustomer();
             clonedRoute = Main.routedCarparks.elementAt(ci.routecp-Main.numNodes).route; // Index of the selected routecarpark
             int customer = clonedRoute.route.elementAt(ci.index); // Index of the selected random customer
@@ -207,7 +202,7 @@ class Solution {
 
         // Iterated Swap Procedure
         iterations = 0;
-        while(iterations < maxIspIterations) {
+        while(iterations < ispIterations) {
             // System.out.println(this.routes + " at " + iterations); // Debug
             CustomerIndex ci1 = getRandomCustomer();
             CustomerIndex ci2 = getRandomCustomer();
@@ -221,7 +216,7 @@ class Solution {
                 Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
                 int customer1 = swapRoute1.route.elementAt(ci1.index);
                 int customer2 = swapRoute2.route.elementAt(ci2.index);
-                if (swapRoute1.isFeasible(customer1, customer2) && swapRoute2.isFeasible(customer2, customer1)) {
+                if (swapRoute1.isSwapFeasible(customer1, customer2) && swapRoute2.isSwapFeasible(customer2, customer1)) {
                     swapRoute1.setCustomer(customer2, ci1.index);
                     swapRoute2.setCustomer(customer1, ci2.index);
                     
@@ -249,8 +244,41 @@ class Solution {
             }
         }
         System.out.println("After iterated swap procedure, solution : " + this.toString() + " with cost: " + this.getCost());
+        
+        // Segment Exchange Operator
+        iterations = 0;
+        while (iterations < exchangeIterations) {
+            CustomerIndex ci1 = getRandomCustomer();
+            CustomerIndex ci2 = getRandomCustomer();
+            if (ci1.routecp==ci2.routecp) {
+                continue;
+            }
+            Route exchangeRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
+            Route exchangeRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
+            int customer1 = exchangeRoute1.route.elementAt(ci1.index);
+            int customer1prev = exchangeRoute1.route.elementAt(ci1.index-1);
+            int customer2 = exchangeRoute2.route.elementAt(ci2.index);
+            int customer2prev = exchangeRoute2.route.elementAt(ci2.index-1);
+            int addCost1 = Main.nodesDistance[customer1prev][customer2] + Main.nodesDistance[customer2prev][customer1];
+            int subtractCost1 = Main.nodesDistance[customer1prev][customer1] + Main.nodesDistance[customer2prev][customer2];
+            // Exchange the customers if better.
+            if (addCost1-subtractCost1 < 0) {
+                Vector<Integer> seg1 = exchangeRoute1.getSubRoute(ci1.index, exchangeRoute1.route.size()-2);
+                Vector<Integer> seg2 = exchangeRoute2.getSubRoute(ci2.index, exchangeRoute2.route.size()-2);
+                if (exchangeRoute1.isExchangeFeasible(seg2, ci1.index) && exchangeRoute2.isExchangeFeasible(seg1, ci2.index)) {
+                    // System.out.println("Exchanging " + customer1 + " from " + exchangeRoute1 + " with " + customer2 + " from " + exchangeRoute2); // Debug
+                    exchangeRoute1.addAllCustomers(seg2, ci1.index);
+                    exchangeRoute2.addAllCustomers(seg1, ci2.index);
+                    exchangeRoute1.removeAllCustomers(ci1.index+seg2.size(), exchangeRoute1.route.size()-2);
+                    exchangeRoute2.removeAllCustomers(ci2.index+seg1.size(), exchangeRoute2.route.size()-2);    
+                    this.updateCost();
+                    System.out.println("Updated Cost : " + this.solutionCost); // Debug
+                } 
+            }
+            iterations++;
+        }
+        System.out.println("After exchange operator, solution : " + this.toString() + " with cost : " + this.solutionCost);
     }
-
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether
         Solution perturbSoln = new Solution();

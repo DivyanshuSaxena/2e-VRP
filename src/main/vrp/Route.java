@@ -85,6 +85,13 @@ class Route {
         this.demand -= (Main.customers[cust-Main.numCarpark-1].demand);
         this.route.remove(custIndex);
     }
+    public void removeAllCustomers(int startIndex, int endIndex) {
+        int i = endIndex - startIndex + 1;
+        while (i>0) {
+            this.removeCustomer(startIndex);
+            i--;
+        }
+    }
     public void setCustomer(int id, int index) {
     	System.out.println("Setting customer " + id + " in " + this.toString() + " at " + index); // Debug
         int offset = Main.numCarpark+1;
@@ -106,13 +113,29 @@ class Route {
         }
         return index;
     }
-
-    public boolean isFeasible(int removeCustomer, int newCustomer) {
+    public Vector<Integer> getSubRoute(int startIndex, int endIndex) {
+        Vector<Integer> v = new Vector<Integer>();
+        for (int i = startIndex; i <= endIndex; i++) {
+            v.add(this.route.elementAt(i));
+        }
+        return v;
+    }
+    public boolean isSwapFeasible(int removeCustomer, int newCustomer) {
         int removeDemand = Main.customers[removeCustomer-Main.numCarpark-1].demand;
         int addDemand = Main.customers[newCustomer-Main.numCarpark-1].demand;
         return (this.demand-removeDemand+addDemand <= Main.l2cap);
     }
-
+    public boolean isExchangeFeasible(Vector<Integer> v, int startIndex) {
+        int addDemand = 0, removeDemand = 0;
+        int offset = Main.numCarpark + 1;
+        for (int id : v) {
+            addDemand += Main.customers[id-offset].demand;
+        }
+        for (int i = startIndex; i < this.route.size()-1; i++) {
+            removeDemand += Main.customers[this.route.elementAt(i)-offset].demand;
+        }
+        return (this.demand+addDemand-removeDemand <= Main.l2cap);
+    }
     public Route mergeRoute(Route r) {
         // Function to return the merged rotue with the current route
         Route merged = new Route();
