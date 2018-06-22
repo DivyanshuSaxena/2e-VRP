@@ -53,6 +53,7 @@ class Solution {
         return cost;
     }
     public int getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
+        // This function returns the best swap neighbour obtained on swapping customers at ci1 and ci2.
         Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
         Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
         int swapCost = 0, type = 1, bestCost = 0;
@@ -151,12 +152,14 @@ class Solution {
         // System.out.println(in + " at " + chosenCarpark.route); // Debug
         return cIndex; 
     }
-    public void updateBestNeighbor() {
+    public boolean updateBestNeighbor() {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
-        int iterations = 0; // Hyper-Parameter
-        int ispIterations = 10 * Main.numCustomers, moveIterations = Main.numCustomers; // Hyper-Parameters
-        int exchangeIterations = 10 * Main.numCustomers;
+        boolean improvement = false;
+        int iterations = 0;
+        int ispIterations = Main.numCustomers; // Hyper-Parameter
+        int moveIterations = Main.numCustomers; // Hyper-Parameter
+        int exchangeIterations = Main.numCustomers; // Hyper-Parameter
         int routeCarparkIndex = 0;
         Route clonedRoute = new Route();
         while (iterations < moveIterations) {
@@ -183,17 +186,19 @@ class Solution {
             }
             // bestIndex contains the position of best insertion of the customer
             if (bestIndex != ci.index) {
+                System.out.println("Found a better solution, relocate customer " + customer + " in route " + clonedRoute + " at " + bestIndex); // Debug
                 routeCarparkIndex = ci.routecp;
                 clonedRoute.addCustomer(customer,bestIndex);
-                // System.out.println("Updated Route: " + clonedRoute + " " + clonedRoute.getCost()); // Debug
+                clonedRoute.removeCustomer(ci.index);
                 Main.routedCarparks.elementAt(routeCarparkIndex-Main.numNodes).route = clonedRoute;
+                improvement = true;
                 this.updateCost();
             } else {
                 iterations++;
             }
             // Random customer relocated to the best location in the route
         }
-        System.out.println("After improved move, solution : " + this.toString() + " with cost: " + this.getCost()); // Debug
+        System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
 
         // Iterated Swap Procedure
         iterations = 0;
@@ -206,7 +211,7 @@ class Solution {
             int type = swapCostType%10;
             if (this.solutionCost > swapCost) {
                 // Swap the two customers
-            	System.out.println("Found lower cost : " + swapCost + " and type : " + type); // Debug
+            	// System.out.println("Found lower cost : " + swapCost + " and type : " + type); // Debug
                 Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
                 Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
                 int customer1 = swapRoute1.route.elementAt(ci1.index);
@@ -214,7 +219,6 @@ class Solution {
                 if (swapRoute1.isSwapFeasible(customer1, customer2) && swapRoute2.isSwapFeasible(customer2, customer1)) {
                     swapRoute1.setCustomer(customer2, ci1.index);
                     swapRoute2.setCustomer(customer1, ci2.index);
-                    
                     if (type == 2) {
                         swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index+1), ci1.index);
                         swapRoute1.setCustomer(customer2, ci1.index+1);
@@ -228,6 +232,7 @@ class Solution {
                         swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index+1), ci2.index);
                         swapRoute2.setCustomer(customer1, ci2.index+1);
                     }
+                    improvement = true;
                     this.updateCost();
                     System.out.println("Updated Solution Cost : " + this.getCost()); // Debug
                 } else {
@@ -238,7 +243,7 @@ class Solution {
                 iterations++;
             }
         }
-        System.out.println("After iterated swap procedure, solution : " + this.toString() + " with cost: " + this.getCost());
+        System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
         
         // Segment Exchange Operator
         iterations = 0;
@@ -265,19 +270,21 @@ class Solution {
                 Vector<Integer> seg1 = exchangeRoute1.getSubRoute(ci1.index, exchangeRoute1.route.size()-2);
                 Vector<Integer> seg2 = exchangeRoute2.getSubRoute(ci2.index, exchangeRoute2.route.size()-2);
                 if (exchangeRoute1.isExchangeFeasible(seg2, ci1.index) && exchangeRoute2.isExchangeFeasible(seg1, ci2.index)) {
-                    System.out.println("Exchanging " + customer1 + " from " + exchangeRoute1 + " with " + customer2 + " from " + exchangeRoute2); // Debug
+                    // System.out.println("Exchanging " + customer1 + " from " + exchangeRoute1 + " with " + customer2 + " from " + exchangeRoute2); // Debug
                     exchangeRoute1.addAllCustomers(seg2, ci1.index);
                     exchangeRoute2.addAllCustomers(seg1, ci2.index);
                     exchangeRoute1.removeAllCustomers(ci1.index+seg2.size(), exchangeRoute1.route.size()-2);
                     exchangeRoute2.removeAllCustomers(ci2.index+seg1.size(), exchangeRoute2.route.size()-2);    
-                    System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
+                    // System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
+                    improvement = true;
                     this.updateCost();
-                    System.out.println("Updated Cost : " + this.solutionCost); // Debug
+                    // System.out.println("Updated Cost : " + this.solutionCost); // Debug
                 } 
             }
             iterations++;
         }
-        System.out.println("After exchange operator, solution : " + this.toString() + " with cost : " + this.solutionCost);
+        System.out.println("After exchange operator, solution cost : " + this.solutionCost);
+        return improvement;
     }
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether

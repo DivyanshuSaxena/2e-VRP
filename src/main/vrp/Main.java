@@ -7,7 +7,6 @@ class Main {
     static int numCustomers, numNodes, numCarpark;
     static int numVehicles1, numVehicles2;
     static int l1cap, l2cap;
-    static int numIterations;
     static int nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
@@ -73,16 +72,23 @@ class Main {
 
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
-        System.out.println(initsol);
+        System.out.println("Initial Solution : " + initsol);
         System.out.println("Cost of Solution: " + initsol.getCost());
         // Use initsol to develop the further solutions here.
-        numIterations = 1; // Hyper-Parameter
+        int numUselessIterations = Main.numCustomers; // Hyper-Parameter
         int iterations = 0;
         Solution bestFoundSoln = initsol;
-        while (iterations < numIterations) {
-            bestFoundSoln.updateBestNeighbor();
+        while (true) {
+            boolean improvement = bestFoundSoln.updateBestNeighbor();
             // Find the best solution of the generated neighborhood, and proceed with it further 
-            iterations++;
+            if (improvement) {
+                System.out.println("------------------------------------------------"); // Debug
+                System.out.println("Cost : " + bestFoundSoln.solutionCost); // Debug
+                iterations = 0;
+            } else {
+                iterations++;
+                if (iterations == numUselessIterations) break;
+            }
         }
         long endTime = System.currentTimeMillis();
         System.out.println("Running time : " + (endTime-startTime));

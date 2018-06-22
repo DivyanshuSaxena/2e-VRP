@@ -1,0 +1,55 @@
+Initial Solution : [
+	0,
+	2 : {2, 13, 14, 12, 2, }, {2, 10, 11, 2, }, {2, 7, 3, 5, 6, 2, }, 
+	0,
+],
+[
+	0,
+	1 : {1, 4, 8, 9, 1, }, 
+	0,
+],
+
+Cost of Solution: 336
+After improved move, solution cost: 336
+Infeasible Solution
+After iterated swap procedure, solution cost: 336
+After exchange operator, solution cost : 302
+------------------------------------------------
+Cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+After improved move, solution cost: 302
+After iterated swap procedure, solution cost: 302
+After exchange operator, solution cost : 302
+Running time : 0
