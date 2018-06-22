@@ -189,7 +189,8 @@ class Solution {
                 System.out.println("Found a better solution, relocate customer " + customer + " in route " + clonedRoute + " at " + bestIndex); // Debug
                 routeCarparkIndex = ci.routecp;
                 clonedRoute.addCustomer(customer,bestIndex);
-                clonedRoute.removeCustomer(ci.index);
+                if (bestIndex < ci.index)   clonedRoute.removeCustomer(ci.index+1);
+                else    clonedRoute.removeCustomer(ci.index);
                 Main.routedCarparks.elementAt(routeCarparkIndex-Main.numNodes).route = clonedRoute;
                 improvement = true;
                 this.updateCost();
@@ -198,7 +199,7 @@ class Solution {
             }
             // Random customer relocated to the best location in the route
         }
-        System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
+        if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
 
         // Iterated Swap Procedure
         iterations = 0;
@@ -243,7 +244,7 @@ class Solution {
                 iterations++;
             }
         }
-        System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
+        if (improvement) System.out.println("After iterated swap procedure, solution : " + this.toString() + " with cost: " + this.getCost());
         
         // Segment Exchange Operator
         iterations = 0;
@@ -283,7 +284,7 @@ class Solution {
             }
             iterations++;
         }
-        System.out.println("After exchange operator, solution cost : " + this.solutionCost);
+        if (improvement) System.out.println("After exchange operator, solution : " + this.toString() + " with cost: " + this.getCost());
         return improvement;
     }
     public Solution perturb() {

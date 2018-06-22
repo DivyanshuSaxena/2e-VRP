@@ -82,13 +82,13 @@ class Main {
             boolean improvement = bestFoundSoln.updateBestNeighbor();
             // Find the best solution of the generated neighborhood, and proceed with it further 
             if (improvement) {
-                System.out.println("------------------------------------------------"); // Debug
-                System.out.println("Cost : " + bestFoundSoln.solutionCost); // Debug
                 iterations = 0;
             } else {
                 iterations++;
                 if (iterations == numUselessIterations) break;
             }
+            System.out.println("------------------------------------------------"); // Debug
+            System.out.println("Cost : " + bestFoundSoln.solutionCost); // Debug
         }
         long endTime = System.currentTimeMillis();
         System.out.println("Running time : " + (endTime-startTime));
