@@ -20,7 +20,7 @@ class Carpark {
     // This id is the id of the car park as in the overall nodes (This must be used for getting the distances)
     int id; 
     Vector<Customer> customers;
-    Vector<Route> routes; // Can be removed
+    Vector<Route> routes;
     Vector<Integer> routeCarparks;
     int totalDemand;
     public Carpark() {
@@ -46,13 +46,6 @@ class Carpark {
     public void removeCustomer(Customer c) {
         customers.remove(c);
         totalDemand = totalDemand - c.demand;
-    }
-    // Can be removed
-    public void addRoute(Route route) {
-        for (int cust : route.route) {
-            addCustomer(Main.customers[cust-Main.numCarpark-1]);
-        }
-        this.routes.add(route);
     }
 }
 

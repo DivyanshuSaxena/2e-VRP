@@ -34,13 +34,25 @@ class Solution {
         }
         return sol;
     }
+    public Vector<Integer> getGiantRoute() {
+        Vector<Integer> giantRoute = new Vector<Integer>();
+        for (Route route : this.routes) {
+            for (int depotIndex : route.route) {
+                if (depotIndex < Main.numNodes) giantRoute.add(depotIndex);
+                else {
+                    for (int customer : Main.routedCarparks.elementAt(depotIndex-Main.numNodes).route.route) {
+                        giantRoute.add(customer);
+                    }
+                }
+            }            
+        }
+        return giantRoute;
+    }
     public int getCost() {
         return this.solutionCost;
     }
     public int updateCost() {
         // Function to evaluate the total costs of the solution.
-        // Note :- This function should include the infeasibility costs
-        // Presently, no infeasibility costs are taken into account
         int cost = 0;
         for (Route route : this.routes) {
             cost += route.getCost();
@@ -151,6 +163,11 @@ class Solution {
         cIndex.index = (1 + in); // Index of the randomly chosen customer in the route 
         // System.out.println(in + " at " + chosenCarpark.route); // Debug
         return cIndex; 
+    }
+    public int getRandomRouteCarpark() {
+        int index = (int)((Main.routedCarparks.size()+1) * Math.random());
+        if (index == Main.routedCarparks.size()+1)  return 0;
+        return index;
     }
     public boolean updateBestNeighbor() {
         // Generate Neighborhood logic here
@@ -290,6 +307,24 @@ class Solution {
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether
         Solution perturbSoln = new Solution();
+        // Check satellite swap (includes only feasible solutions as of now)
+        while (true) {
+            int cp1 = 0, cp2 = 0;
+            int rcpIndex1 = this.getRandomRouteCarpark();
+            int rcpIndex2 = this.getRandomRouteCarpark();
+            RouteCarpark rc1 = Main.routedCarparks.elementAt(rcpIndex1);
+            RouteCarpark rc2 = Main.routedCarparks.elementAt(rcpIndex2);
+            cp1 = Main.routedCarparks.elementAt(rcpIndex1).cpindex;
+            cp2 = Main.routedCarparks.elementAt(rcpIndex2).cpindex;
+            // int addCost1 = Main.nodesDistance[cp1+1][rc2.route.route.elementAt(1)] + Main.nodesDistance[rc2.route.route.elementAt(rc2.route.route.size()-2)][cp1+1];
+            // int addCost2 = Main.nodesDistance[cp2+1][rc1.route.route.elementAt(1)] + Main.nodesDistance[rc1.route.route.elementAt(rc1.route.route.size()-2)][cp2+1];
+            // int removeCost1 = Main.nodesDistance[cp1+1][rc1.route.route.elementAt(1)] + Main.nodesDistance[rc1.route.route.elementAt(rc1.route.route.size()-2)][cp1+1];
+            // int removeCost2 = Main.nodesDistance[cp2+1][rc2.route.route.elementAt(1)] + Main.nodesDistance[rc2.route.route.elementAt(rc2.route.route.size()-2)][cp2+1];
+            if (cp1 != cp2) {
+                
+                break;
+            }        
+        }
         
     	return perturbSoln;        
     }
