@@ -1,5 +1,6 @@
 package vrp;
 
+import java.util.Stack;
 import java.util.Vector;
 
 // Class for the representation of the customers
@@ -21,7 +22,7 @@ class Carpark {
     int id; 
     Vector<Customer> customers;
     Vector<Route> routes;
-    Vector<Integer> routeCarparks;
+    Vector<Integer> vehicles;
     int totalDemand;
     public Carpark() {
         this.id = 0;
@@ -49,14 +50,14 @@ class Carpark {
     }
 }
 
-class RouteCarpark {
+class Vehicle {
     int cpindex; // The index of the actual carpark
     Route route;
-    RouteCarpark() {
+    Vehicle() {
         cpindex = 0;
         route = new Route();
     }
-    RouteCarpark(int index, Route route) {
+    Vehicle(int index, Route route) {
         cpindex = index;
         this.route = route;
     }
@@ -68,5 +69,48 @@ class CustomerIndex {
     int index;
     public boolean isSameRoute(CustomerIndex ci) {
         return (ci.route==this.route && ci.routecp==this.routecp);
+    }
+}
+
+class GiantRoute {
+    Vector<Integer> giantRoute;
+    public Solution getSolution() {
+        Solution solution = new Solution();
+        Stack<Integer> stack = new Stack<Integer>();
+        Vector<Integer> customerRoute = new Vector<Integer>();
+        Vector<Integer> carparkRoute = new Vector<Integer>();
+        int index = 0;
+        for (int node : giantRoute) {
+            if (node > Main.numCarpark) {
+                // A customer on node
+                customerRoute.add(node);
+            } else if (node != 0) {
+                // A carpark on node
+                if (stack.size() != 0 && stack.peek() == node) {
+                    Vehicle v = Main.routedCarparks.elementAt(index);
+                    v.route.removeAllCustomers(1, v.route.route.size()-2);
+                    v.route.addAllCustomers(customerRoute, 1);
+                    v.cpindex = stack.pop();
+                    customerRoute = new Vector<Integer>();
+                    carparkRoute.add(index + Main.numNodes);
+                    index++;
+                } else {
+                    stack.push(node);
+                }
+            } else {
+                // Main depot on the node
+                carparkRoute.add(0);
+                if (stack.size() != 0 && stack.peek() == 0) {
+                    Route route = new Route();
+                    route.addAllCustomers(carparkRoute, 0);
+                    solution.routes.add(route);
+                    carparkRoute = new Vector<Integer>();
+                } else if (stack.size() == 0) {
+                    stack.push(0);
+                }
+            }
+        }
+        solution.updateCost();
+        return solution;
     }
 }

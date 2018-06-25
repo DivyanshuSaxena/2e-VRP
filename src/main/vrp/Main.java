@@ -10,7 +10,7 @@ class Main {
     static int nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
-    static Vector<RouteCarpark> routedCarparks;
+    static Vector<Vehicle> routedCarparks;
 
     public static void main(String args[]) throws IOException {
         // The Method reads the inputs from a file and initializes the data structures
@@ -72,7 +72,10 @@ class Main {
 
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
+        GiantRoute initgr = initsol.getGiantRoute();
         System.out.println("Initial Solution : " + initsol);
+        System.out.println("Initial Solution : " + initgr.giantRoute); // Debug
+        System.out.println("Initial Solution : " + initgr.getSolution()); // Debug
         System.out.println("Cost of Solution: " + initsol.getCost());
         // Use initsol to develop the further solutions here.
         int numUselessIterations = Main.numCustomers; // Hyper-Parameter
@@ -102,14 +105,16 @@ class Main {
         
         // Assign each customer to the nearest carpark.
         for(int i = 0; i < numCustomers; i++) {
+        	int customerOffset = numCarpark + 1;
             int minDistance = -1;
             int assigned = 0;
             for(int j = 1; j <= numCarpark; j++) {
-                if (minDistance > nodesDistance[i][j] || minDistance == -1) {
-                    minDistance = nodesDistance[i][j];
+                if (minDistance > nodesDistance[i+customerOffset][j] || minDistance == -1) {
+                    minDistance = nodesDistance[i+customerOffset][j];
                     assigned = j;
                 }
             }
+            // System.out.println("Carpark assigned to " + customers[i].id + " is " + assigned); // Debug
             customers[i].assignedPark = assigned; // Customer at index i in customers array is assigned the carpark at index 'assigned' in nodes numbering 
             carparks[assigned-1].addCustomer(customers[i]); // The carpark also holds the customer now.
         }
@@ -130,20 +135,20 @@ class Main {
             }
         }
 
-        // Decompose the carparks into RouteCarparks for each route
-        Vector<Integer> routeCarparks = new Vector<Integer>();
-        Main.routedCarparks = new Vector<RouteCarpark>();
+        // Decompose the carparks into Vehicles for each route
+        Vector<Integer> vehicles = new Vector<Integer>();
+        Main.routedCarparks = new Vector<Vehicle>();
         int temp = Main.numNodes;
         for (int id : carparksLevel1) {
             for (Route route : carparks[id-1].routes) {
-                RouteCarpark rc = new RouteCarpark(id, route);
-                routeCarparks.add(temp);
+                Vehicle rc = new Vehicle(id, route);
+                vehicles.add(temp);
                 Main.routedCarparks.add(rc);
                 temp++;
             }
         }
-        // Apply Clarke and Wright's Savings Algorithm for the first level RouteCarparks
-        initial.routes = savingSolution(routeCarparks, 0, l1cap);
+        // Apply Clarke and Wright's Savings Algorithm for the first level Vehicles
+        initial.routes = savingSolution(vehicles, 0, l1cap);
         // System.out.println("Final Routes: " + initial.routes); // Debug
         initial.updateCost();
         return initial;

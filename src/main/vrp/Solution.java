@@ -34,7 +34,8 @@ class Solution {
         }
         return sol;
     }
-    public Vector<Integer> getGiantRoute() {
+    public GiantRoute getGiantRoute() {
+        GiantRoute gr = new GiantRoute();
         Vector<Integer> giantRoute = new Vector<Integer>();
         for (Route route : this.routes) {
             for (int depotIndex : route.route) {
@@ -46,7 +47,8 @@ class Solution {
                 }
             }            
         }
-        return giantRoute;
+        gr.giantRoute = giantRoute;
+        return gr;
     }
     public int getCost() {
         return this.solutionCost;
@@ -57,7 +59,7 @@ class Solution {
         for (Route route : this.routes) {
             cost += route.getCost();
         }
-        for (RouteCarpark cp : Main.routedCarparks) {
+        for (Vehicle cp : Main.routedCarparks) {
             cost += cp.route.getCost();
         }
         // Add the infeasibility costs here.
@@ -139,11 +141,11 @@ class Solution {
     public CustomerIndex getRandomCustomer() {
         // Function to get a random customer from the solution.
         CustomerIndex cIndex = new CustomerIndex();
-        int totalRouteCarparks = 0;
+        int totalVehicles = 0;
         for (Route route : this.routes) {
-            totalRouteCarparks += (route.route.size()-2);
+            totalVehicles += (route.route.size()-2);
         }
-        double chooseRoute = Math.random() * totalRouteCarparks;
+        double chooseRoute = Math.random() * totalVehicles;
         Route chosen = new Route();
         int sum = 0;
         for (int i = 0; i < this.routes.size(); i++) {
@@ -154,17 +156,17 @@ class Solution {
             }
             sum += (this.routes.elementAt(i).route.size()-2);
         }
-        // chosen holds the Route from which the random customer is to be taken, choose the routeCarpark
+        // chosen holds the Route from which the random customer is to be taken, choose the vehicle
         int in = (int)(Math.random() * (chosen.route.size()-2));
         // System.out.println(in + " at " + chosen); // Debug
-        cIndex.routecp = chosen.route.elementAt(1 + in); // Index of the selected routecarpark
-        RouteCarpark chosenCarpark = Main.routedCarparks.elementAt(cIndex.routecp-Main.numNodes);
+        cIndex.routecp = chosen.route.elementAt(1 + in); // Index of the selected vehicle
+        Vehicle chosenCarpark = Main.routedCarparks.elementAt(cIndex.routecp-Main.numNodes);
         in = (int)(Math.random() * (chosenCarpark.route.route.size()-2));
         cIndex.index = (1 + in); // Index of the randomly chosen customer in the route 
         // System.out.println(in + " at " + chosenCarpark.route); // Debug
         return cIndex; 
     }
-    public int getRandomRouteCarpark() {
+    public int getRandomVehicle() {
         int index = (int)((Main.routedCarparks.size()+1) * Math.random());
         if (index == Main.routedCarparks.size()+1)  return 0;
         return index;
@@ -174,16 +176,16 @@ class Solution {
         // Apply the move operator on the Solution to get to a better solution
         boolean improvement = false;
         int iterations = 0;
-        int ispIterations = Main.numCustomers; // Hyper-Parameter
+        int ispIterations = 100 * Main.numCustomers; // Hyper-Parameter
         int moveIterations = Main.numCustomers; // Hyper-Parameter
-        int exchangeIterations = Main.numCustomers; // Hyper-Parameter
-        int routeCarparkIndex = 0;
+        int exchangeIterations = 100 * Main.numCustomers; // Hyper-Parameter
+        int vehicleIndex = 0;
         Route clonedRoute = new Route();
         while (iterations < moveIterations) {
             CustomerIndex ci = getRandomCustomer();
-            clonedRoute = Main.routedCarparks.elementAt(ci.routecp-Main.numNodes).route; // Index of the selected routecarpark
+            clonedRoute = Main.routedCarparks.elementAt(ci.routecp-Main.numNodes).route; // Index of the selected vehicle
             int customer = clonedRoute.route.elementAt(ci.index); // Index of the selected random customer
-            // This customer is to be placed in the best location, in the route of the given RouteCarpark
+            // This customer is to be placed in the best location, in the route of the given Vehicle
             int prevCustomer = clonedRoute.route.elementAt(ci.index-1);
             int nextCustomer = clonedRoute.route.elementAt(ci.index+1);
             // System.out.println("For route: "+ clonedRoute + " " + clonedRoute.getCost() + " " + customer + " " + prevCustomer + " " + nextCustomer); // Debug
@@ -204,11 +206,11 @@ class Solution {
             // bestIndex contains the position of best insertion of the customer
             if (bestIndex != ci.index) {
                 System.out.println("Found a better solution, relocate customer " + customer + " in route " + clonedRoute + " at " + bestIndex); // Debug
-                routeCarparkIndex = ci.routecp;
+                vehicleIndex = ci.routecp;
                 clonedRoute.addCustomer(customer,bestIndex);
                 if (bestIndex < ci.index)   clonedRoute.removeCustomer(ci.index+1);
                 else    clonedRoute.removeCustomer(ci.index);
-                Main.routedCarparks.elementAt(routeCarparkIndex-Main.numNodes).route = clonedRoute;
+                Main.routedCarparks.elementAt(vehicleIndex-Main.numNodes).route = clonedRoute;
                 improvement = true;
                 this.updateCost();
             } else {
@@ -310,10 +312,10 @@ class Solution {
         // Check satellite swap (includes only feasible solutions as of now)
         while (true) {
             int cp1 = 0, cp2 = 0;
-            int rcpIndex1 = this.getRandomRouteCarpark();
-            int rcpIndex2 = this.getRandomRouteCarpark();
-            RouteCarpark rc1 = Main.routedCarparks.elementAt(rcpIndex1);
-            RouteCarpark rc2 = Main.routedCarparks.elementAt(rcpIndex2);
+            int rcpIndex1 = this.getRandomVehicle();
+            int rcpIndex2 = this.getRandomVehicle();
+            Vehicle rc1 = Main.routedCarparks.elementAt(rcpIndex1);
+            Vehicle rc2 = Main.routedCarparks.elementAt(rcpIndex2);
             cp1 = Main.routedCarparks.elementAt(rcpIndex1).cpindex;
             cp2 = Main.routedCarparks.elementAt(rcpIndex2).cpindex;
             // int addCost1 = Main.nodesDistance[cp1+1][rc2.route.route.elementAt(1)] + Main.nodesDistance[rc2.route.route.elementAt(rc2.route.route.size()-2)][cp1+1];

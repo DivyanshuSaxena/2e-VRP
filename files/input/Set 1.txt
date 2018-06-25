@@ -1,0 +1,26 @@
+INSTANCES E-12
+
+These files are organized as follows:
+
+NAME : Name of the Instance
+COMMENT : Comment
+TYPE : 2ECVRP (Two-Echelon Capacitated Vehicle Routing Problem)
+DIMENSION : Total number of nodes, including depot and satellites
+SATELLITES : Number of satellites
+CUSTOMERS : Number of Customers
+EDGE_WEIGHT_TYPE : In all these instances, the travelling costs are eucliedan 2D distances
+FLEET_SECTION (description of the vehicles' characteristics)
+L1CAPACITY : Capacity of 1st-level vehicles
+L2CAPACITY : Capacity of 2nd-level vehicles
+L1FLEET: Number of 1st-level vehicles
+L1FLEET: Number of 2nd-level vehicles
+EDGE_WEIGHT_SECTION
+In this section is presented the cost matrix. The matrix contains N+S+1 rows and columns, where N is the numeber of the cutomersand S the number of the satellites. Node 0 represents the depot, while the nodes from 1 to N the customers.
+DEMAND_SECTION
+In this section are enumerated the demands of the customers.
+The first column indicates the number of the node and the second the demand of the node. The node corresponding to the depot have demand 0.
+DEPOT_SECTION
+In this section is indicated which node is the depot (usually 0)
+-1
+EOF
+
