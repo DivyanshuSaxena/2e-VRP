@@ -72,20 +72,24 @@ class Main {
 
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
+        GiantRoute bestSolution = new GiantRoute();
         System.out.println("Initial Solution : " + initsol);
         System.out.println("Cost of Solution: " + initsol.getCost());
         // Use initsol to develop the further solutions here.
-        Vector<GiantRoute> solutions = new Vector<GiantRoute>();
         int numUselessIterations = Main.numCustomers; // Hyper-Parameter
         int iterations = 0;
         Solution bestFoundSoln = initsol;
         while (true) {
             boolean improvement = bestFoundSoln.updateBestNeighbor();
-            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); // Debug
-            solutions.add(bestFoundSoln.getGiantRoute());
+            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost + " Solution : " + bestFoundSoln.toString()); // Debug
+            GiantRoute bfs = bestFoundSoln.getGiantRoute();
+            if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
+                bestSolution = bfs;
+                improvement = true;
+            } else improvement = false;
             // Find the best solution of the generated neighborhood, and proceed with it further 
             bestFoundSoln = bestFoundSoln.perturb();
-            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost); // Debug
+            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost + " Solution : " + bestFoundSoln.toString()); // Debug
             
             if (improvement) {
                 iterations = 0;
@@ -95,6 +99,7 @@ class Main {
             }
         }
         long endTime = System.currentTimeMillis();
+        System.out.println("Final Solution : " + bestSolution.getSolution() + " cost " + bestSolution.cost);
         System.out.println("Running time : " + (endTime-startTime));
         
         sc.close();

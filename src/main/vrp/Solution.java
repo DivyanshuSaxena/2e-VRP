@@ -1,6 +1,5 @@
 package vrp;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
 
@@ -257,7 +256,6 @@ class Solution {
                     }
                     improvement = true;
                     this.updateCost();
-                    System.out.println("Updated Solution Cost : " + this.getCost()); // Debug
                 } else {
                     // All infeasible but good quality solutions are received here
                     System.out.println("Infeasible Solution");
@@ -266,7 +264,7 @@ class Solution {
                 iterations++;
             }
         }
-        if (improvement) System.out.println("After iterated swap procedure, solution : " + this.toString() + " with cost: " + this.getCost());
+        if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
         
         // Segment Exchange Operator
         iterations = 0;
@@ -306,12 +304,12 @@ class Solution {
             }
             iterations++;
         }
-        if (improvement) System.out.println("After exchange operator, solution : " + this.toString() + " with cost: " + this.getCost());
+        if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
         return improvement;
     }
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether
-        GiantRoute gr = this.getGiantRoute();
+        final GiantRoute gr = this.getGiantRoute();
         Solution perturbSoln = new Solution();
         
         // Worst Removal
