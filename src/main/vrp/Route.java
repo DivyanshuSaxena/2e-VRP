@@ -101,6 +101,20 @@ class Route {
         this.routeCost = this.routeCost - removedCost + addedCost; 
         this.route.set(index, id);
     }
+    public void setStart(int id) {
+        // Carparks shall be added 
+        int removedCost = Main.nodesDistance[route.elementAt(0)][route.elementAt(1)];
+        int addedCost = Main.nodesDistance[id][route.elementAt(1)];
+        this.routeCost = this.routeCost - removedCost + addedCost; 
+        this.route.set(0, id);
+    }
+    public void setEnd(int id) {
+        // Carparks shall be added 
+        int removedCost = Main.nodesDistance[route.elementAt(route.size()-1)][route.elementAt(route.size()-2)];
+        int addedCost = Main.nodesDistance[id][route.elementAt(route.size()-1)];
+        this.routeCost = this.routeCost - removedCost + addedCost; 
+        this.route.set(route.size()-1, id);
+    }
     public int positionOf(int customer) {
         // This function gives the position of the customer in the route.
         // It returns -2 if the customer is at the begin or end of the route

@@ -1,5 +1,7 @@
 package vrp;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Vector;
 
 // Class to represent the solution
@@ -48,6 +50,7 @@ class Solution {
             }            
         }
         gr.giantRoute = giantRoute;
+        gr.cost = this.solutionCost;
         return gr;
     }
     public int getCost() {
@@ -176,9 +179,9 @@ class Solution {
         // Apply the move operator on the Solution to get to a better solution
         boolean improvement = false;
         int iterations = 0;
-        int ispIterations = 100 * Main.numCustomers; // Hyper-Parameter
+        int ispIterations = Main.numCustomers; // Hyper-Parameter
         int moveIterations = Main.numCustomers; // Hyper-Parameter
-        int exchangeIterations = 100 * Main.numCustomers; // Hyper-Parameter
+        int exchangeIterations = Main.numCustomers; // Hyper-Parameter
         int vehicleIndex = 0;
         Route clonedRoute = new Route();
         while (iterations < moveIterations) {
@@ -308,26 +311,58 @@ class Solution {
     }
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether
+        GiantRoute gr = this.getGiantRoute();
         Solution perturbSoln = new Solution();
-        // Check satellite swap (includes only feasible solutions as of now)
-        while (true) {
-            int cp1 = 0, cp2 = 0;
-            int rcpIndex1 = this.getRandomVehicle();
-            int rcpIndex2 = this.getRandomVehicle();
-            Vehicle rc1 = Main.routedCarparks.elementAt(rcpIndex1);
-            Vehicle rc2 = Main.routedCarparks.elementAt(rcpIndex2);
-            cp1 = Main.routedCarparks.elementAt(rcpIndex1).cpindex;
-            cp2 = Main.routedCarparks.elementAt(rcpIndex2).cpindex;
-            // int addCost1 = Main.nodesDistance[cp1+1][rc2.route.route.elementAt(1)] + Main.nodesDistance[rc2.route.route.elementAt(rc2.route.route.size()-2)][cp1+1];
-            // int addCost2 = Main.nodesDistance[cp2+1][rc1.route.route.elementAt(1)] + Main.nodesDistance[rc1.route.route.elementAt(rc1.route.route.size()-2)][cp2+1];
-            // int removeCost1 = Main.nodesDistance[cp1+1][rc1.route.route.elementAt(1)] + Main.nodesDistance[rc1.route.route.elementAt(rc1.route.route.size()-2)][cp1+1];
-            // int removeCost2 = Main.nodesDistance[cp2+1][rc2.route.route.elementAt(1)] + Main.nodesDistance[rc2.route.route.elementAt(rc2.route.route.size()-2)][cp2+1];
-            if (cp1 != cp2) {
-                
-                break;
-            }        
-        }
         
-    	return perturbSoln;        
+        // Worst Removal
+        Vector<Integer> customerPool = new Vector<Integer>(); // Holds the Customer Ids that have been removed 
+        Vector<Double> avgIncomeCost = new Vector<Double>();
+        int q = 5;
+        for (Customer c : Main.customers) {
+            int total = 0;
+            for (int dist : Main.nodesDistance[c.id]) {
+                total += dist;
+            }
+            avgIncomeCost.add((double)(total/Main.numNodes));
+        }
+        for (int i = 0; i < q; i++) {
+            double rcost1 = gr.getCustomerRemovalCost(Main.numCarpark+1)/avgIncomeCost.elementAt(0);
+            int highest = 0;
+            for (int j = 0; j < Main.customers.length; j++) {
+                if (customerPool.indexOf(j+Main.numCarpark+1) == -1) {
+                    double rcost2 = gr.getCustomerRemovalCost(j+Main.numCarpark+1)/avgIncomeCost.elementAt(j);
+                    if (rcost1 < rcost2) {
+                        rcost1 = rcost2;
+                        highest = j;
+                    }
+                }
+            }
+            customerPool.add(highest+Main.numCarpark+1);
+            gr.removeCustomer(highest+Main.numCarpark+1);
+        }
+        // System.out.println("Customer Pool : " + customerPool); // Debug
+        // System.out.println("Giant Route after worst removal : " + gr.giantRoute); // Debug
+        
+        // Regret Insertion
+        customerPool.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) { 
+                double regcost1 = gr.getRegretCost(o1);
+                double regcost2 = gr.getRegretCost(o2);
+                if (regcost1 < regcost2) {
+                    return -1;
+                }
+                return 1;
+            }
+        });
+        int count = 0;
+        while (count < q) {
+            int customer = customerPool.elementAt(count);
+            gr.insertAtBestLocation(customer);
+            count++;
+        }
+        // System.out.println("Giant Route after regret insertion : " + gr.giantRoute); // Debug
+        perturbSoln = gr.getSolution();
+        return perturbSoln;        
     }
 }
