@@ -329,6 +329,7 @@ class Solution {
             for (int j = 0; j < Main.customers.length; j++) {
                 if (customerPool.indexOf(j+Main.numCarpark+1) == -1) {
                     double rcost2 = gr.getCustomerRemovalCost(j+Main.numCarpark+1)/avgIncomeCost.elementAt(j);
+                    System.out.println("Normalized Removal Cost for " + (j+Main.numCarpark+1) + " : " + rcost2); // Debug
                     if (rcost1 < rcost2) {
                         rcost1 = rcost2;
                         highest = j;
@@ -338,7 +339,7 @@ class Solution {
             customerPool.add(highest+Main.numCarpark+1);
             gr.removeCustomer(highest+Main.numCarpark+1);
         }
-        // System.out.println("Customer Pool : " + customerPool); // Debug
+        System.out.println("Customer Pool : " + customerPool); // Debug
         // System.out.println("Giant Route after worst removal : " + gr.giantRoute); // Debug
         
         // Regret Insertion
@@ -353,6 +354,7 @@ class Solution {
                 return 1;
             }
         });
+        System.out.println("Customer Pool : " + customerPool); // Debug
         int count = 0;
         while (count < q) {
             int customer = customerPool.elementAt(count);
