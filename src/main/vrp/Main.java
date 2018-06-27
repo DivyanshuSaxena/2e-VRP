@@ -81,7 +81,7 @@ class Main {
         Solution bestFoundSoln = initsol;
         while (true) {
             boolean improvement = bestFoundSoln.updateBestNeighbor();
-            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); // Debug
+            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
             GiantRoute bfs = bestFoundSoln.getGiantRoute();
             if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
                 bestSolution = bfs;
@@ -89,7 +89,8 @@ class Main {
             } else improvement = false;
             // Find the best solution of the generated neighborhood, and proceed with it further 
             bestFoundSoln = bestFoundSoln.perturb();
-            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost); // Debug
+            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
+            System.out.println("--------------------------------------------------"); // Debug
             
             if (improvement) {
                 iterations = 0;

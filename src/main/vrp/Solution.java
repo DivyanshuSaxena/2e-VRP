@@ -314,23 +314,23 @@ class Solution {
         
         // Worst Removal
         Vector<Integer> customerPool = new Vector<Integer>(); // Holds the Customer Ids that have been removed 
-        Vector<Double> avgIncomeCost = new Vector<Double>();
+        Vector<Double> normRemovalCost = new Vector<Double>();
         int q = 5;
         for (Customer c : Main.customers) {
             int total = 0;
             for (int dist : Main.nodesDistance[c.id]) {
                 total += dist;
             }
-            avgIncomeCost.add((double)(total/Main.numNodes));
+            double avgIncomingCost = (double)(total/Main.numNodes);
+            normRemovalCost.add(gr.getCustomerRemovalCost(c.id)/avgIncomingCost);
         }
         for (int i = 0; i < q; i++) {
-            double rcost1 = gr.getCustomerRemovalCost(Main.numCarpark+1)/avgIncomeCost.elementAt(0);
-            int highest = 0;
-            for (int j = 0; j < Main.customers.length; j++) {
+            double rcost1 = normRemovalCost.elementAt(0);
+            int highest = -1;
+            for (int j = 0; j < normRemovalCost.size(); j++) {
                 if (customerPool.indexOf(j+Main.numCarpark+1) == -1) {
-                    double rcost2 = gr.getCustomerRemovalCost(j+Main.numCarpark+1)/avgIncomeCost.elementAt(j);
-                    System.out.println("Normalized Removal Cost for " + (j+Main.numCarpark+1) + " : " + rcost2); // Debug
-                    if (rcost1 < rcost2) {
+                    double rcost2 = normRemovalCost.elementAt(j);
+                    if (rcost1 < rcost2 || highest == -1) {
                         rcost1 = rcost2;
                         highest = j;
                     }
@@ -338,9 +338,9 @@ class Solution {
             }
             customerPool.add(highest+Main.numCarpark+1);
             gr.removeCustomer(highest+Main.numCarpark+1);
+            // System.out.println("Customer Pool : " + customerPool); // Debug
+            // System.out.println("Giant Route after worst removal : " + gr.giantRoute); // Debug
         }
-        System.out.println("Customer Pool : " + customerPool); // Debug
-        // System.out.println("Giant Route after worst removal : " + gr.giantRoute); // Debug
         
         // Regret Insertion
         customerPool.sort(new Comparator<Integer>() {
@@ -354,7 +354,7 @@ class Solution {
                 return 1;
             }
         });
-        System.out.println("Customer Pool : " + customerPool); // Debug
+        // System.out.println("Customer Pool : " + customerPool); // Debug
         int count = 0;
         while (count < q) {
             int customer = customerPool.elementAt(count);

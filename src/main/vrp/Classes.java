@@ -186,6 +186,7 @@ class GiantRoute {
     }
     public void removeCustomer(int customer) {
         int index = this.giantRoute.indexOf(customer);
+        // if (index == -1) System.out.println(customer + " not found in giant route"); // Debug
         this.cost -= (Main.nodesDistance[giantRoute.elementAt(index-1)][giantRoute.elementAt(index)] + Main.nodesDistance[giantRoute.elementAt(index)][giantRoute.elementAt(index+1)]);
         this.giantRoute.remove((Integer)customer);
     }
