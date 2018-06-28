@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 // Class to represent the solution
-class Solution implements Iterable<Integer> {
+class Solution implements Iterable<CustomerIndex> {
     Vector<Route> routes;
     int solutionCost;
     Solution() {
@@ -36,7 +36,7 @@ class Solution implements Iterable<Integer> {
         }
         return sol;
     }
-    public Iterator<Integer> iterator() {
+    public Iterator<CustomerIndex> iterator() {
         return new SolutionIterator(this);
     }
     public GiantRoute getGiantRoute() {
@@ -183,12 +183,12 @@ class Solution implements Iterable<Integer> {
         boolean improvement = false;
         int iterations = 0;
         int ispIterations = Main.numCustomers; // Hyper-Parameter
-        int moveIterations = Main.numCustomers; // Hyper-Parameter
         int exchangeIterations = Main.numCustomers; // Hyper-Parameter
         int vehicleIndex = 0;
         Route clonedRoute = new Route();
-        while (iterations < moveIterations) {
-            CustomerIndex ci = getRandomCustomer();
+        SolutionIterator iter = new SolutionIterator(this);
+        while (iter.hasNext()) {
+            CustomerIndex ci = iter.next();
             clonedRoute = Main.routedCarparks.elementAt(ci.routecp-Main.numNodes).route; // Index of the selected vehicle
             int customer = clonedRoute.route.elementAt(ci.index); // Index of the selected random customer
             // This customer is to be placed in the best location, in the route of the given Vehicle

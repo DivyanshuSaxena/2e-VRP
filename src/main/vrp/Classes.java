@@ -74,7 +74,7 @@ class CustomerIndex {
     }
 }
 
-class SolutionIterator implements Iterator<Integer> {
+class SolutionIterator implements Iterator<CustomerIndex> {
     int currPosition = 0;
     int route = 0;
     int routecp = 1;
@@ -86,12 +86,16 @@ class SolutionIterator implements Iterator<Integer> {
     public boolean hasNext() {
         return (currPosition < Main.customers.length);
     }
-    public Integer next() {
+    public CustomerIndex next() {
+        CustomerIndex cinext = new CustomerIndex();
         if (hasNext()) {
             Route firstLevel = solution.routes.elementAt(route);
             // System.out.println(route + " " + routecp + " " + customerIndex); // Debug
+            cinext.route = route;
+            cinext.routecp = firstLevel.route.elementAt(routecp);
+            cinext.index = customerIndex; 
             Vehicle vehicle = Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp)-Main.numNodes);
-            int retVal = vehicle.route.route.elementAt(customerIndex++); 
+            customerIndex++;
             if (customerIndex == vehicle.route.route.size()-1) {
                 customerIndex = 1;
                 routecp++;
@@ -103,7 +107,7 @@ class SolutionIterator implements Iterator<Integer> {
             }
             // System.out.println(retVal); // Debug
             currPosition++;
-            return retVal;
+            return cinext;
         }
         throw new NoSuchElementException();
     }
