@@ -74,32 +74,36 @@ class CustomerIndex {
     }
 }
 
-class SolutionIterator extends Solution implements Iterator<Integer> {
+class SolutionIterator implements Iterator<Integer> {
     int currPosition = 0;
     int route = 0;
     int routecp = 1;
-    int customerIndex = 0;
+    int customerIndex = 1;
+    Solution solution;
+    public SolutionIterator(Solution solnobj) {
+        solution = solnobj;
+    }
     public boolean hasNext() {
         return (currPosition < Main.customers.length);
     }
     public Integer next() {
         if (hasNext()) {
-            Route firstLevel = super.routes.elementAt(route);
-            if (routecp < firstLevel.route.size()) {
-                Vehicle vehicle = Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp));
-                if (customerIndex < vehicle.route.route.size()-1) {
-                    return vehicle.route.route.elementAt(++customerIndex);
-                } else {
-                    routecp++;
-                    customerIndex = 0;
-                    return Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp)).route.route.elementAt(++customerIndex);
-                }
-            } else {
-                firstLevel = super.routes.elementAt(++route);
-                routecp = 1;
-                customerIndex = 0;
-                return Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp)).route.route.elementAt(++customerIndex);
+            Route firstLevel = solution.routes.elementAt(route);
+            // System.out.println(route + " " + routecp + " " + customerIndex); // Debug
+            Vehicle vehicle = Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp)-Main.numNodes);
+            int retVal = vehicle.route.route.elementAt(customerIndex++); 
+            if (customerIndex == vehicle.route.route.size()-1) {
+                customerIndex = 1;
+                routecp++;
             }
+            if (routecp == firstLevel.route.size()-1 && route < solution.routes.size()-1) {
+                firstLevel = solution.routes.elementAt(++route);
+                routecp = 1;
+                customerIndex = 1;
+            }
+            // System.out.println(retVal); // Debug
+            currPosition++;
+            return retVal;
         }
         throw new NoSuchElementException();
     }

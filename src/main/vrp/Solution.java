@@ -37,7 +37,7 @@ class Solution implements Iterable<Integer> {
         return sol;
     }
     public Iterator<Integer> iterator() {
-        return new SolutionIterator();
+        return new SolutionIterator(this);
     }
     public GiantRoute getGiantRoute() {
         GiantRoute gr = new GiantRoute();
