@@ -73,8 +73,8 @@ class Main {
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
         GiantRoute bestSolution = new GiantRoute();
-        System.out.println("Initial Solution : " + initsol);
-        System.out.println("Cost of Solution: " + initsol.getCost());
+        System.out.println("Initial Solution : " + initsol + " cost " + initsol.getCost());
+
         // Use initsol to develop the further solutions here.
         int numUselessIterations = Main.numCustomers; // Hyper-Parameter
         int iterations = 0;

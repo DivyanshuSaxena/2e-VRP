@@ -1,5 +1,7 @@
 package vrp;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -69,6 +71,37 @@ class CustomerIndex {
     int index;
     public boolean isSameRoute(CustomerIndex ci) {
         return (ci.route==this.route && ci.routecp==this.routecp);
+    }
+}
+
+class SolutionIterator extends Solution implements Iterator<Integer> {
+    int currPosition = 0;
+    int route = 0;
+    int routecp = 1;
+    int customerIndex = 0;
+    public boolean hasNext() {
+        return (currPosition < Main.customers.length);
+    }
+    public Integer next() {
+        if (hasNext()) {
+            Route firstLevel = super.routes.elementAt(route);
+            if (routecp < firstLevel.route.size()) {
+                Vehicle vehicle = Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp));
+                if (customerIndex < vehicle.route.route.size()-1) {
+                    return vehicle.route.route.elementAt(++customerIndex);
+                } else {
+                    routecp++;
+                    customerIndex = 0;
+                    return Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp)).route.route.elementAt(++customerIndex);
+                }
+            } else {
+                firstLevel = super.routes.elementAt(++route);
+                routecp = 1;
+                customerIndex = 0;
+                return Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp)).route.route.elementAt(++customerIndex);
+            }
+        }
+        throw new NoSuchElementException();
     }
 }
 
@@ -186,7 +219,6 @@ class GiantRoute {
     }
     public void removeCustomer(int customer) {
         int index = this.giantRoute.indexOf(customer);
-        // if (index == -1) System.out.println(customer + " not found in giant route"); // Debug
         this.cost -= (Main.nodesDistance[giantRoute.elementAt(index-1)][giantRoute.elementAt(index)] + Main.nodesDistance[giantRoute.elementAt(index)][giantRoute.elementAt(index+1)]);
         this.giantRoute.remove((Integer)customer);
     }

@@ -1,10 +1,11 @@
 package vrp;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Vector;
 
 // Class to represent the solution
-class Solution {
+class Solution implements Iterable<Integer> {
     Vector<Route> routes;
     int solutionCost;
     Solution() {
@@ -34,6 +35,9 @@ class Solution {
             sol += "\n],\n";
         }
         return sol;
+    }
+    public Iterator<Integer> iterator() {
+        return new SolutionIterator();
     }
     public GiantRoute getGiantRoute() {
         GiantRoute gr = new GiantRoute();
@@ -207,7 +211,7 @@ class Solution {
             }
             // bestIndex contains the position of best insertion of the customer
             if (bestIndex != ci.index) {
-                System.out.println("Found a better solution, relocate customer " + customer + " in route " + clonedRoute + " at " + bestIndex); // Debug
+                // System.out.println("Found a better solution, relocate customer " + customer + " in route " + clonedRoute + " at " + bestIndex); // Debug
                 vehicleIndex = ci.routecp;
                 clonedRoute.addCustomer(customer,bestIndex);
                 if (bestIndex < ci.index)   clonedRoute.removeCustomer(ci.index+1);
@@ -258,7 +262,7 @@ class Solution {
                     this.updateCost();
                 } else {
                     // All infeasible but good quality solutions are received here
-                    System.out.println("Infeasible Solution");
+                    // System.out.println("Infeasible Solution");
                 }
             } else {
                 iterations++;
