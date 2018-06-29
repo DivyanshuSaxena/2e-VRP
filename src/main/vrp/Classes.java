@@ -191,7 +191,7 @@ class GiantRoute {
         return (vehicleDemand <= Main.l2cap);
     }
     public void insertAtBestLocation(int customer) {
-        int lastCarpark = 0, bestIndex = 0;
+        int lastCarpark = 0, bestIndex = -1;
         double bestCost = 0.0;
         for (int i = 0; i < this.giantRoute.size(); i++) {
             int node = giantRoute.elementAt(i);
@@ -208,8 +208,12 @@ class GiantRoute {
             } 
             if (node <= Main.numCarpark && node != 0)   lastCarpark = lastCarpark==0?node:0;                
         }
-        // System.out.println("Found best location for " + customer + " at " + bestIndex); // Debug
-        this.addCustomer(customer, bestIndex);
+        System.out.println("Found best location for " + customer + " at " + bestIndex); // Debug
+        if (bestIndex != -1) {
+            this.addCustomer(customer, bestIndex);
+        } else {
+            // No Suitable vehicle found, where the customer can be assigned.
+        }
     }
     public double getRegretCost(int customer) {
         int lastCarpark = 0;
@@ -235,5 +239,28 @@ class GiantRoute {
     public void addCustomer(int customer, int index) {
         this.cost += (Main.nodesDistance[giantRoute.elementAt(index-1)][customer] + Main.nodesDistance[customer][giantRoute.elementAt(index)]);
         this.giantRoute.add(index, customer);
+    }
+    public void removeUnusedCarparks() {
+        int prevNode = -1, lastCarpark = 0;
+        int currNode = giantRoute.elementAt(0);
+        for (int i = 1; i < giantRoute.size(); i++) {
+            currNode = giantRoute.elementAt(i);
+            if (currNode <= Main.numCarpark && currNode != 0) {
+                if (lastCarpark == currNode) {
+                    lastCarpark = 0; 
+                    if (currNode == prevNode) {
+                        giantRoute.remove(i);
+                        giantRoute.remove(i-1);
+                    }
+                    if (giantRoute.elementAt(i-2) == giantRoute.elementAt(i-1)) {
+                        giantRoute.remove(i-1);
+                        giantRoute.remove(i-2);
+                    }                
+                } else {
+                    lastCarpark = currNode;
+                }
+            }
+            prevNode = giantRoute.elementAt(i);
+        }
     }
 }

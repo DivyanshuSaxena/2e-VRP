@@ -369,6 +369,8 @@ class Solution implements Iterable<Integer> {
             gr.insertAtBestLocation(customer);
             count++;
         }
+        // Check the solution for any removed carparks
+        gr.removeUnusedCarparks();
         // System.out.println("Giant Route after regret insertion : " + gr.giantRoute); // Debug
         perturbSoln = gr.getSolution();
         return perturbSoln;        
