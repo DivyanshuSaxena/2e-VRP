@@ -24,7 +24,12 @@ hs_err_pid*
 /bin/
 
 # vscode
-./vscode/*
+.vscode/*
 
 # output
 output/*
+
+# Test Data
+Set1/
+Set2/
+Set3/

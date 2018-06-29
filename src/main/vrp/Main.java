@@ -11,13 +11,55 @@ class Main {
     static Customer customers[];
     static Carpark carparks[];
     static Vector<Vehicle> routedCarparks;
+    static Scanner sc;
 
     public static void main(String args[]) throws IOException {
         // The Method reads the inputs from a file and initializes the data structures
         String filename = args[0];
         File file = new File(filename);
-        Scanner sc = new Scanner(file);
+        sc = new Scanner(file);
+        if (filename.contains("E-n13")) {
+            setOneInput();
+        } else {
+            setTwoInput();
+        }
 
+        long startTime = System.currentTimeMillis();
+        Solution initsol = getInitialSoln();
+        GiantRoute bestSolution = new GiantRoute();
+        System.out.println("Initial Solution : " + initsol + " cost " + initsol.getCost());
+
+        // Use initsol to develop the further solutions here.
+        int numUselessIterations = Main.numCustomers; // Hyper-Parameter
+        int iterations = 0;
+        Solution bestFoundSoln = initsol;
+        while (true) {
+            boolean improvement = bestFoundSoln.updateBestNeighbor();
+            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
+            GiantRoute bfs = bestFoundSoln.getGiantRoute();
+            if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
+                bestSolution = bfs;
+                improvement = true;
+            } else improvement = false;
+            // Find the best solution of the generated neighborhood, and proceed with it further 
+            bestFoundSoln = bestFoundSoln.perturb();
+            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
+            System.out.println("--------------------------------------------------"); // Debug
+            
+            if (improvement) {
+                iterations = 0;
+            } else {
+                iterations++;
+                if (iterations == numUselessIterations) break;
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Final Solution : " + bestSolution.getSolution() + " cost " + bestSolution.cost);
+        System.out.println("Running time : " + (endTime-startTime));
+        
+        sc.close();
+    }
+    public static void setOneInput() {
         // Input parameters form the input file
         sc.nextLine(); // Name
         sc.nextLine(); // Comment
@@ -69,49 +111,69 @@ class Main {
                 customers[i-offset].setDemand(demand);            
             }
         }
+    }
+    
+    public static void setTwoInput() {
+        // Input parameters form the input file
+        sc.nextLine(); // Name
+        sc.nextLine(); // Comment
+        sc.nextLine(); // Type
+        numNodes = Integer.parseInt(sc.nextLine().split(" ")[2]); //Dimension 
+        numCarpark = Integer.parseInt(sc.nextLine().split(" ")[2]); // Satellites
+        numCustomers = Integer.parseInt(sc.nextLine().split(" ")[2]); // Customers
 
-        long startTime = System.currentTimeMillis();
-        Solution initsol = getInitialSoln();
-        GiantRoute bestSolution = new GiantRoute();
-        System.out.println("Initial Solution : " + initsol + " cost " + initsol.getCost());
-        // Check iterator
-        Iterator<Integer> iterator = initsol.iterator();
-        while (iterator.hasNext()) {
-            int cust = iterator.next();
-            System.out.print(cust + " "); // Debug
-        }
-        System.out.println(); // Debug
-        // Use initsol to develop the further solutions here.
-        int numUselessIterations = Main.numCustomers; // Hyper-Parameter
-        int iterations = 0;
-        Solution bestFoundSoln = initsol;
-        while (true) {
-            boolean improvement = bestFoundSoln.updateBestNeighbor();
-            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
-            GiantRoute bfs = bestFoundSoln.getGiantRoute();
-            if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
-                bestSolution = bfs;
-                improvement = true;
-            } else improvement = false;
-            // Find the best solution of the generated neighborhood, and proceed with it further 
-            bestFoundSoln = bestFoundSoln.perturb();
-            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
-            System.out.println("--------------------------------------------------"); // Debug
-            
-            if (improvement) {
-                iterations = 0;
+        sc.nextLine(); // Edge Weight Type
+        sc.nextLine(); // Fleet Section
+        l1cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L1 Cap
+        l2cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L2 Cap
+
+        numVehicles1 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L1 Fleet
+        numVehicles2 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L2 Fleet
+        
+        sc.nextLine(); // Node Coord Section
+        nodesDistance = new int[numNodes][numNodes];
+        customers = new Customer[numCustomers];
+        carparks = new Carpark[numCarpark];
+
+        // Creation of distances matrix from the input file
+        int x_coord[] = new int[numNodes];
+        int y_coord[] = new int[numNodes];
+        for (int i = 0; i <= numCustomers; i++) {
+            sc.nextInt(); // Node Number
+            if (i == 0) {
+                x_coord[i] = sc.nextInt();
+                y_coord[i] = sc.nextInt();
             } else {
-                iterations++;
-                if (iterations == numUselessIterations) break;
+                x_coord[i+numCarpark] = sc.nextInt();
+                y_coord[i+numCarpark] = sc.nextInt();
             }
         }
-        long endTime = System.currentTimeMillis();
-        System.out.println("Final Solution : " + bestSolution.getSolution() + " cost " + bestSolution.cost);
-        System.out.println("Running time : " + (endTime-startTime));
-        
-        sc.close();
-    }
+        sc.nextLine(); // Empty Line
+        sc.nextLine(); // Satellite Section
+        for (int i = 0; i < numCarpark; i++) {
+            sc.nextInt(); // Node Number
+            x_coord[i+1] = sc.nextInt();
+            y_coord[i+1] = sc.nextInt();
+        }
+        sc.nextLine(); // Empty Line
+        for (int i = 0; i < numNodes; i++) {
+            for (int j = i+1; j < numNodes; j++) {
+                nodesDistance[i][j] = (int) Math.round(Math.sqrt((x_coord[i]-x_coord[j])*(x_coord[i]-x_coord[j]) + (y_coord[i]-y_coord[j])*(y_coord[i]-y_coord[j])));
+                nodesDistance[j][i] = nodesDistance[i][j];
+            }
+        }
 
+        // Initialization of the customer array 
+        sc.nextLine(); // Demand Section
+        sc.nextLine(); // Demand of Main Depot	
+        for(int i = 1; i < numCustomers; i++) {
+            // i = 0 is reserved for the main depot
+            customers[i-1] = new Customer();
+            customers[i-1].setId(i+numCarpark);
+            int demand = Integer.parseInt(sc.nextLine().split(" ")[1]);
+            customers[i-1].setDemand(demand);            
+        }
+    }
     public static Solution getInitialSoln() {
         // Finds the initial solution and places it in the static variable route.
         Solution initial = new Solution();
@@ -166,7 +228,6 @@ class Main {
         initial.updateCost();
         return initial;
     }
-
     public static Vector<Route> savingSolution(Vector<Integer> customers, final int depot, int capacity) {
         // This function implements the Clarke and Wright's Saving Algortihm
     	// System.out.println("Applying C&W for " + depot + " with customers: " + customers); // Debug
