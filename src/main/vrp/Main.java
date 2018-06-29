@@ -7,7 +7,7 @@ class Main {
     static int numCustomers, numNodes, numCarpark;
     static int numVehicles1, numVehicles2;
     static int l1cap, l2cap;
-    static int nodesDistance[][];
+    static double nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
     static Vector<Vehicle> routedCarparks;
@@ -77,7 +77,7 @@ class Main {
         numVehicles2 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L2 Fleet
         
         sc.nextLine(); // Edge Weight Section
-        nodesDistance = new int[numNodes][numNodes];
+        nodesDistance = new double[numNodes][numNodes];
         customers = new Customer[numCustomers];
         carparks = new Carpark[numCarpark];
 
@@ -131,7 +131,7 @@ class Main {
         numVehicles2 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L2 Fleet
         
         sc.nextLine(); // Node Coord Section
-        nodesDistance = new int[numNodes][numNodes];
+        nodesDistance = new double[numNodes][numNodes];
         customers = new Customer[numCustomers];
         carparks = new Carpark[numCarpark];
 
@@ -160,7 +160,7 @@ class Main {
         sc.nextLine(); // Empty Line
         for (int i = 0; i < numNodes; i++) {
             for (int j = i+1; j < numNodes; j++) {
-                nodesDistance[i][j] = (int) Math.round(Math.sqrt((x_coord[i]-x_coord[j])*(x_coord[i]-x_coord[j]) + (y_coord[i]-y_coord[j])*(y_coord[i]-y_coord[j])));
+                nodesDistance[i][j] = Math.sqrt((x_coord[i]-x_coord[j])*(x_coord[i]-x_coord[j]) + (y_coord[i]-y_coord[j])*(y_coord[i]-y_coord[j]));
                 nodesDistance[j][i] = nodesDistance[i][j];
             }
         }
@@ -183,7 +183,7 @@ class Main {
         // Assign each customer to the nearest carpark.
         for(int i = 0; i < numCustomers; i++) {
         	int customerOffset = numCarpark + 1;
-            int minDistance = -1;
+            double minDistance = -1;
             int assigned = 0;
             for(int j = 1; j <= numCarpark; j++) {
                 if (minDistance > nodesDistance[i+customerOffset][j] || minDistance == -1) {
@@ -258,8 +258,8 @@ class Main {
                 if (secondo1 >= Main.numNodes) secondo1 = Main.routedCarparks.elementAt(secondo1-Main.numNodes).cpindex;
                 if (firsto2 >= Main.numNodes) firsto2 = Main.routedCarparks.elementAt(firsto2-Main.numNodes).cpindex;
                 if (secondo2 >= Main.numNodes) secondo2 = Main.routedCarparks.elementAt(secondo2-Main.numNodes).cpindex;
-                int savings1 = nodesDistance[depot][firsto1] + nodesDistance[depot][secondo1] - nodesDistance[firsto1][secondo1];
-                int savings2 = nodesDistance[depot][firsto2] + nodesDistance[depot][secondo2] - nodesDistance[firsto2][secondo2];
+                double savings1 = nodesDistance[depot][firsto1] + nodesDistance[depot][secondo1] - nodesDistance[firsto1][secondo1];
+                double savings2 = nodesDistance[depot][firsto2] + nodesDistance[depot][secondo2] - nodesDistance[firsto2][secondo2];
                 if (savings1 > savings2 ) {
                     return -1;
                 } else if (savings1 == savings2 && o1.demand < o2.demand) {

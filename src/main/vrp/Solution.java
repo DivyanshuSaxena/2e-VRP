@@ -7,10 +7,10 @@ import java.util.Vector;
 // Class to represent the solution
 class Solution implements Iterable<Integer> {
     Vector<Route> routes;
-    int solutionCost;
+    double solutionCost;
     Solution() {
         routes = new Vector<Route>();
-        solutionCost = 0;
+        solutionCost = 0.0;
     }
     public String toString() {
         // Change this function
@@ -56,12 +56,12 @@ class Solution implements Iterable<Integer> {
         gr.cost = this.solutionCost;
         return gr;
     }
-    public int getCost() {
+    public double getCost() {
         return this.solutionCost;
     }
-    public int updateCost() {
+    public double updateCost() {
         // Function to evaluate the total costs of the solution.
-        int cost = 0;
+        double cost = 0;
         for (Route route : this.routes) {
             cost += route.getCost();
         }
@@ -72,11 +72,12 @@ class Solution implements Iterable<Integer> {
         this.solutionCost = cost;
         return cost;
     }
-    public int getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
+    public SwapCostType getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
         // This function returns the best swap neighbour obtained on swapping customers at ci1 and ci2.
         Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
         Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
-        int swapCost = 0, type = 1, bestCost = 0;
+        int type = 1;
+        double swapCost = 0.0, bestCost = 0.0;
         int customer1nextnext = -1, customer2nextnext = -1, customer1prevprev = -1, customer2prevprev = -1;
         
         int customer1 = swapRoute1.route.elementAt(ci1.index);
@@ -98,17 +99,17 @@ class Solution implements Iterable<Integer> {
             customer2nextnext = customer2;
         }
         // System.out.println("Swapping " + customer1 + " in " + swapRoute1 + " with " + customer2 + " in " + swapRoute2); // Debug
-        int subtractCost1 = Main.nodesDistance[customer1][customer1next] + Main.nodesDistance[customer1prev][customer1];
-        int subtractCost2 = Main.nodesDistance[customer2][customer2next] + Main.nodesDistance[customer2prev][customer2];
-        int addCost1 = Main.nodesDistance[customer2][customer1next] + Main.nodesDistance[customer1prev][customer2];
-        int addCost2 = Main.nodesDistance[customer1][customer2next] + Main.nodesDistance[customer2prev][customer1];
+        double subtractCost1 = Main.nodesDistance[customer1][customer1next] + Main.nodesDistance[customer1prev][customer1];
+        double subtractCost2 = Main.nodesDistance[customer2][customer2next] + Main.nodesDistance[customer2prev][customer2];
+        double addCost1 = Main.nodesDistance[customer2][customer1next] + Main.nodesDistance[customer1prev][customer2];
+        double addCost2 = Main.nodesDistance[customer1][customer2next] + Main.nodesDistance[customer2prev][customer1];
         swapCost = (this.solutionCost - subtractCost1 - subtractCost2 + addCost1 + addCost2);
         if (ci1.index-ci2.index == 1 || ci1.index-ci2.index == -1) {
         	swapCost = swapCost + 2*Main.nodesDistance[customer1][customer2];
         }
         // System.out.println("Cost of swapping " + customer1 + " and " + customer2 + " : " + swapCost); // Debug
         // Checkout alternatives
-        int costType2 = 0, costType3 = 0, costType4 = 0, costType5 = 0;
+        double costType2 = 0, costType3 = 0, costType4 = 0, costType5 = 0;
         if (customer1nextnext != -1) {
             costType2 = Main.nodesDistance[customer1prev][customer1next] + Main.nodesDistance[customer2][customer1nextnext] - Main.nodesDistance[customer1prev][customer2] - Main.nodesDistance[customer1next][customer1nextnext];
             if (costType2 < bestCost) {
@@ -141,8 +142,10 @@ class Solution implements Iterable<Integer> {
             } 
         }   
         // System.out.println("Cost of change, type 5 : " + costType2); // Debug
-        int returnCost = (swapCost + bestCost)*10 + type;
-        return returnCost;
+        SwapCostType sct = new SwapCostType();
+        sct.swapCost = swapCost + bestCost;
+        sct.type = type;
+        return sct;
     }
     public CustomerIndex getRandomCustomer() {
         // Function to get a random customer from the solution.
@@ -195,14 +198,15 @@ class Solution implements Iterable<Integer> {
             int prevCustomer = clonedRoute.route.elementAt(ci.index-1);
             int nextCustomer = clonedRoute.route.elementAt(ci.index+1);
             // System.out.println("For route: "+ clonedRoute + " " + clonedRoute.getCost() + " " + customer + " " + prevCustomer + " " + nextCustomer); // Debug
-            int sameCost = solutionCost - Main.nodesDistance[prevCustomer][customer] - Main.nodesDistance[customer][nextCustomer] + Main.nodesDistance[prevCustomer][nextCustomer];
-            int bestIndex = ci.index, bestCost = this.solutionCost;
+            double sameCost = solutionCost - Main.nodesDistance[prevCustomer][customer] - Main.nodesDistance[customer][nextCustomer] + Main.nodesDistance[prevCustomer][nextCustomer];
+            int bestIndex = ci.index;
+            double bestCost = this.solutionCost;
             for (int i = 1; i < clonedRoute.route.size()-1; i++) {
                 // Loop to iterate over the places in the current route
                 if (i == ci.index || i == ci.index+1) continue;
                 int prev = clonedRoute.route.elementAt(i-1);
                 int next = clonedRoute.route.elementAt(i);
-                int newCost = sameCost + Main.nodesDistance[prev][customer] + Main.nodesDistance[customer][next] - Main.nodesDistance[prev][next];
+                double newCost = sameCost + Main.nodesDistance[prev][customer] + Main.nodesDistance[customer][next] - Main.nodesDistance[prev][next];
                 if (bestCost > newCost) {
                 	// System.out.println(bestCost + " " + newCost); // Debug
                     bestCost = newCost;
@@ -232,9 +236,9 @@ class Solution implements Iterable<Integer> {
             // System.out.println(this.routes + " at " + iterations); // Debug
             CustomerIndex ci1 = getRandomCustomer();
             CustomerIndex ci2 = getRandomCustomer();
-            int swapCostType = getSwapCost(ci1,ci2);
-            int swapCost = swapCostType/10;
-            int type = swapCostType%10;
+            SwapCostType swapCostType = getSwapCost(ci1,ci2);
+            double swapCost = swapCostType.swapCost;
+            int type = swapCostType.type;
             if (this.solutionCost > swapCost) {
                 // Swap the two customers
             	// System.out.println("Found lower cost : " + swapCost + " and type : " + type); // Debug
@@ -288,8 +292,8 @@ class Solution implements Iterable<Integer> {
             int customer2prev = exchangeRoute2.route.elementAt(ci2.index-1);
             int route2last = exchangeRoute2.route.elementAt(exchangeRoute2.route.size()-2);
             int route2depot = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).cpindex;
-            int addCost1 = Main.nodesDistance[customer1prev][customer2] + Main.nodesDistance[customer2prev][customer1] + Main.nodesDistance[route2last][route1depot] + Main.nodesDistance[route1last][route2depot];
-            int subtractCost1 = Main.nodesDistance[customer1prev][customer1] + Main.nodesDistance[customer2prev][customer2] + Main.nodesDistance[route1last][route1depot] + Main.nodesDistance[route2last][route2depot];
+            double addCost1 = Main.nodesDistance[customer1prev][customer2] + Main.nodesDistance[customer2prev][customer1] + Main.nodesDistance[route2last][route1depot] + Main.nodesDistance[route1last][route2depot];
+            double subtractCost1 = Main.nodesDistance[customer1prev][customer1] + Main.nodesDistance[customer2prev][customer2] + Main.nodesDistance[route1last][route1depot] + Main.nodesDistance[route2last][route2depot];
             // Exchange the customers if better.
             if (addCost1-subtractCost1 < 0) {
                 Vector<Integer> seg1 = exchangeRoute1.getSubRoute(ci1.index, exchangeRoute1.route.size()-2);
@@ -322,7 +326,7 @@ class Solution implements Iterable<Integer> {
         int q = 5;
         for (Customer c : Main.customers) {
             int total = 0;
-            for (int dist : Main.nodesDistance[c.id]) {
+            for (double dist : Main.nodesDistance[c.id]) {
                 total += dist;
             }
             double avgIncomingCost = (double)(total/Main.numNodes);

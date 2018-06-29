@@ -74,6 +74,11 @@ class CustomerIndex {
     }
 }
 
+class SwapCostType {
+    double swapCost;
+    int type;
+}
+
 class SolutionIterator implements Iterator<Integer> {
     int currPosition = 0;
     int route = 0;
@@ -111,7 +116,7 @@ class SolutionIterator implements Iterator<Integer> {
 
 class GiantRoute {
     Vector<Integer> giantRoute;
-    int cost;
+    double cost;
     public GiantRoute() {
         giantRoute = new Vector<Integer>();
         cost = 0;
@@ -159,8 +164,8 @@ class GiantRoute {
         solution.updateCost();
         return solution;
     }
-    public int getCustomerRemovalCost(int customer) {
-        int rcost = 0;
+    public double getCustomerRemovalCost(int customer) {
+        double rcost = 0;
         for (int i = 0; i < this.giantRoute.size(); i++) {
             if (this.giantRoute.elementAt(i) == customer) {
                 rcost = Main.nodesDistance[giantRoute.elementAt(i-1)][giantRoute.elementAt(i)] + Main.nodesDistance[giantRoute.elementAt(i)][giantRoute.elementAt(i+1)];
@@ -187,12 +192,13 @@ class GiantRoute {
         return (vehicleDemand <= Main.l2cap);
     }
     public void insertAtBestLocation(int customer) {
-        int lastCarpark = 0, bestCost = 0, bestIndex = 0;
+        int lastCarpark = 0, bestIndex = 0;
+        double bestCost = 0.0;
         for (int i = 0; i < this.giantRoute.size(); i++) {
             int node = giantRoute.elementAt(i);
             if (node != 0 && lastCarpark == 0) {
                 // Insertion is possible at index (i+1)
-                int addCost = Main.nodesDistance[node][customer] + Main.nodesDistance[customer][giantRoute.elementAt(i+1)];
+                double addCost = Main.nodesDistance[node][customer] + Main.nodesDistance[customer][giantRoute.elementAt(i+1)];
                 if (bestCost == 0 && this.isInsertionFeasible(customer, i+1))  {
                     bestCost = addCost;
                     bestIndex = i+1;
@@ -206,12 +212,13 @@ class GiantRoute {
         this.addCustomer(customer, bestIndex);
         // System.out.println("Giant Route after regret insertion : " + this.giantRoute); // Debug
     }
-    public int getRegretCost(int customer) {
-        int lastCarpark = 0, best = 0, secondBest = 0;
+    public double getRegretCost(int customer) {
+        int lastCarpark = 0;
+        double best = 0.0, secondBest = 0.0;
         for (int i = 0; i < this.giantRoute.size(); i++) {
             if (giantRoute.elementAt(i) != 0 && lastCarpark == 0) {
                 // Insertion is possible at index (i+1)
-                int addCost = Main.nodesDistance[giantRoute.elementAt(i)][customer] + Main.nodesDistance[customer][giantRoute.elementAt(i+1)];
+                double addCost = Main.nodesDistance[giantRoute.elementAt(i)][customer] + Main.nodesDistance[customer][giantRoute.elementAt(i+1)];
                 if (best == 0)  best = addCost;
                 else if (best > addCost) {
                     secondBest = best;
