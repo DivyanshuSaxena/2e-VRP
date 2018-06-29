@@ -74,7 +74,13 @@ class Main {
         Solution initsol = getInitialSoln();
         GiantRoute bestSolution = new GiantRoute();
         System.out.println("Initial Solution : " + initsol + " cost " + initsol.getCost());
-        
+        // // Check Iterator
+        // SolutionIterator iterator = new SolutionIterator(initsol);
+        // while (iterator.hasNext()) {
+        //     CustomerIndex ci = iterator.next();
+        //     int customer = routedCarparks.elementAt(ci.routecp-numNodes).route.route.elementAt(ci.index);
+        //     System.out.println(customer); // Debug
+        // }
         // Use initsol to develop the further solutions here.
         int numUselessIterations = Main.numCustomers; // Hyper-Parameter
         int iterations = 0;

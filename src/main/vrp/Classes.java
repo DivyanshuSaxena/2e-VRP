@@ -75,7 +75,6 @@ class CustomerIndex {
 }
 
 class SolutionIterator implements Iterator<CustomerIndex> {
-    int currPosition = 0;
     int route = 0;
     int routecp = 1;
     int customerIndex = 1;
@@ -84,32 +83,35 @@ class SolutionIterator implements Iterator<CustomerIndex> {
         solution = solnobj;
     }
     public boolean hasNext() {
-        return (currPosition < Main.customers.length);
+        return (route < solution.routes.size());
     }
     public CustomerIndex next() {
         CustomerIndex cinext = new CustomerIndex();
+        // System.out.println("Finding the next for " + solution + " at " + route + " " + routecp + " " + customerIndex); // Debug
         if (hasNext()) {
+            // System.out.println("Next is available"); // Debug
             Route firstLevel = solution.routes.elementAt(route);
-            // System.out.println(route + " " + routecp + " " + customerIndex); // Debug
             cinext.route = route;
             cinext.routecp = firstLevel.route.elementAt(routecp);
-            cinext.index = customerIndex; 
-            Vehicle vehicle = Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp)-Main.numNodes);
+            cinext.index = customerIndex;
             customerIndex++;
-            if (customerIndex == vehicle.route.route.size()-1) {
-                customerIndex = 1;
+            Vehicle vehicle = Main.routedCarparks.elementAt(firstLevel.route.elementAt(routecp)-Main.numNodes);
+            if (customerIndex >= vehicle.route.route.size()-1) {
                 routecp++;
-            }
-            if (routecp == firstLevel.route.size()-1 && route < solution.routes.size()-1) {
-                firstLevel = solution.routes.elementAt(++route);
-                routecp = 1;
                 customerIndex = 1;
+                if (routecp >= firstLevel.route.size()-1) {
+                    route++;
+                    routecp = 1;
+                }
             }
-            // System.out.println(retVal); // Debug
-            currPosition++;
             return cinext;
         }
         throw new NoSuchElementException();
+    }
+    public void reset() {
+        route = 0;
+        routecp = 1;
+        customerIndex = 1;    
     }
 }
 

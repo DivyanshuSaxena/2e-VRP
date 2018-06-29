@@ -177,136 +177,149 @@ class Solution implements Iterable<CustomerIndex> {
         if (index == Main.routedCarparks.size()+1)  return 0;
         return index;
     }
+    private boolean moveOperator(CustomerIndex ci) {
+        boolean improvement = false;
+        Route clonedRoute = Main.routedCarparks.elementAt(ci.routecp-Main.numNodes).route; // Index of the selected vehicle
+        int customer = clonedRoute.route.elementAt(ci.index); // Index of the selected random customer
+        // This customer is to be placed in the best location, in the route of the given Vehicle
+        int prevCustomer = clonedRoute.route.elementAt(ci.index-1);
+        int nextCustomer = clonedRoute.route.elementAt(ci.index+1);
+        // System.out.println("For route: "+ clonedRoute + " " + clonedRoute.getCost() + " " + customer + " " + prevCustomer + " " + nextCustomer); // Debug
+        int sameCost = solutionCost - Main.nodesDistance[prevCustomer][customer] - Main.nodesDistance[customer][nextCustomer] + Main.nodesDistance[prevCustomer][nextCustomer];
+        int bestIndex = ci.index, bestCost = this.solutionCost;
+        for (int i = 1; i < clonedRoute.route.size()-1; i++) {
+            // Loop to iterate over the places in the current route
+            if (i == ci.index || i == ci.index+1) continue;
+            int prev = clonedRoute.route.elementAt(i-1);
+            int next = clonedRoute.route.elementAt(i);
+            int newCost = sameCost + Main.nodesDistance[prev][customer] + Main.nodesDistance[customer][next] - Main.nodesDistance[prev][next];
+            if (bestCost > newCost) {
+                // System.out.println(bestCost + " " + newCost); // Debug
+                bestCost = newCost;
+                bestIndex = i;
+            }
+        }
+        // bestIndex contains the position of best insertion of the customer
+        if (bestIndex != ci.index) {
+            // System.out.println("Found a better solution, relocate customer " + customer + " in route " + clonedRoute + " at " + bestIndex); // Debug
+            int vehicleIndex = ci.routecp;
+            clonedRoute.addCustomer(customer,bestIndex);
+            if (bestIndex < ci.index)   clonedRoute.removeCustomer(ci.index+1);
+            else    clonedRoute.removeCustomer(ci.index);
+            Main.routedCarparks.elementAt(vehicleIndex-Main.numNodes).route = clonedRoute;
+            improvement = true;
+            this.updateCost();
+        }
+        // Random customer relocated to the best location in the route
+        return improvement;
+    }
+    private boolean iteratedSwapOperator(CustomerIndex ci1, CustomerIndex ci2) {
+        boolean improvement = false;
+        int swapCostType = getSwapCost(ci1,ci2);
+        int swapCost = swapCostType/10;
+        int type = swapCostType%10;
+        if (this.solutionCost > swapCost) {
+            // Swap the two customers
+            // System.out.println("Found lower cost : " + swapCost + " and type : " + type); // Debug
+            Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
+            Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
+            int customer1 = swapRoute1.route.elementAt(ci1.index);
+            int customer2 = swapRoute2.route.elementAt(ci2.index);
+            if (swapRoute1.isSwapFeasible(customer1, customer2) && swapRoute2.isSwapFeasible(customer2, customer1)) {
+                swapRoute1.setCustomer(customer2, ci1.index);
+                swapRoute2.setCustomer(customer1, ci2.index);
+                if (type == 2) {
+                    swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index+1), ci1.index);
+                    swapRoute1.setCustomer(customer2, ci1.index+1);
+                } else if (type == 3) {
+                    swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index-1), ci1.index);
+                    swapRoute1.setCustomer(customer2, ci1.index-1);                    
+                } else if (type == 4) {
+                    swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index-1), ci2.index);
+                    swapRoute2.setCustomer(customer1, ci2.index-1);                    
+                } else if (type == 5) {
+                    swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index+1), ci2.index);
+                    swapRoute2.setCustomer(customer1, ci2.index+1);
+                }
+                improvement = true;
+                this.updateCost();
+            } else {
+                // All infeasible but good quality solutions are received here
+                // System.out.println("Infeasible Solution");
+            }
+        }
+        return improvement;
+    }
+    private boolean exchangeOperator(CustomerIndex ci1, CustomerIndex ci2) {
+        boolean improvement = false;
+        if (ci1.routecp==ci2.routecp) {
+            return improvement;
+        }
+        Route exchangeRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
+        Route exchangeRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
+        int customer1 = exchangeRoute1.route.elementAt(ci1.index);
+        int customer1prev = exchangeRoute1.route.elementAt(ci1.index-1);
+        int route1last = exchangeRoute1.route.elementAt(exchangeRoute1.route.size()-2);
+        int route1depot = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).cpindex;
+        int customer2 = exchangeRoute2.route.elementAt(ci2.index);
+        int customer2prev = exchangeRoute2.route.elementAt(ci2.index-1);
+        int route2last = exchangeRoute2.route.elementAt(exchangeRoute2.route.size()-2);
+        int route2depot = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).cpindex;
+        int addCost1 = Main.nodesDistance[customer1prev][customer2] + Main.nodesDistance[customer2prev][customer1] + Main.nodesDistance[route2last][route1depot] + Main.nodesDistance[route1last][route2depot];
+        int subtractCost1 = Main.nodesDistance[customer1prev][customer1] + Main.nodesDistance[customer2prev][customer2] + Main.nodesDistance[route1last][route1depot] + Main.nodesDistance[route2last][route2depot];
+        // Exchange the customers if better.
+        if (addCost1-subtractCost1 < 0) {
+            Vector<Integer> seg1 = exchangeRoute1.getSubRoute(ci1.index, exchangeRoute1.route.size()-2);
+            Vector<Integer> seg2 = exchangeRoute2.getSubRoute(ci2.index, exchangeRoute2.route.size()-2);
+            if (exchangeRoute1.isExchangeFeasible(seg2, ci1.index) && exchangeRoute2.isExchangeFeasible(seg1, ci2.index)) {
+                // System.out.println("Exchanging " + customer1 + " from " + exchangeRoute1 + " with " + customer2 + " from " + exchangeRoute2); // Debug
+                exchangeRoute1.addAllCustomers(seg2, ci1.index);
+                exchangeRoute2.addAllCustomers(seg1, ci2.index);
+                exchangeRoute1.removeAllCustomers(ci1.index+seg2.size(), exchangeRoute1.route.size()-2);
+                exchangeRoute2.removeAllCustomers(ci2.index+seg1.size(), exchangeRoute2.route.size()-2);    
+                // System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
+                improvement = true;
+                this.updateCost();
+                // System.out.println("Updated Cost : " + this.solutionCost); // Debug
+            } 
+        }
+        return improvement;
+    }
     public boolean updateBestNeighbor() {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
         boolean improvement = false;
         int iterations = 0;
         int ispIterations = Main.numCustomers; // Hyper-Parameter
-        int exchangeIterations = Main.numCustomers; // Hyper-Parameter
-        int vehicleIndex = 0;
-        Route clonedRoute = new Route();
         SolutionIterator iter = new SolutionIterator(this);
         while (iter.hasNext()) {
             CustomerIndex ci = iter.next();
-            clonedRoute = Main.routedCarparks.elementAt(ci.routecp-Main.numNodes).route; // Index of the selected vehicle
-            int customer = clonedRoute.route.elementAt(ci.index); // Index of the selected random customer
-            // This customer is to be placed in the best location, in the route of the given Vehicle
-            int prevCustomer = clonedRoute.route.elementAt(ci.index-1);
-            int nextCustomer = clonedRoute.route.elementAt(ci.index+1);
-            // System.out.println("For route: "+ clonedRoute + " " + clonedRoute.getCost() + " " + customer + " " + prevCustomer + " " + nextCustomer); // Debug
-            int sameCost = solutionCost - Main.nodesDistance[prevCustomer][customer] - Main.nodesDistance[customer][nextCustomer] + Main.nodesDistance[prevCustomer][nextCustomer];
-            int bestIndex = ci.index, bestCost = this.solutionCost;
-            for (int i = 1; i < clonedRoute.route.size()-1; i++) {
-                // Loop to iterate over the places in the current route
-                if (i == ci.index || i == ci.index+1) continue;
-                int prev = clonedRoute.route.elementAt(i-1);
-                int next = clonedRoute.route.elementAt(i);
-                int newCost = sameCost + Main.nodesDistance[prev][customer] + Main.nodesDistance[customer][next] - Main.nodesDistance[prev][next];
-                if (bestCost > newCost) {
-                	// System.out.println(bestCost + " " + newCost); // Debug
-                    bestCost = newCost;
-                    bestIndex = i;
-                }
-            }
-            // bestIndex contains the position of best insertion of the customer
-            if (bestIndex != ci.index) {
-                // System.out.println("Found a better solution, relocate customer " + customer + " in route " + clonedRoute + " at " + bestIndex); // Debug
-                vehicleIndex = ci.routecp;
-                clonedRoute.addCustomer(customer,bestIndex);
-                if (bestIndex < ci.index)   clonedRoute.removeCustomer(ci.index+1);
-                else    clonedRoute.removeCustomer(ci.index);
-                Main.routedCarparks.elementAt(vehicleIndex-Main.numNodes).route = clonedRoute;
-                improvement = true;
-                this.updateCost();
-            } else {
-                iterations++;
-            }
-            // Random customer relocated to the best location in the route
+            improvement = this.moveOperator(ci);
         }
         if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
 
         // Iterated Swap Procedure
         iterations = 0;
         while(iterations < ispIterations) {
-            // System.out.println(this.routes + " at " + iterations); // Debug
             CustomerIndex ci1 = getRandomCustomer();
             CustomerIndex ci2 = getRandomCustomer();
-            int swapCostType = getSwapCost(ci1,ci2);
-            int swapCost = swapCostType/10;
-            int type = swapCostType%10;
-            if (this.solutionCost > swapCost) {
-                // Swap the two customers
-            	// System.out.println("Found lower cost : " + swapCost + " and type : " + type); // Debug
-                Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
-                Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
-                int customer1 = swapRoute1.route.elementAt(ci1.index);
-                int customer2 = swapRoute2.route.elementAt(ci2.index);
-                if (swapRoute1.isSwapFeasible(customer1, customer2) && swapRoute2.isSwapFeasible(customer2, customer1)) {
-                    swapRoute1.setCustomer(customer2, ci1.index);
-                    swapRoute2.setCustomer(customer1, ci2.index);
-                    if (type == 2) {
-                        swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index+1), ci1.index);
-                        swapRoute1.setCustomer(customer2, ci1.index+1);
-                    } else if (type == 3) {
-                        swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index-1), ci1.index);
-                        swapRoute1.setCustomer(customer2, ci1.index-1);                    
-                    } else if (type == 4) {
-                        swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index-1), ci2.index);
-                        swapRoute2.setCustomer(customer1, ci2.index-1);                    
-                    } else if (type == 5) {
-                        swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index+1), ci2.index);
-                        swapRoute2.setCustomer(customer1, ci2.index+1);
-                    }
-                    improvement = true;
-                    this.updateCost();
-                } else {
-                    // All infeasible but good quality solutions are received here
-                    // System.out.println("Infeasible Solution");
-                }
-            } else {
+            boolean ispimprove = this.iteratedSwapOperator(ci1, ci2);
+            if (!ispimprove) {
                 iterations++;
             }
+            improvement = improvement || ispimprove;
         }
         if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
         
         // Segment Exchange Operator
-        iterations = 0;
-        while (iterations < exchangeIterations) {
-            CustomerIndex ci1 = getRandomCustomer();
-            CustomerIndex ci2 = getRandomCustomer();
-            if (ci1.routecp==ci2.routecp) {
-                continue;
+        iter.reset();
+        while (iter.hasNext()) {
+            CustomerIndex ci1 = iter.next();
+            SolutionIterator innerIterator = new SolutionIterator(this);
+            while (innerIterator.hasNext()) {
+                CustomerIndex ci2 = innerIterator.next();
+                improvement = improvement || this.exchangeOperator(ci1, ci2);
             }
-            Route exchangeRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
-            Route exchangeRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
-            int customer1 = exchangeRoute1.route.elementAt(ci1.index);
-            int customer1prev = exchangeRoute1.route.elementAt(ci1.index-1);
-            int route1last = exchangeRoute1.route.elementAt(exchangeRoute1.route.size()-2);
-            int route1depot = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).cpindex;
-            int customer2 = exchangeRoute2.route.elementAt(ci2.index);
-            int customer2prev = exchangeRoute2.route.elementAt(ci2.index-1);
-            int route2last = exchangeRoute2.route.elementAt(exchangeRoute2.route.size()-2);
-            int route2depot = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).cpindex;
-            int addCost1 = Main.nodesDistance[customer1prev][customer2] + Main.nodesDistance[customer2prev][customer1] + Main.nodesDistance[route2last][route1depot] + Main.nodesDistance[route1last][route2depot];
-            int subtractCost1 = Main.nodesDistance[customer1prev][customer1] + Main.nodesDistance[customer2prev][customer2] + Main.nodesDistance[route1last][route1depot] + Main.nodesDistance[route2last][route2depot];
-            // Exchange the customers if better.
-            if (addCost1-subtractCost1 < 0) {
-                Vector<Integer> seg1 = exchangeRoute1.getSubRoute(ci1.index, exchangeRoute1.route.size()-2);
-                Vector<Integer> seg2 = exchangeRoute2.getSubRoute(ci2.index, exchangeRoute2.route.size()-2);
-                if (exchangeRoute1.isExchangeFeasible(seg2, ci1.index) && exchangeRoute2.isExchangeFeasible(seg1, ci2.index)) {
-                    // System.out.println("Exchanging " + customer1 + " from " + exchangeRoute1 + " with " + customer2 + " from " + exchangeRoute2); // Debug
-                    exchangeRoute1.addAllCustomers(seg2, ci1.index);
-                    exchangeRoute2.addAllCustomers(seg1, ci2.index);
-                    exchangeRoute1.removeAllCustomers(ci1.index+seg2.size(), exchangeRoute1.route.size()-2);
-                    exchangeRoute2.removeAllCustomers(ci2.index+seg1.size(), exchangeRoute2.route.size()-2);    
-                    // System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
-                    improvement = true;
-                    this.updateCost();
-                    // System.out.println("Updated Cost : " + this.solutionCost); // Debug
-                } 
-            }
-            iterations++;
         }
         if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
         return improvement;
