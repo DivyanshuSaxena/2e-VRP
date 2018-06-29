@@ -7,17 +7,59 @@ class Main {
     static int numCustomers, numNodes, numCarpark;
     static int numVehicles1, numVehicles2;
     static int l1cap, l2cap;
-    static int nodesDistance[][];
+    static double nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
     static Vector<Vehicle> routedCarparks;
+    static Scanner sc;
 
     public static void main(String args[]) throws IOException {
         // The Method reads the inputs from a file and initializes the data structures
         String filename = args[0];
         File file = new File(filename);
-        Scanner sc = new Scanner(file);
+        sc = new Scanner(file);
+        if (filename.contains("E-n13")) {
+            setOneInput();
+        } else {
+            setTwoInput();
+        }
 
+        long startTime = System.currentTimeMillis();
+        Solution initsol = getInitialSoln();
+        GiantRoute bestSolution = new GiantRoute();
+        System.out.println("Initial Solution : " + initsol + " cost " + initsol.getCost());
+
+        // Use initsol to develop the further solutions here.
+        int numUselessIterations = Main.numCustomers; // Hyper-Parameter
+        int iterations = 0;
+        Solution bestFoundSoln = initsol;
+        while (true) {
+            boolean improvement = bestFoundSoln.updateBestNeighbor();
+            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
+            GiantRoute bfs = bestFoundSoln.getGiantRoute();
+            if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
+                bestSolution = bfs;
+                improvement = true;
+            } else improvement = false;
+            // Find the best solution of the generated neighborhood, and proceed with it further 
+            bestFoundSoln = bestFoundSoln.perturb();
+            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost + ", solution: " + bestFoundSoln);
+            System.out.println("--------------------------------------------------"); // Debug
+            
+            if (improvement) {
+                iterations = 0;
+            } else {
+                iterations++;
+                if (iterations == numUselessIterations) break;
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Final Solution : " + bestSolution.getSolution() + " cost " + bestSolution.cost);
+        System.out.println("Running time : " + (endTime-startTime));
+        
+        sc.close();
+    }
+    public static void setOneInput() {
         // Input parameters form the input file
         sc.nextLine(); // Name
         sc.nextLine(); // Comment
@@ -35,7 +77,7 @@ class Main {
         numVehicles2 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L2 Fleet
         
         sc.nextLine(); // Edge Weight Section
-        nodesDistance = new int[numNodes][numNodes];
+        nodesDistance = new double[numNodes][numNodes];
         customers = new Customer[numCustomers];
         carparks = new Carpark[numCarpark];
 
@@ -69,49 +111,71 @@ class Main {
                 customers[i-offset].setDemand(demand);            
             }
         }
+    }
+    
+    public static void setTwoInput() {
+        // Input parameters form the input file
+        sc.nextLine(); // Name
+        sc.nextLine(); // Comment
+        sc.nextLine(); // Type
+        numNodes = Integer.parseInt(sc.nextLine().split(" ")[2]); //Dimension 
+        numCarpark = Integer.parseInt(sc.nextLine().split(" ")[2]); // Satellites
+        numCustomers = Integer.parseInt(sc.nextLine().split(" ")[2]); // Customers
 
-        long startTime = System.currentTimeMillis();
-        Solution initsol = getInitialSoln();
-        GiantRoute bestSolution = new GiantRoute();
-        System.out.println("Initial Solution : " + initsol + " cost " + initsol.getCost());
-        // // Check Iterator
-        // SolutionIterator iterator = new SolutionIterator(initsol);
-        // while (iterator.hasNext()) {
-        //     CustomerIndex ci = iterator.next();
-        //     int customer = routedCarparks.elementAt(ci.routecp-numNodes).route.route.elementAt(ci.index);
-        //     System.out.println(customer); // Debug
-        // }
-        // Use initsol to develop the further solutions here.
-        int numUselessIterations = Main.numCustomers; // Hyper-Parameter
-        int iterations = 0;
-        Solution bestFoundSoln = initsol;
-        while (true) {
-            boolean improvement = bestFoundSoln.updateBestNeighbor();
-            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
-            GiantRoute bfs = bestFoundSoln.getGiantRoute();
-            if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
-                bestSolution = bfs;
-                improvement = true;
-            } else improvement = false;
-            // Find the best solution of the generated neighborhood, and proceed with it further 
-            bestFoundSoln = bestFoundSoln.perturb();
-            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
-            System.out.println("--------------------------------------------------"); // Debug
-            
-            if (improvement) {
-                iterations = 0;
+        sc.nextLine(); // Edge Weight Type
+        sc.nextLine(); // Fleet Section
+        l1cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L1 Cap
+        l2cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L2 Cap
+
+        numVehicles1 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L1 Fleet
+        numVehicles2 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L2 Fleet
+        
+        sc.nextLine(); // Node Coord Section
+        nodesDistance = new double[numNodes][numNodes];
+        customers = new Customer[numCustomers];
+        carparks = new Carpark[numCarpark];
+
+        // Creation of distances matrix from the input file
+        int x_coord[] = new int[numNodes];
+        int y_coord[] = new int[numNodes];
+        for (int i = 0; i <= numCustomers; i++) {
+            sc.nextInt(); // Node Number
+            if (i == 0) {
+                x_coord[i] = sc.nextInt();
+                y_coord[i] = sc.nextInt();
             } else {
-                iterations++;
-                if (iterations == numUselessIterations) break;
+                x_coord[i+numCarpark] = sc.nextInt();
+                y_coord[i+numCarpark] = sc.nextInt();                
             }
         }
-        long endTime = System.currentTimeMillis();
-        System.out.println("Final Solution : " + bestSolution.getSolution() + " cost " + bestSolution.cost);
-        System.out.println("Running time : " + (endTime-startTime));
-        
-        sc.close();
-    }
+        sc.nextLine(); // Empty Line
+        sc.nextLine(); // Satellite Section
+        for (int i = 0; i < numCarpark; i++) {
+            sc.nextInt(); // Node Number
+            x_coord[i+1] = sc.nextInt();
+            y_coord[i+1] = sc.nextInt();
+            carparks[i] = new Carpark();
+            carparks[i].setId(i+1);
+        }
+        sc.nextLine(); // Empty Line
+        for (int i = 0; i < numNodes; i++) {
+            for (int j = i+1; j < numNodes; j++) {
+                nodesDistance[i][j] = Math.sqrt((x_coord[i]-x_coord[j])*(x_coord[i]-x_coord[j]) + (y_coord[i]-y_coord[j])*(y_coord[i]-y_coord[j]));
+                nodesDistance[j][i] = nodesDistance[i][j];
+            }
+        }
 
+        // Initialization of the customer array 
+        sc.nextLine(); // Demand Section
+        sc.nextLine(); // Demand of Main Depot	
+        for(int i = 1; i <= numCustomers; i++) {
+            // i = 0 is reserved for the main depot
+            customers[i-1] = new Customer();
+            customers[i-1].setId(i+numCarpark);
+            int demand = Integer.parseInt(sc.nextLine().split(" ")[1]);
+            customers[i-1].setDemand(demand);            
+        }
+    }
     public static Solution getInitialSoln() {
         // Finds the initial solution and places it in the static variable route.
         Solution initial = new Solution();
@@ -119,7 +183,7 @@ class Main {
         // Assign each customer to the nearest carpark.
         for(int i = 0; i < numCustomers; i++) {
         	int customerOffset = numCarpark + 1;
-            int minDistance = -1;
+            double minDistance = -1;
             int assigned = 0;
             for(int j = 1; j <= numCarpark; j++) {
                 if (minDistance > nodesDistance[i+customerOffset][j] || minDistance == -1) {
@@ -166,10 +230,9 @@ class Main {
         initial.updateCost();
         return initial;
     }
-
     public static Vector<Route> savingSolution(Vector<Integer> customers, final int depot, int capacity) {
         // This function implements the Clarke and Wright's Saving Algortihm
-    	// System.out.println("Applying C&W for " + depot + " with customers: " + customers); // Debug
+    	System.out.println("Applying C&W for " + depot + " with customers: " + customers); // Debug
         Vector<Route> routes = new Vector<Route>();
         Vector<Route> savingsList = new Vector<Route>(); //  To hold all the two location routes
         for(int i = 0; i < customers.size()-1; i++) {
@@ -195,8 +258,8 @@ class Main {
                 if (secondo1 >= Main.numNodes) secondo1 = Main.routedCarparks.elementAt(secondo1-Main.numNodes).cpindex;
                 if (firsto2 >= Main.numNodes) firsto2 = Main.routedCarparks.elementAt(firsto2-Main.numNodes).cpindex;
                 if (secondo2 >= Main.numNodes) secondo2 = Main.routedCarparks.elementAt(secondo2-Main.numNodes).cpindex;
-                int savings1 = nodesDistance[depot][firsto1] + nodesDistance[depot][secondo1] - nodesDistance[firsto1][secondo1];
-                int savings2 = nodesDistance[depot][firsto2] + nodesDistance[depot][secondo2] - nodesDistance[firsto2][secondo2];
+                double savings1 = nodesDistance[depot][firsto1] + nodesDistance[depot][secondo1] - nodesDistance[firsto1][secondo1];
+                double savings2 = nodesDistance[depot][firsto2] + nodesDistance[depot][secondo2] - nodesDistance[firsto2][secondo2];
                 if (savings1 > savings2 ) {
                     return -1;
                 } else if (savings1 == savings2 && o1.demand < o2.demand) {
@@ -208,7 +271,7 @@ class Main {
         // Now we have the sorted list, arranged in descending order as per the savings
         for(int i = 0; i < savingsList.size(); i++) {
             Route bestSavings = savingsList.elementAt(i); // This is the yet best merge for two delivery locations
-            //  System.out.println("Best Savings Route: " + bestSavings); // Debug
+            // System.out.println("Best Savings Route: " + bestSavings); // Debug
             int bestStart = bestSavings.route.elementAt(1);
             int bestEnd = bestSavings.route.elementAt(2);
             if (routes.size() == 0) {
@@ -223,7 +286,7 @@ class Main {
             for(int j = 0; j < routes.size(); j++) {
                 // routes contains all routes, and bestsavings may be merged with any of them.
                 Route currRoute = routes.elementAt(j);
-                //  System.out.println(j + " " + currRoute); // Debug
+                // System.out.println(j + " " + currRoute); // Debug
                 int positionOfStart = currRoute.positionOf(bestStart);
                 int positionOfEnd = currRoute.positionOf(bestEnd);
                 // Now check if the positions are valid for merging or not
@@ -241,6 +304,7 @@ class Main {
                     }
                 	if (newRoute.route.size() == 0) {
                 		if ((bestSavings.demand + currRoute.demand - commonDemand) <= capacity) {
+                            // System.out.println("Found a suitable merge, demand: " + (bestSavings.demand + currRoute.demand - commonDemand)); // Debug
                 			added = true;
                 			discard = false;
                 			newRoute = currRoute.mergeRoute(bestSavings);
@@ -251,7 +315,7 @@ class Main {
                 		}
                     } else if (newRoute.route.size() > 0) {
                     	if ((newRoute.demand + currRoute.demand - commonDemand) <= capacity) {
-                    		System.out.println("Merging " + newRoute + " and " + currRoute);
+                    		// System.out.println("Merging " + newRoute + " and " + currRoute);
                     		added = true;
                 			discard = false;
                     		newRoute = newRoute.mergeRoute(currRoute);
@@ -269,12 +333,12 @@ class Main {
                 }
             }
             if (routeIndex != -1)  {
-            	//   System.out.println("New Route: " + newRoute); // Debug
+            	// System.out.println("New Route: " + newRoute); // Debug
             	routes.set(routeIndex, newRoute);
             }
             if (mergedIndex != -1)  routes.remove(mergedIndex);
             if (!added && !discard)	{
-            	//  System.out.println("No suitable route found, adding: " + bestSavings); // Debug
+            	// System.out.println("No suitable route found, adding: " + bestSavings); // Debug
             	routes.add(bestSavings);
             }
         }
@@ -295,7 +359,7 @@ class Main {
                 routes.add(single); // For adding the single customer routes
             }
         }
-        //  System.out.println(routes); // Debug
+        // System.out.println(routes); // Debug
         return routes;
     }
 }

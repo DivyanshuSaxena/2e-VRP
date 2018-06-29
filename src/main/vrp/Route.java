@@ -7,11 +7,11 @@ import java.util.Collections;
 // All routes are defined as a vector of integers, and hence, all customers are to be accessed from the Main.nodes array
 class Route {
     Vector<Integer> route;
-    int routeCost;
+    double routeCost;
     int demand;
     public Route() {
         route = new Vector<Integer>();
-        routeCost = 0;
+        routeCost = 0.0;
         demand = 0;
     }
     public String toString() {
@@ -20,6 +20,7 @@ class Route {
         for (int cust : this.route) {
             route = route + cust + ", ";
         }
+        route += (": " + demand);
         return route;
     }
     public Route clone() {
@@ -95,23 +96,23 @@ class Route {
     public void setCustomer(int id, int index) {
     	// System.out.println("Setting customer " + id + " in " + this.toString() + " at " + index); // Debug
         int offset = Main.numCarpark+1;
-        int removedCost = Main.nodesDistance[route.elementAt(index)][route.elementAt(index+1)] + Main.nodesDistance[route.elementAt(index-1)][route.elementAt(index)];
-        int addedCost = Main.nodesDistance[id][route.elementAt(index+1)] + Main.nodesDistance[route.elementAt(index-1)][id];
+        double removedCost = Main.nodesDistance[route.elementAt(index)][route.elementAt(index+1)] + Main.nodesDistance[route.elementAt(index-1)][route.elementAt(index)];
+        double addedCost = Main.nodesDistance[id][route.elementAt(index+1)] + Main.nodesDistance[route.elementAt(index-1)][id];
         this.demand = this.demand - Main.customers[this.route.elementAt(index)-offset].demand + Main.customers[id-offset].demand;
         this.routeCost = this.routeCost - removedCost + addedCost; 
         this.route.set(index, id);
     }
     public void setStart(int id) {
         // Carparks shall be added 
-        int removedCost = Main.nodesDistance[route.elementAt(0)][route.elementAt(1)];
-        int addedCost = Main.nodesDistance[id][route.elementAt(1)];
+        double removedCost = Main.nodesDistance[route.elementAt(0)][route.elementAt(1)];
+        double addedCost = Main.nodesDistance[id][route.elementAt(1)];
         this.routeCost = this.routeCost - removedCost + addedCost; 
         this.route.set(0, id);
     }
     public void setEnd(int id) {
         // Carparks shall be added 
-        int removedCost = Main.nodesDistance[route.elementAt(route.size()-1)][route.elementAt(route.size()-2)];
-        int addedCost = Main.nodesDistance[id][route.elementAt(route.size()-1)];
+        double removedCost = Main.nodesDistance[route.elementAt(route.size()-1)][route.elementAt(route.size()-2)];
+        double addedCost = Main.nodesDistance[id][route.elementAt(route.size()-1)];
         this.routeCost = this.routeCost - removedCost + addedCost; 
         this.route.set(route.size()-1, id);
     }
@@ -178,10 +179,11 @@ class Route {
         // System.out.println("Merged Route: " + merged); // Debug
         return merged;
     }
-    public int getCost() {
+    public double getCost() {
         // Function to evaluate the total costs of the solution, including the infeasibility costs
         // Presently, no infeasibility costs are taken into account
-        int cost = 0, prevIndex = -1;
+        int prevIndex = -1;
+        double cost = 0;
         for (int index : this.route) {
             if (prevIndex == -1) {
                 prevIndex = index;
