@@ -43,7 +43,7 @@ class Main {
             } else improvement = false;
             // Find the best solution of the generated neighborhood, and proceed with it further 
             bestFoundSoln = bestFoundSoln.perturb();
-            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
+            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost + ", solution: " + bestFoundSoln);
             System.out.println("--------------------------------------------------"); // Debug
             
             if (improvement) {
@@ -232,7 +232,7 @@ class Main {
     }
     public static Vector<Route> savingSolution(Vector<Integer> customers, final int depot, int capacity) {
         // This function implements the Clarke and Wright's Saving Algortihm
-    	// System.out.println("Applying C&W for " + depot + " with customers: " + customers); // Debug
+    	System.out.println("Applying C&W for " + depot + " with customers: " + customers); // Debug
         Vector<Route> routes = new Vector<Route>();
         Vector<Route> savingsList = new Vector<Route>(); //  To hold all the two location routes
         for(int i = 0; i < customers.size()-1; i++) {
@@ -271,7 +271,7 @@ class Main {
         // Now we have the sorted list, arranged in descending order as per the savings
         for(int i = 0; i < savingsList.size(); i++) {
             Route bestSavings = savingsList.elementAt(i); // This is the yet best merge for two delivery locations
-            //  System.out.println("Best Savings Route: " + bestSavings); // Debug
+            // System.out.println("Best Savings Route: " + bestSavings); // Debug
             int bestStart = bestSavings.route.elementAt(1);
             int bestEnd = bestSavings.route.elementAt(2);
             if (routes.size() == 0) {
@@ -286,7 +286,7 @@ class Main {
             for(int j = 0; j < routes.size(); j++) {
                 // routes contains all routes, and bestsavings may be merged with any of them.
                 Route currRoute = routes.elementAt(j);
-                //  System.out.println(j + " " + currRoute); // Debug
+                // System.out.println(j + " " + currRoute); // Debug
                 int positionOfStart = currRoute.positionOf(bestStart);
                 int positionOfEnd = currRoute.positionOf(bestEnd);
                 // Now check if the positions are valid for merging or not
@@ -304,6 +304,7 @@ class Main {
                     }
                 	if (newRoute.route.size() == 0) {
                 		if ((bestSavings.demand + currRoute.demand - commonDemand) <= capacity) {
+                            // System.out.println("Found a suitable merge, demand: " + (bestSavings.demand + currRoute.demand - commonDemand)); // Debug
                 			added = true;
                 			discard = false;
                 			newRoute = currRoute.mergeRoute(bestSavings);
@@ -314,7 +315,7 @@ class Main {
                 		}
                     } else if (newRoute.route.size() > 0) {
                     	if ((newRoute.demand + currRoute.demand - commonDemand) <= capacity) {
-                    		System.out.println("Merging " + newRoute + " and " + currRoute);
+                    		// System.out.println("Merging " + newRoute + " and " + currRoute);
                     		added = true;
                 			discard = false;
                     		newRoute = newRoute.mergeRoute(currRoute);
@@ -332,12 +333,12 @@ class Main {
                 }
             }
             if (routeIndex != -1)  {
-            	//   System.out.println("New Route: " + newRoute); // Debug
+            	// System.out.println("New Route: " + newRoute); // Debug
             	routes.set(routeIndex, newRoute);
             }
             if (mergedIndex != -1)  routes.remove(mergedIndex);
             if (!added && !discard)	{
-            	//  System.out.println("No suitable route found, adding: " + bestSavings); // Debug
+            	// System.out.println("No suitable route found, adding: " + bestSavings); // Debug
             	routes.add(bestSavings);
             }
         }
@@ -358,7 +359,7 @@ class Main {
                 routes.add(single); // For adding the single customer routes
             }
         }
-        //  System.out.println(routes); // Debug
+        // System.out.println(routes); // Debug
         return routes;
     }
 }

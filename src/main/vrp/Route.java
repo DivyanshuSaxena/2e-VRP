@@ -20,6 +20,7 @@ class Route {
         for (int cust : this.route) {
             route = route + cust + ", ";
         }
+        route += (": " + demand);
         return route;
     }
     public Route clone() {

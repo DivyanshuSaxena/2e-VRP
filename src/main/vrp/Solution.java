@@ -362,7 +362,7 @@ class Solution implements Iterable<Integer> {
                 return 1;
             }
         });
-        // System.out.println("Customer Pool : " + customerPool); // Debug
+        System.out.println("Customer Pool : " + customerPool); // Debug
         int count = 0;
         while (count < q) {
             int customer = customerPool.elementAt(count);

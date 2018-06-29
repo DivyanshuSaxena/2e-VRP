@@ -188,7 +188,6 @@ class GiantRoute {
                 vehicleDemand += Main.customers[node-Main.numCarpark-1].demand;
             } else break;
         }
-        // System.out.println("Demand :" + vehicleDemand); // Debug
         return (vehicleDemand <= Main.l2cap);
     }
     public void insertAtBestLocation(int customer) {
@@ -209,8 +208,8 @@ class GiantRoute {
             } 
             if (node <= Main.numCarpark && node != 0)   lastCarpark = lastCarpark==0?node:0;                
         }
+        // System.out.println("Found best location for " + customer + " at " + bestIndex); // Debug
         this.addCustomer(customer, bestIndex);
-        // System.out.println("Giant Route after regret insertion : " + this.giantRoute); // Debug
     }
     public double getRegretCost(int customer) {
         int lastCarpark = 0;
