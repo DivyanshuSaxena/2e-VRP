@@ -145,7 +145,7 @@ class Main {
                 y_coord[i] = sc.nextInt();
             } else {
                 x_coord[i+numCarpark] = sc.nextInt();
-                y_coord[i+numCarpark] = sc.nextInt();
+                y_coord[i+numCarpark] = sc.nextInt();                
             }
         }
         sc.nextLine(); // Empty Line
@@ -154,6 +154,8 @@ class Main {
             sc.nextInt(); // Node Number
             x_coord[i+1] = sc.nextInt();
             y_coord[i+1] = sc.nextInt();
+            carparks[i] = new Carpark();
+            carparks[i].setId(i+1);
         }
         sc.nextLine(); // Empty Line
         for (int i = 0; i < numNodes; i++) {
@@ -166,7 +168,7 @@ class Main {
         // Initialization of the customer array 
         sc.nextLine(); // Demand Section
         sc.nextLine(); // Demand of Main Depot	
-        for(int i = 1; i < numCustomers; i++) {
+        for(int i = 1; i <= numCustomers; i++) {
             // i = 0 is reserved for the main depot
             customers[i-1] = new Customer();
             customers[i-1].setId(i+numCarpark);

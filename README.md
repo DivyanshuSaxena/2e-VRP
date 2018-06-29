@@ -31,7 +31,9 @@ The source code is placed in main/vrp/ and the compiled .CLASS files are placed 
 - [X] Check Iterated Swap Procedure, without the dynamically changing solution with every iteration.
 - [X] Perturbation Algorithm :- Satellite Swap and Worst Removal Operations to be implemented first. Regret Insertion also done.
 - [X] Modify the current problem such that the constraints match the classical Two Echelon VRP, and check the results. 
-- [ ] Implement restrictions on the number of carparks
-- [ ] Check for larger test cases - Appropriate input format for the test cases of set 2, set 3, etc. 
-- [ ] Python Coed to generate random test cases and plot them for visualization.
+- [ ] Implement restrictions on the number of carparks.
+- [X] Check for larger test cases - Appropriate input format for the test cases of set 2, set 3, etc.
+- [ ] Change nodesDistances[][] to double[][].
+- [ ] Separate out the test case files in a separate src/test/ folder 
+- [ ] Python Code to generate random test cases and plot them for visualization.
 - [ ] Code clean-up for private and public access modifiers of functions.
