@@ -1,6 +1,9 @@
 // File to take input from a text file, and run the algorithm
 package vrp;
 import java.util.*;
+
+import org.omg.CORBA.VM_CUSTOM;
+
 import java.io.*;
 
 class Main {
@@ -112,7 +115,6 @@ class Main {
             }
         }
     }
-    
     public static void setTwoInput() {
         // Input parameters form the input file
         sc.nextLine(); // Name
@@ -198,6 +200,7 @@ class Main {
 
         // Add the required Carparks to the initial solution
         Vector<Integer> carparksLevel1 = new Vector<Integer>();
+        Vector<Route> appendRoutes = new Vector<Route>();
         for (Carpark cp : carparks) {
             if (cp.customers.size() > 0) {
                 // Apply Clarke and Wright's Savings Algorithm for the second level routes (carparks)
@@ -207,9 +210,52 @@ class Main {
                 }
                 cp.routes = savingSolution(carparkCustomers, cp.id, l2cap);
                 // System.out.println("Carpark " + cp.id + " : " + cp.routes); // Debug
+                if (cp.routes.size() > numVehicles2) {
+                    System.out.println("Routes for carpark " + cp.id + " is more than the limit"); // Debug
+                    // Choose the route with the largest average distance from the carpark and remove the route
+                    int routeIndex = -1, index = 0;
+                    double maxAvgDistance = 0;
+                    for (Route route : cp.routes) {
+                        double avgDistance = 0;
+                        for (int node : route.route) {
+                            avgDistance += nodesDistance[cp.id][node];
+                        }
+                        avgDistance = avgDistance/(route.route.size()-2);
+                        if (avgDistance > maxAvgDistance || routeIndex == -1) {
+                            maxAvgDistance = avgDistance;
+                            routeIndex = index;
+                        }
+                        index++;
+                    }
+                    appendRoutes.add(cp.routes.remove(routeIndex));
+                }
                 // We now have the routes for each carpark.
                 carparksLevel1.add(cp.id);
             }
+        }
+
+        // Add the removed vehicles
+        for (Route appendRoute : appendRoutes) {
+            int bestCarpark = -1, index = 0;
+            double minAvgDistance = 0;
+            for (Carpark carpark : carparks) {
+                if (carpark.routes.size() < numVehicles2) {
+                    double avgDistance = 0;
+                    for (int node : appendRoute.route) {
+                        if (node > numCarpark)  avgDistance += nodesDistance[carpark.id][node];
+                    }
+                    avgDistance = avgDistance/(appendRoute.route.size()-2);
+                    if (avgDistance < minAvgDistance || bestCarpark == -1) {
+                        minAvgDistance = avgDistance;
+                        bestCarpark = index;
+                    }
+                }
+                index++;
+            }
+            appendRoute.setStart(carparks[bestCarpark].id);
+            appendRoute.setEnd(carparks[bestCarpark].id);
+            carparks[bestCarpark].routes.add(appendRoute);
+            if (carparksLevel1.indexOf(carparks[bestCarpark].id) == -1) carparksLevel1.add(carparks[bestCarpark].id);
         }
 
         // Decompose the carparks into Vehicles for each route
