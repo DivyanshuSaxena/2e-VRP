@@ -27,6 +27,11 @@ Network-Design:
 
 The source code is placed in main/vrp/ and the compiled .CLASS files are placed in bin/vrp/.  
 
+## Assumptions
+1. The goods are to be delivered in a to tier hierarchy. First, the level 1 vehicles shall take the goods to certain carparks, where the goods shall be transferred into the smaller vehicles. These smaller vehicles shall deliver the goods to the customers.
+2. The capacity of level 1 vehicles is more than the capacity of level 2 vehicles.
+3. The number of vehicles available at level 1 and level 2 are known beforehand. 
+
 ## To-do
 - [X] Check Iterated Swap Procedure, without the dynamically changing solution with every iteration.
 - [X] Perturbation Algorithm :- Satellite Swap and Worst Removal Operations to be implemented first. Regret Insertion also done.
