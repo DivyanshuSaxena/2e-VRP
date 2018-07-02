@@ -1,9 +1,6 @@
 // File to take input from a text file, and run the algorithm
 package vrp;
 import java.util.*;
-
-import org.omg.CORBA.VM_CUSTOM;
-
 import java.io.*;
 
 class Main {
