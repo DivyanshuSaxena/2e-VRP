@@ -303,16 +303,25 @@ class Solution implements Iterable<CustomerIndex> {
         if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
 
         // Iterated Swap Procedure
-        iterations = 0;
-        while(iterations < ispIterations) {
-            CustomerIndex ci1 = getRandomCustomer();
-            CustomerIndex ci2 = getRandomCustomer();
-            boolean ispimprove = this.iteratedSwapOperator(ci1, ci2);
-            if (!ispimprove) {
-                iterations++;
+        iter.reset();
+        while (iter.hasNext()) {
+            CustomerIndex ci1 = iter.next();
+            SolutionIterator innerIterator = new SolutionIterator(this);
+            while (innerIterator.hasNext()) {
+                CustomerIndex ci2 = innerIterator.next();
+                improvement = improvement || this.iteratedSwapOperator(ci1, ci2);
             }
-            improvement = improvement || ispimprove;
         }
+        // iterations = 0;
+        // while(iterations < ispIterations) {
+        //     CustomerIndex ci1 = getRandomCustomer();
+        //     CustomerIndex ci2 = getRandomCustomer();
+        //     boolean ispimprove = this.iteratedSwapOperator(ci1, ci2);
+        //     if (!ispimprove) {
+        //         iterations++;
+        //     }
+        //     improvement = improvement || ispimprove;
+        // }
         if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
         
         // Segment Exchange Operator

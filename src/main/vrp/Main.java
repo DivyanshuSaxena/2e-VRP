@@ -7,6 +7,7 @@ class Main {
     static int numCustomers, numNodes, numCarpark;
     static int numVehicles1, numVehicles2;
     static int l1cap, l2cap;
+    static int x_coord[], y_coord[];
     static double nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
@@ -43,7 +44,8 @@ class Main {
             } else improvement = false;
             // Find the best solution of the generated neighborhood, and proceed with it further 
             bestFoundSoln = bestFoundSoln.perturb();
-            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost + ", solution: " + bestFoundSoln);
+            // System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost + ", solution: " + bestFoundSoln);
+            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
             System.out.println("--------------------------------------------------"); // Debug
             
             if (improvement) {
@@ -54,10 +56,23 @@ class Main {
             }
         }
         long endTime = System.currentTimeMillis();
-        System.out.println("Final Solution : " + bestSolution.getSolution() + " cost " + bestSolution.cost);
+        Solution finalSolution = bestSolution.getSolution();
+        System.out.println("Final Solution : " + finalSolution + " cost " + bestSolution.cost);
         System.out.println("Running time : " + (endTime-startTime));
-        
         sc.close();
+        // Write the solution in solution.txt
+        PrintWriter pWriter = new PrintWriter("./files/output/solution.txt", "UTF-8");
+        for (int x : x_coord) {
+            pWriter.print(x + " ");
+        }
+        pWriter.println();
+        for (int y : y_coord) {
+            pWriter.print(y + " ");
+        }
+        pWriter.println();
+        pWriter.println(numNodes);
+        pWriter.println(finalSolution);
+        pWriter.close();
     }
     public static void setOneInput() {
         // Input parameters form the input file
@@ -135,8 +150,8 @@ class Main {
         carparks = new Carpark[numCarpark];
 
         // Creation of distances matrix from the input file
-        int x_coord[] = new int[numNodes];
-        int y_coord[] = new int[numNodes];
+        x_coord = new int[numNodes];
+        y_coord = new int[numNodes];
         for (int i = 0; i <= numCustomers; i++) {
             sc.nextInt(); // Node Number
             if (i == 0) {
