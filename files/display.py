@@ -17,7 +17,10 @@ for line in file :
             if start_node == 0 and lastCarpark == 0:
                 if len(cproute_x) > 0 and len(cproute_y) > 0:
                     # Add the cproute to the plot.
-                    plt.plot(cproute_x,cproute_y)
+                    first_level_obj = plt.plot(cproute_x, cproute_y, 'o')
+                    first_level_line = plt.plot(cproute_x, cproute_y)
+                    plt.setp(first_level_obj, color='k')
+                    plt.setp(first_level_line, color='r')
                     print ("First Level Route : ") # Debug
                     print (cproute_x, cproute_y)
                 cproute_x = [int(x_coord[0])]
@@ -37,7 +40,7 @@ for line in file :
                         routeEnd = 1
                     elif int(node) == lastCarpark and routeEnd == 1:
                         # Add the route to the plot
-                        plt.plot(route_x, route_y, 'o')
+                        second_level_obj = plt.plot(route_x, route_y, 'o', route_x, route_y, '--')
                         print ("Second Level Route : ") # Debug
                         print (route_x, route_y)
                         route_x, route_y = [], []
@@ -53,5 +56,5 @@ for line in file :
         x_coord_filled = True
 print ("First Level Route : ") # Debug
 print (cproute_x, cproute_y)
-plt.plot(cproute_x, cproute_y, 'bo', cproute_x, cproute_y, 'k--')
+plt.plot(cproute_x, cproute_y, 'bo', cproute_x, cproute_y)
 plt.show()
