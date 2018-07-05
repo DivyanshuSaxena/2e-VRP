@@ -23,8 +23,8 @@ for line in file :
                     first_level_route = plt.plot(cproute_x, cproute_y, 'o', cproute_x, cproute_y)
                     plt.setp(first_level_route, color=(first_level_color + (0.6,)), lw=3.0, ms=10.0)
                     first_level_color = (random.random(), random.random(), random.random())
-                    print ("First Level Route : ") # Debug
-                    print (cproute_x, cproute_y)
+                    # print ("First Level Route : ") # Debug
+                    # print (cproute_x, cproute_y)
                 cproute_x = [int(x_coord[0])]
                 cproute_y = [int(y_coord[0])]
             else:
@@ -32,10 +32,10 @@ for line in file :
                 cproute_y.append(int(y_coord[start_node]))
             lastCarpark = start_node
             if len(listLine) > 1:
-                print (listLine)
+                # print (listLine)
                 for node in listLine[1:-1]:
                     if int(node) < numNodes:
-                        print (node, end = ' ') # Debug
+                        # print (node, end = ' ') # Debug
                         route_x.append(int(x_coord[int(node)]))
                         route_y.append(int(y_coord[int(node)]))
                     if int(node) == lastCarpark and routeEnd == 0:
@@ -44,8 +44,8 @@ for line in file :
                         # Add the route to the plot
                         second_level_route = plt.plot(route_x, route_y, 'o', route_x, route_y, '-.')
                         plt.setp(second_level_route, color=first_level_color, ms=4.0)
-                        print ("Second Level Route : ") # Debug
-                        print (route_x, route_y)
+                        # print ("Second Level Route : ") # Debug
+                        # print (route_x, route_y)
                         route_x, route_y = [], []
                         routeEnd = 0
     elif x_coord_filled and y_coord_filled:
@@ -57,8 +57,8 @@ for line in file :
     else:
         x_coord = listLine
         x_coord_filled = True
-print ("First Level Route : ") # Debug
-print (cproute_x, cproute_y)
+# print ("First Level Route : ") # Debug
+# print (cproute_x, cproute_y)
 first_level_route = plt.plot(cproute_x, cproute_y, 'o', cproute_x, cproute_y)
 plt.setp(first_level_route, color=(first_level_color + (0.6,)), lw=3.0, ms=10.0)
 plt.show()

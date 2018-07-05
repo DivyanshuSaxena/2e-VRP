@@ -27,8 +27,9 @@ class Main {
 
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
+        double initCost = initsol.getCost();
         GiantRoute bestSolution = new GiantRoute();
-        System.out.println("Initial Solution : " + initsol + " cost " + initsol.getCost());
+        System.out.println("Initial Solution : " + initsol + " cost " + initCost);
 
         // Use initsol to develop the further solutions here.
         int numUselessIterations = Main.numCustomers; // Hyper-Parameter
@@ -36,7 +37,7 @@ class Main {
         Solution bestFoundSoln = initsol;
         while (true) {
             boolean improvement = bestFoundSoln.updateBestNeighbor();
-            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
+            // System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
             GiantRoute bfs = bestFoundSoln.getGiantRoute();
             if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
                 bestSolution = bfs;
@@ -44,9 +45,8 @@ class Main {
             } else improvement = false;
             // Find the best solution of the generated neighborhood, and proceed with it further 
             bestFoundSoln = bestFoundSoln.perturb();
-            // System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost + ", solution: " + bestFoundSoln);
-            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
-            System.out.println("--------------------------------------------------"); // Debug
+            // System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
+            // System.out.println("--------------------------------------------------"); // Debug
             
             if (improvement) {
                 iterations = 0;
@@ -75,12 +75,14 @@ class Main {
         pWriter.println(finalSolution);
         pWriter.close();
 
+        System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost));
+
         // Call the Python script
-        String[] cmd = {
-            "py",
-            "./files/display.py",
-        };
-        Runtime.getRuntime().exec(cmd);
+        // String[] cmd = {
+        //     "py",
+        //     "./files/display.py",
+        // };
+        // Runtime.getRuntime().exec(cmd);
     }
     public static void setOneInput() {
         // Input parameters form the input file

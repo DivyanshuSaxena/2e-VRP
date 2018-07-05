@@ -1,11 +1,12 @@
 from sklearn.cluster import MeanShift
 import numpy as np
 import random
+import math
 
 file = open("./input/custom/generated.dat","w")
 
-num_customers = 100
-max_range = 50
+num_customers = 500
+max_range = 1000
 coord = []
 file.write("NAME : Generated\n")
 file.write("COMMENT : Generated Test-Case Using Python\n")
@@ -14,7 +15,9 @@ file.write("TYPE : 2ECVRP\n")
 for node in range(num_customers+1):
     coord.append([random.randint(0,max_range), random.randint(0,max_range)]) 
 
-bandwidth_ = (max_range/num_customers)**(max_range/num_customers) * max_range
+density = num_customers/max_range
+bandwidth_ = 0.1 * math.pow(1.414, -(density*density)) * max_range
+print (bandwidth_)
 ms = MeanShift(bandwidth=bandwidth_)
 ms.fit(coord)
 labels = ms.labels_
