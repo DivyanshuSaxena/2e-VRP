@@ -254,10 +254,9 @@ class Solution implements Iterable<CustomerIndex> {
         }
         return improvement;
     }
-    private boolean exchangeOperator(CustomerIndex ci1, CustomerIndex ci2) {
-        boolean improvement = false;
+    private double exchangeOperator(CustomerIndex ci1, CustomerIndex ci2) {
         if (ci1.routecp==ci2.routecp) {
-            return improvement;
+            return 0;
         }
         Route exchangeRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
         Route exchangeRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
@@ -272,22 +271,8 @@ class Solution implements Iterable<CustomerIndex> {
         double addCost1 = Main.nodesDistance[customer1prev][customer2] + Main.nodesDistance[customer2prev][customer1] + Main.nodesDistance[route2last][route1depot] + Main.nodesDistance[route1last][route2depot];
         double subtractCost1 = Main.nodesDistance[customer1prev][customer1] + Main.nodesDistance[customer2prev][customer2] + Main.nodesDistance[route1last][route1depot] + Main.nodesDistance[route2last][route2depot];
         // Exchange the customers if better.
-        if (addCost1-subtractCost1 < 0) {
-            Vector<Integer> seg1 = exchangeRoute1.getSubRoute(ci1.index, exchangeRoute1.route.size()-2);
-            Vector<Integer> seg2 = exchangeRoute2.getSubRoute(ci2.index, exchangeRoute2.route.size()-2);
-            if (exchangeRoute1.isExchangeFeasible(seg2, ci1.index) && exchangeRoute2.isExchangeFeasible(seg1, ci2.index)) {
-                // System.out.println("Exchanging " + customer1 + " from " + exchangeRoute1 + " with " + customer2 + " from " + exchangeRoute2); // Debug
-                exchangeRoute1.addAllCustomers(seg2, ci1.index);
-                exchangeRoute2.addAllCustomers(seg1, ci2.index);
-                exchangeRoute1.removeAllCustomers(ci1.index+seg2.size(), exchangeRoute1.route.size()-2);
-                exchangeRoute2.removeAllCustomers(ci2.index+seg1.size(), exchangeRoute2.route.size()-2);    
-                // System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
-                improvement = true;
-                this.updateCost();
-                // System.out.println("Updated Cost : " + this.solutionCost); // Debug
-            } 
-        }
-        return improvement;
+        return (addCost1-subtractCost1);
+        // return improvement;
     }
     public boolean updateBestNeighbor() {
         // Generate Neighborhood logic here
@@ -314,13 +299,38 @@ class Solution implements Iterable<CustomerIndex> {
         
         // Segment Exchange Operator
         iter.reset();
+        CustomerIndex bestPair1 = new CustomerIndex();
+        CustomerIndex bestPair2 = new CustomerIndex();
+        double bestCost = 0;
         while (iter.hasNext()) {
             CustomerIndex ci1 = iter.next();
             SolutionIterator innerIterator = new SolutionIterator(this);
             while (innerIterator.hasNext()) {
                 CustomerIndex ci2 = innerIterator.next();
-                improvement = improvement || this.exchangeOperator(ci1, ci2);
+                double cost = this.exchangeOperator(ci1, ci2);
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    bestPair1 = ci1;
+                    bestPair2 = ci2;
+                }
             }
+        }
+        if (bestCost < 0) {
+            Route exchangeRoute1 = Main.routedCarparks.elementAt(bestPair1.routecp-Main.numNodes).route;
+            Route exchangeRoute2 = Main.routedCarparks.elementAt(bestPair2.routecp-Main.numNodes).route;
+            Vector<Integer> seg1 = exchangeRoute1.getSubRoute(bestPair1.index, exchangeRoute1.route.size()-2);
+            Vector<Integer> seg2 = exchangeRoute2.getSubRoute(bestPair2.index, exchangeRoute2.route.size()-2);
+            if (exchangeRoute1.isExchangeFeasible(seg2, bestPair1.index) && exchangeRoute2.isExchangeFeasible(seg1, bestPair2.index)) {
+                // System.out.println("Exchanging " + customer1 + " from " + exchangeRoute1 + " with " + customer2 + " from " + exchangeRoute2); // Debug
+                exchangeRoute1.addAllCustomers(seg2, bestPair1.index);
+                exchangeRoute2.addAllCustomers(seg1, bestPair2.index);
+                exchangeRoute1.removeAllCustomers(bestPair1.index+seg2.size(), exchangeRoute1.route.size()-2);
+                exchangeRoute2.removeAllCustomers(bestPair2.index+seg1.size(), exchangeRoute2.route.size()-2);    
+                // System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
+                improvement = true;
+                this.updateCost();
+                // System.out.println("Updated Cost : " + this.solutionCost); // Debug
+            }           
         }
         if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
         return improvement;
@@ -355,12 +365,7 @@ class Solution implements Iterable<CustomerIndex> {
         }
         return customerPool;
     }
-    private Vector<Integer> routeRemoval() {
-        Vector<Integer> customers = new Vector<Integer>();
-        
-    	return customers;
-    }
-    private void regretInsertion(GiantRoute gr, Vector<Integer> customers) {
+    private void regretInsertion(final GiantRoute gr, Vector<Integer> customers) {
         customers.sort(new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) { 
