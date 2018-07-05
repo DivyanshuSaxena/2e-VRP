@@ -214,7 +214,7 @@ class GiantRoute {
             } 
             if (node <= Main.numCarpark && node != 0)   lastCarpark = lastCarpark==0?node:0;                
         }
-        // System.out.println("Found best location for " + customer + " at " + bestIndex); // Debug
+        System.out.println("Found best location for " + customer + " at " + bestIndex); // Debug
         if (bestIndex != -1) {
             this.addCustomer(customer, bestIndex);
         } else {

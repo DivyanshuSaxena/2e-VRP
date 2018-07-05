@@ -298,7 +298,7 @@ class Solution implements Iterable<CustomerIndex> {
             CustomerIndex ci = iter.next();
             improvement = this.moveOperator(ci);
         }
-        // if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
+        if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
 
         // Iterated Swap Procedure
         iter.reset();
@@ -310,7 +310,7 @@ class Solution implements Iterable<CustomerIndex> {
                 improvement = improvement || this.iteratedSwapOperator(ci1, ci2);
             }
         }
-        // if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
+        if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
         
         // Segment Exchange Operator
         iter.reset();
@@ -322,7 +322,7 @@ class Solution implements Iterable<CustomerIndex> {
                 improvement = improvement || this.exchangeOperator(ci1, ci2);
             }
         }
-        // if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
+        if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
         return improvement;
     }
     private Vector<Integer> worstRemoval(GiantRoute gr, int q) {
@@ -350,10 +350,15 @@ class Solution implements Iterable<CustomerIndex> {
             }
             customerPool.add(highest+Main.numCarpark+1);
             gr.removeCustomer(highest+Main.numCarpark+1);
-            // System.out.println("Customer Pool : " + customerPool); // Debug
-            // System.out.println("Giant Route after worst removal : " + gr.giantRoute); // Debug
+            System.out.println("Customer Pool : " + customerPool); // Debug
+            System.out.println("Giant Route after worst removal : " + gr.giantRoute); // Debug
         }
         return customerPool;
+    }
+    private Vector<Integer> routeRemoval() {
+        Vector<Integer> customers = new Vector<Integer>();
+        
+    	return customers;
     }
     private void regretInsertion(GiantRoute gr, Vector<Integer> customers) {
         customers.sort(new Comparator<Integer>() {
@@ -379,7 +384,7 @@ class Solution implements Iterable<CustomerIndex> {
         // Perturb the local best found solution to get a new solution altogether
         final GiantRoute gr = this.getGiantRoute();
         Solution perturbSoln = new Solution();
-        int q = 50;
+        int q = 5;
 
         Vector<Integer> customerPool = this.worstRemoval(gr,q); // Worst Removal
         this.regretInsertion(gr, customerPool); // Regret Insertion
