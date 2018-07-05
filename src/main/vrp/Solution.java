@@ -300,7 +300,7 @@ class Solution implements Iterable<CustomerIndex> {
             CustomerIndex ci = iter.next();
             improvement = this.moveOperator(ci);
         }
-        if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
+        // if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
 
         // Iterated Swap Procedure
         iter.reset();
@@ -322,7 +322,7 @@ class Solution implements Iterable<CustomerIndex> {
         //     }
         //     improvement = improvement || ispimprove;
         // }
-        if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
+        // if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
         
         // Segment Exchange Operator
         iter.reset();
@@ -334,7 +334,7 @@ class Solution implements Iterable<CustomerIndex> {
                 improvement = improvement || this.exchangeOperator(ci1, ci2);
             }
         }
-        if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
+        // if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
         return improvement;
     }
     public Solution perturb() {
@@ -384,7 +384,7 @@ class Solution implements Iterable<CustomerIndex> {
                 return 1;
             }
         });
-        System.out.println("Customer Pool : " + customerPool); // Debug
+        // System.out.println("Customer Pool : " + customerPool); // Debug
         int count = 0;
         while (count < q) {
             int customer = customerPool.elementAt(count);

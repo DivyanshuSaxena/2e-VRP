@@ -20,12 +20,29 @@ Network-Design:
 │   ├───test  
 │   └───vrp  
 ├───files  
+|   ├───input  
+|   ├───output  
 └───src  
     ├───main  
     │   └───vrp  
     └───test  
 
 The source code is placed in main/vrp/ and the compiled .CLASS files are placed in bin/vrp/.  
+
+## Dependencies
+The package uses Java as the primary language for algorithms, and Python 3 as a secondary language for data visualization and test case generation.  
+The python library dependencies are mentioned in the requirements.txt file.
+
+## Usage
+1. A random test case can be generated using the following command:
+```py generate.py``` [On Windows]  
+```python generate.py``` [On Linux]  
+2. The generated input file is located at ./files/input/custom/generated.dat by default.  
+3. Providing this filename as an argument to the main() method of the Main Class, the project is run on Eclipse IDE.
+4. The output solution is sent to ./files/output/solution.txt by default.
+5. The resulting final solution can be visualaized using the following command:
+```py display.py``` [On Windows]  
+```python display.py``` [On Linux]  
 
 ## Assumptions
 1. The goods are to be delivered in a to tier hierarchy. First, the level 1 vehicles shall take the goods to certain carparks, where the goods shall be transferred into the smaller vehicles. These smaller vehicles shall deliver the goods to the customers.
@@ -36,9 +53,11 @@ The source code is placed in main/vrp/ and the compiled .CLASS files are placed 
 - [X] Check Iterated Swap Procedure, without the dynamically changing solution with every iteration.
 - [X] Perturbation Algorithm :- Satellite Swap and Worst Removal Operations to be implemented first. Regret Insertion also done.
 - [X] Modify the current problem such that the constraints match the classical Two Echelon VRP, and check the results. 
-- [ ] Implement restrictions on the number of carparks.
 - [X] Check for larger test cases - Appropriate input format for the test cases of set 2, set 3, etc.
 - [X] Change nodesDistances[][] to double[][].
+- [X] Python Code to generate random test cases and plot them for visualization.
+- [ ] Implement Route Removal and Route Redistribution for perturbation.
+- [ ] Local Search for first level vehicles.
+- [ ] Implement restrictions on the number of carparks.
 - [ ] Separate out the test case files in a separate src/test/ folder 
-- [ ] Python Code to generate random test cases and plot them for visualization.
 - [ ] Code clean-up for private and public access modifiers of functions.
