@@ -72,7 +72,7 @@ class Solution implements Iterable<CustomerIndex> {
         this.solutionCost = cost;
         return cost;
     }
-    public SwapCostType getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
+    private SwapCostType getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
         // This function returns the best swap neighbour obtained on swapping customers at ci1 and ci2.
         Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
         Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
@@ -293,8 +293,6 @@ class Solution implements Iterable<CustomerIndex> {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
         boolean improvement = false;
-        int iterations = 0;
-        int ispIterations = Main.numCustomers; // Hyper-Parameter
         SolutionIterator iter = new SolutionIterator(this);
         while (iter.hasNext()) {
             CustomerIndex ci = iter.next();
@@ -312,16 +310,6 @@ class Solution implements Iterable<CustomerIndex> {
                 improvement = improvement || this.iteratedSwapOperator(ci1, ci2);
             }
         }
-        // iterations = 0;
-        // while(iterations < ispIterations) {
-        //     CustomerIndex ci1 = getRandomCustomer();
-        //     CustomerIndex ci2 = getRandomCustomer();
-        //     boolean ispimprove = this.iteratedSwapOperator(ci1, ci2);
-        //     if (!ispimprove) {
-        //         iterations++;
-        //     }
-        //     improvement = improvement || ispimprove;
-        // }
         // if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
         
         // Segment Exchange Operator
@@ -337,15 +325,9 @@ class Solution implements Iterable<CustomerIndex> {
         // if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
         return improvement;
     }
-    public Solution perturb() {
-        // Perturb the local best found solution to get a new solution altogether
-        final GiantRoute gr = this.getGiantRoute();
-        Solution perturbSoln = new Solution();
-        
-        // Worst Removal
+    private Vector<Integer> worstRemoval(GiantRoute gr, int q) {
         Vector<Integer> customerPool = new Vector<Integer>(); // Holds the Customer Ids that have been removed 
-        Vector<Double> normRemovalCost = new Vector<Double>();
-        int q = 5;
+        Vector<Double> normRemovalCost = new Vector<Double>(); // Normalized Removal Cost
         for (Customer c : Main.customers) {
             int total = 0;
             for (double dist : Main.nodesDistance[c.id]) {
@@ -371,9 +353,10 @@ class Solution implements Iterable<CustomerIndex> {
             // System.out.println("Customer Pool : " + customerPool); // Debug
             // System.out.println("Giant Route after worst removal : " + gr.giantRoute); // Debug
         }
-        
-        // Regret Insertion
-        customerPool.sort(new Comparator<Integer>() {
+        return customerPool;
+    }
+    private void regretInsertion(GiantRoute gr, Vector<Integer> customers) {
+        customers.sort(new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) { 
                 double regcost1 = gr.getRegretCost(o1);
@@ -386,11 +369,21 @@ class Solution implements Iterable<CustomerIndex> {
         });
         // System.out.println("Customer Pool : " + customerPool); // Debug
         int count = 0;
-        while (count < q) {
-            int customer = customerPool.elementAt(count);
+        while (count < customers.size()) {
+            int customer = customers.elementAt(count);
             gr.insertAtBestLocation(customer);
             count++;
         }
+    }
+    public Solution perturb() {
+        // Perturb the local best found solution to get a new solution altogether
+        final GiantRoute gr = this.getGiantRoute();
+        Solution perturbSoln = new Solution();
+        int q = 50;
+
+        Vector<Integer> customerPool = this.worstRemoval(gr,q); // Worst Removal
+        this.regretInsertion(gr, customerPool); // Regret Insertion
+        
         // Check the solution for any removed carparks
         gr.removeUnusedCarparks();
         // System.out.println("Giant Route after regret insertion : " + gr.giantRoute); // Debug
