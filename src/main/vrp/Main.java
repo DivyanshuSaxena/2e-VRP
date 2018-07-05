@@ -60,6 +60,7 @@ class Main {
         System.out.println("Final Solution : " + finalSolution + " cost " + bestSolution.cost);
         System.out.println("Running time : " + (endTime-startTime));
         sc.close();
+
         // Write the solution in solution.txt
         PrintWriter pWriter = new PrintWriter("./files/output/solution.txt", "UTF-8");
         for (int x : x_coord) {
@@ -73,6 +74,13 @@ class Main {
         pWriter.println(numNodes);
         pWriter.println(finalSolution);
         pWriter.close();
+
+        // Call the Python script
+        String[] cmd = {
+            "py",
+            "./files/display.py",
+        };
+        Runtime.getRuntime().exec(cmd);
     }
     public static void setOneInput() {
         // Input parameters form the input file
