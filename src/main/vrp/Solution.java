@@ -77,27 +77,16 @@ class Solution implements Iterable<CustomerIndex> {
         Route swapRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
         Route swapRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
         int type = 1;
-        double swapCost = 0.0, bestCost = 0.0;
-        int customer1nextnext = -1, customer2nextnext = -1, customer1prevprev = -1, customer2prevprev = -1;
+        double swapCost = 0.0;
         
         int customer1 = swapRoute1.route.elementAt(ci1.index);
         int customer1prev = swapRoute1.route.elementAt(ci1.index-1);
         int customer1next = swapRoute1.route.elementAt(ci1.index+1);
-        if (ci1.index < swapRoute1.route.size()-2)  customer1nextnext = swapRoute1.route.elementAt(ci1.index+2);
-        if (ci1.index > 1)  customer1prevprev = swapRoute1.route.elementAt(ci1.index-2);
         
         int customer2 = swapRoute2.route.elementAt(ci2.index);
         int customer2prev = swapRoute2.route.elementAt(ci2.index-1);
         int customer2next = swapRoute2.route.elementAt(ci2.index+1);
-        if (ci2.index < swapRoute2.route.size()-2)  customer2nextnext = swapRoute2.route.elementAt(ci2.index+2);
-        if (ci2.index > 1)  customer2prevprev = swapRoute2.route.elementAt(ci2.index-2);
-        if (ci1.isSameRoute(ci2) && ci2.index-ci1.index==2) {
-            customer1nextnext = customer1;
-            customer2prevprev = customer2;
-        } else if (ci1.isSameRoute(ci2) && ci1.index-ci2.index==2) {
-            customer1prevprev = customer1;
-            customer2nextnext = customer2;
-        }
+
         // System.out.println("Swapping " + customer1 + " in " + swapRoute1 + " with " + customer2 + " in " + swapRoute2); // Debug
         double subtractCost1 = Main.nodesDistance[customer1][customer1next] + Main.nodesDistance[customer1prev][customer1];
         double subtractCost2 = Main.nodesDistance[customer2][customer2next] + Main.nodesDistance[customer2prev][customer2];
@@ -105,45 +94,12 @@ class Solution implements Iterable<CustomerIndex> {
         double addCost2 = Main.nodesDistance[customer1][customer2next] + Main.nodesDistance[customer2prev][customer1];
         swapCost = (this.solutionCost - subtractCost1 - subtractCost2 + addCost1 + addCost2);
         if (ci1.index-ci2.index == 1 || ci1.index-ci2.index == -1) {
+            // Adjacent nodes
         	swapCost = swapCost + 2*Main.nodesDistance[customer1][customer2];
         }
         // System.out.println("Cost of swapping " + customer1 + " and " + customer2 + " : " + swapCost); // Debug
-        // Checkout alternatives
-        double costType2 = 0, costType3 = 0, costType4 = 0, costType5 = 0;
-        if (customer1nextnext != -1) {
-            costType2 = Main.nodesDistance[customer1prev][customer1next] + Main.nodesDistance[customer2][customer1nextnext] - Main.nodesDistance[customer1prev][customer2] - Main.nodesDistance[customer1next][customer1nextnext];
-            if (costType2 < bestCost) {
-                bestCost = costType2;
-                type = 2;
-            }  
-        }   
-        // System.out.println("Cost of change, type 2 : " + costType2); // Debug
-        if (customer1prevprev != -1) {
-            costType3 = Main.nodesDistance[customer1prev][customer1next] + Main.nodesDistance[customer1prevprev][customer2] - Main.nodesDistance[customer2][customer1next] - Main.nodesDistance[customer1prevprev][customer1prev];
-            if (costType3 < bestCost) {
-                bestCost = costType3;
-                type = 3;
-            }  
-        }   
-        // System.out.println("Cost of change, type 3 : " + costType2); // Debug
-        if (customer2prevprev != -1) {
-            costType4 = Main.nodesDistance[customer2prev][customer2next] + Main.nodesDistance[customer2prevprev][customer1] - Main.nodesDistance[customer1][customer2next] - Main.nodesDistance[customer2prevprev][customer2prev];
-            if (costType4 < bestCost) {
-                bestCost = costType4;
-                type = 4;
-            } 
-        }   
-        // System.out.println("Cost of change, type 4 : " + costType2); // Debug
-        if (customer2nextnext != -1) {
-            costType5 = Main.nodesDistance[customer2prev][customer2next] + Main.nodesDistance[customer1][customer2nextnext] - Main.nodesDistance[customer2prev][customer1] - Main.nodesDistance[customer2next][customer2nextnext];
-            if (costType5 < bestCost) {
-                bestCost = costType5;
-                type = 5;
-            } 
-        }   
-        // System.out.println("Cost of change, type 5 : " + costType2); // Debug
         SwapCostType sct = new SwapCostType();
-        sct.swapCost = swapCost + bestCost;
+        sct.swapCost = swapCost;
         sct.type = type;
         return sct;
     }
@@ -176,8 +132,8 @@ class Solution implements Iterable<CustomerIndex> {
         return cIndex; 
     }
     public int getRandomVehicle() {
-        int index = (int)((Main.routedCarparks.size()+1) * Math.random());
-        if (index == Main.routedCarparks.size()+1)  return 0;
+        int index = (int)((Main.routedCarparks.size()) * Math.random());
+        if (index == Main.routedCarparks.size())  return 0;
         return index;
     }
     private boolean moveOperator(CustomerIndex ci) {
@@ -232,19 +188,6 @@ class Solution implements Iterable<CustomerIndex> {
             if (swapRoute1.isSwapFeasible(customer1, customer2) && swapRoute2.isSwapFeasible(customer2, customer1)) {
                 swapRoute1.setCustomer(customer2, ci1.index);
                 swapRoute2.setCustomer(customer1, ci2.index);
-                if (type == 2) {
-                    swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index+1), ci1.index);
-                    swapRoute1.setCustomer(customer2, ci1.index+1);
-                } else if (type == 3) {
-                    swapRoute1.setCustomer(swapRoute1.route.elementAt(ci1.index-1), ci1.index);
-                    swapRoute1.setCustomer(customer2, ci1.index-1);                    
-                } else if (type == 4) {
-                    swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index-1), ci2.index);
-                    swapRoute2.setCustomer(customer1, ci2.index-1);                    
-                } else if (type == 5) {
-                    swapRoute2.setCustomer(swapRoute2.route.elementAt(ci2.index+1), ci2.index);
-                    swapRoute2.setCustomer(customer1, ci2.index+1);
-                }
                 improvement = true;
                 this.updateCost();
             } else {
@@ -254,10 +197,9 @@ class Solution implements Iterable<CustomerIndex> {
         }
         return improvement;
     }
-    private boolean exchangeOperator(CustomerIndex ci1, CustomerIndex ci2) {
-        boolean improvement = false;
+    private double exchangeOperator(CustomerIndex ci1, CustomerIndex ci2) {
         if (ci1.routecp==ci2.routecp) {
-            return improvement;
+            return 0;
         }
         Route exchangeRoute1 = Main.routedCarparks.elementAt(ci1.routecp-Main.numNodes).route;
         Route exchangeRoute2 = Main.routedCarparks.elementAt(ci2.routecp-Main.numNodes).route;
@@ -272,22 +214,8 @@ class Solution implements Iterable<CustomerIndex> {
         double addCost1 = Main.nodesDistance[customer1prev][customer2] + Main.nodesDistance[customer2prev][customer1] + Main.nodesDistance[route2last][route1depot] + Main.nodesDistance[route1last][route2depot];
         double subtractCost1 = Main.nodesDistance[customer1prev][customer1] + Main.nodesDistance[customer2prev][customer2] + Main.nodesDistance[route1last][route1depot] + Main.nodesDistance[route2last][route2depot];
         // Exchange the customers if better.
-        if (addCost1-subtractCost1 < 0) {
-            Vector<Integer> seg1 = exchangeRoute1.getSubRoute(ci1.index, exchangeRoute1.route.size()-2);
-            Vector<Integer> seg2 = exchangeRoute2.getSubRoute(ci2.index, exchangeRoute2.route.size()-2);
-            if (exchangeRoute1.isExchangeFeasible(seg2, ci1.index) && exchangeRoute2.isExchangeFeasible(seg1, ci2.index)) {
-                // System.out.println("Exchanging " + customer1 + " from " + exchangeRoute1 + " with " + customer2 + " from " + exchangeRoute2); // Debug
-                exchangeRoute1.addAllCustomers(seg2, ci1.index);
-                exchangeRoute2.addAllCustomers(seg1, ci2.index);
-                exchangeRoute1.removeAllCustomers(ci1.index+seg2.size(), exchangeRoute1.route.size()-2);
-                exchangeRoute2.removeAllCustomers(ci2.index+seg1.size(), exchangeRoute2.route.size()-2);    
-                // System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
-                improvement = true;
-                this.updateCost();
-                // System.out.println("Updated Cost : " + this.solutionCost); // Debug
-            } 
-        }
-        return improvement;
+        return (addCost1-subtractCost1);
+        // return improvement;
     }
     public boolean updateBestNeighbor() {
         // Generate Neighborhood logic here
@@ -314,16 +242,53 @@ class Solution implements Iterable<CustomerIndex> {
         
         // Segment Exchange Operator
         iter.reset();
+        CustomerIndex bestPair1 = new CustomerIndex();
+        CustomerIndex bestPair2 = new CustomerIndex();
+        double bestCost = 0;
         while (iter.hasNext()) {
             CustomerIndex ci1 = iter.next();
             SolutionIterator innerIterator = new SolutionIterator(this);
             while (innerIterator.hasNext()) {
                 CustomerIndex ci2 = innerIterator.next();
-                improvement = improvement || this.exchangeOperator(ci1, ci2);
+                double cost = this.exchangeOperator(ci1, ci2);
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    bestPair1 = ci1;
+                    bestPair2 = ci2;
+                }
             }
+        }
+        if (bestCost < 0) {
+            Route exchangeRoute1 = Main.routedCarparks.elementAt(bestPair1.routecp-Main.numNodes).route;
+            Route exchangeRoute2 = Main.routedCarparks.elementAt(bestPair2.routecp-Main.numNodes).route;
+            Vector<Integer> seg1 = exchangeRoute1.getSubRoute(bestPair1.index, exchangeRoute1.route.size()-2);
+            Vector<Integer> seg2 = exchangeRoute2.getSubRoute(bestPair2.index, exchangeRoute2.route.size()-2);
+            if (exchangeRoute1.isExchangeFeasible(seg2, bestPair1.index) && exchangeRoute2.isExchangeFeasible(seg1, bestPair2.index)) {
+                // System.out.println("Exchanging " + customer1 + " from " + exchangeRoute1 + " with " + customer2 + " from " + exchangeRoute2); // Debug
+                exchangeRoute1.addAllCustomers(seg2, bestPair1.index);
+                exchangeRoute2.addAllCustomers(seg1, bestPair2.index);
+                exchangeRoute1.removeAllCustomers(bestPair1.index+seg2.size(), exchangeRoute1.route.size()-2);
+                exchangeRoute2.removeAllCustomers(bestPair2.index+seg1.size(), exchangeRoute2.route.size()-2);    
+                // System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
+                improvement = true;
+                this.updateCost();
+                // System.out.println("Updated Cost : " + this.solutionCost); // Debug
+            }           
         }
         if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
         return improvement;
+    }
+    private Vector<Integer> routeRemoval(GiantRoute gr) {
+        Vector<Integer> customers = new Vector<Integer>();
+        int vehicleIndex = this.getRandomVehicle();
+        Vector<Integer> selectedRoute = Main.routedCarparks.elementAt(vehicleIndex).route.route;
+        for (int customer : selectedRoute) {
+            if (customer > Main.numCarpark) {
+                customers.add(customer);
+            }
+        }
+        
+        return customers;
     }
     private Vector<Integer> worstRemoval(GiantRoute gr, int q) {
         Vector<Integer> customerPool = new Vector<Integer>(); // Holds the Customer Ids that have been removed 
@@ -355,12 +320,7 @@ class Solution implements Iterable<CustomerIndex> {
         }
         return customerPool;
     }
-    private Vector<Integer> routeRemoval() {
-        Vector<Integer> customers = new Vector<Integer>();
-        
-    	return customers;
-    }
-    private void regretInsertion(GiantRoute gr, Vector<Integer> customers) {
+    private void regretInsertion(final GiantRoute gr, Vector<Integer> customers) {
         customers.sort(new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) { 
