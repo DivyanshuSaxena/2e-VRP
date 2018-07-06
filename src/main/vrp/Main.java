@@ -32,7 +32,7 @@ class Main {
         System.out.println("Initial Solution : " + initsol + " cost " + initCost);
 
         // Use initsol to develop the further solutions here.
-        int numUselessIterations = Main.numCustomers; // Hyper-Parameter
+        int numUselessIterations = Main.numCustomers/10; // Hyper-Parameter
         int iterations = 0;
         Solution bestFoundSoln = initsol;
         while (true) {
@@ -231,7 +231,7 @@ class Main {
                     carparkCustomers.add(customer.id); // To get the vector of indices of customers assigned to the carpark.
                 }
                 cp.routes = savingSolution(carparkCustomers, cp.id, l2cap);
-                // System.out.println("Carpark " + cp.id + " : " + cp.routes); // Debug
+                // If the number of vehicles required is more than the number of vehicles available
                 if (cp.routes.size() > numVehicles2) {
                     System.out.println("Routes for carpark " + cp.id + " is more than the limit"); // Debug
                     // Choose the route with the largest average distance from the carpark and remove the route

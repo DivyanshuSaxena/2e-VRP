@@ -226,7 +226,7 @@ class Solution implements Iterable<CustomerIndex> {
             CustomerIndex ci = iter.next();
             improvement = this.moveOperator(ci);
         }
-        if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
+        // if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
 
         // Iterated Swap Procedure
         iter.reset();
@@ -238,7 +238,7 @@ class Solution implements Iterable<CustomerIndex> {
                 improvement = improvement || this.iteratedSwapOperator(ci1, ci2);
             }
         }
-        if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
+        // if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
         
         // Segment Exchange Operator
         iter.reset();
@@ -275,19 +275,18 @@ class Solution implements Iterable<CustomerIndex> {
                 // System.out.println("Updated Cost : " + this.solutionCost); // Debug
             }           
         }
-        if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
+        // if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
         return improvement;
     }
-    private Vector<Integer> routeRemoval(GiantRoute gr) {
+    private Vector<Integer> routeRemoval(GiantRoute gr, int vehicleIndex) {
         Vector<Integer> customers = new Vector<Integer>();
-        int vehicleIndex = this.getRandomVehicle();
         Vector<Integer> selectedRoute = Main.routedCarparks.elementAt(vehicleIndex).route.route;
         for (int customer : selectedRoute) {
             if (customer > Main.numCarpark) {
                 customers.add(customer);
+                gr.removeCustomer(customer);
             }
         }
-        
         return customers;
     }
     private Vector<Integer> worstRemoval(GiantRoute gr, int q) {
@@ -315,8 +314,8 @@ class Solution implements Iterable<CustomerIndex> {
             }
             customerPool.add(highest+Main.numCarpark+1);
             gr.removeCustomer(highest+Main.numCarpark+1);
-            System.out.println("Customer Pool : " + customerPool); // Debug
-            System.out.println("Giant Route after worst removal : " + gr.giantRoute); // Debug
+            // System.out.println("Customer Pool : " + customerPool); // Debug
+            // System.out.println("Giant Route after worst removal : " + gr.giantRoute); // Debug
         }
         return customerPool;
     }
@@ -346,8 +345,12 @@ class Solution implements Iterable<CustomerIndex> {
         Solution perturbSoln = new Solution();
         int q = 5;
 
-        Vector<Integer> customerPool = this.worstRemoval(gr,q); // Worst Removal
-        this.regretInsertion(gr, customerPool); // Regret Insertion
+        Vector<Integer> customerPoolWorstRemoval = this.worstRemoval(gr,q); // Worst Removal
+        this.regretInsertion(gr, customerPoolWorstRemoval); // Regret Insertion
+
+        int vehicleIndex = this.getRandomVehicle();
+        Vector<Integer> customerPoolRouteRemoval = this.routeRemoval(gr, vehicleIndex); // Route Removal
+        this.regretInsertion(gr, customerPoolRouteRemoval); // Regret Insertion
         
         // Check the solution for any removed carparks
         gr.removeUnusedCarparks();
