@@ -58,6 +58,7 @@ The python library dependencies are mentioned in the requirements.txt file.
 - [X] Python Code to generate random test cases and plot them for visualization.
 - [ ] Implement Route Removal and Route Redistribution for perturbation.
 - [ ] Local Search for first level vehicles.
+- [ ] Making new choices for the location of first level vehicles.
 - [ ] Implement restrictions on the number of carparks.
 - [ ] Separate out the test case files in a separate src/test/ folder 
 - [ ] Code clean-up for private and public access modifiers of functions.
