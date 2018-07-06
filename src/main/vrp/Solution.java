@@ -176,8 +176,8 @@ class Solution implements Iterable<CustomerIndex> {
         return cIndex; 
     }
     public int getRandomVehicle() {
-        int index = (int)((Main.routedCarparks.size()+1) * Math.random());
-        if (index == Main.routedCarparks.size()+1)  return 0;
+        int index = (int)((Main.routedCarparks.size()) * Math.random());
+        if (index == Main.routedCarparks.size())  return 0;
         return index;
     }
     private boolean moveOperator(CustomerIndex ci) {
@@ -334,6 +334,18 @@ class Solution implements Iterable<CustomerIndex> {
         }
         if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
         return improvement;
+    }
+    private Vector<Integer> routeRemoval(GiantRoute gr) {
+        Vector<Integer> customers = new Vector<Integer>();
+        int vehicleIndex = this.getRandomVehicle();
+        Vector<Integer> selectedRoute = Main.routedCarparks.elementAt(vehicleIndex).route.route;
+        for (int customer : selectedRoute) {
+            if (customer > Main.numCarpark) {
+                customers.add(customer);
+            }
+        }
+        
+        return customers;
     }
     private Vector<Integer> worstRemoval(GiantRoute gr, int q) {
         Vector<Integer> customerPool = new Vector<Integer>(); // Holds the Customer Ids that have been removed 
