@@ -75,7 +75,7 @@ class Main {
         pWriter.println(finalSolution);
         pWriter.close();
 
-        System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost));
+        System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
 
         // Call the Python script
         // String[] cmd = {

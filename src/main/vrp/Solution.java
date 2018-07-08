@@ -331,7 +331,7 @@ class Solution implements Iterable<CustomerIndex> {
                 return 1;
             }
         });
-        // System.out.println("Customer Pool : " + customerPool); // Debug
+        System.out.println("Customer Pool : " + customers); // Debug
         int count = 0;
         while (count < customers.size()) {
             int customer = customers.elementAt(count);
@@ -343,14 +343,17 @@ class Solution implements Iterable<CustomerIndex> {
         // Perturb the local best found solution to get a new solution altogether
         final GiantRoute gr = this.getGiantRoute();
         Solution perturbSoln = new Solution();
-        int q = 5;
+        int q = 10;
 
-        Vector<Integer> customerPoolWorstRemoval = this.worstRemoval(gr,q); // Worst Removal
-        this.regretInsertion(gr, customerPoolWorstRemoval); // Regret Insertion
-
-        int vehicleIndex = this.getRandomVehicle();
-        Vector<Integer> customerPoolRouteRemoval = this.routeRemoval(gr, vehicleIndex); // Route Removal
-        this.regretInsertion(gr, customerPoolRouteRemoval); // Regret Insertion
+        double p = Math.random();
+        Vector<Integer> customerPool = new Vector<Integer>(); 
+        if (p <= 0.5) {
+            customerPool = this.worstRemoval(gr,q); // Worst Removal
+        } else {
+            int vehicleIndex = this.getRandomVehicle();
+            customerPool = this.routeRemoval(gr, vehicleIndex); // Route Removal
+        }
+        this.regretInsertion(gr, customerPool); // Regret Insertion
         
         // Check the solution for any removed carparks
         gr.removeUnusedCarparks();
