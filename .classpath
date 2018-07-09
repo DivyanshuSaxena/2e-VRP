@@ -3,5 +3,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry excluding="main/" kind="src" path="src"/>
 	<classpathentry kind="src" path="src/main"/>
+	<classpathentry kind="lib" path="G:/Installers/jython-standalone-2.5.4-rc1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

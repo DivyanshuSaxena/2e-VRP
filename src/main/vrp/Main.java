@@ -7,7 +7,7 @@ class Main {
     static int numCustomers, numNodes, numCarpark;
     static int numVehicles1, numVehicles2;
     static int l1cap, l2cap;
-    static int x_coord[], y_coord[];
+    static Vector<Integer> x_coord, y_coord;
     static double nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
@@ -26,38 +26,11 @@ class Main {
         }
 
         long startTime = System.currentTimeMillis();
-        Solution initsol = getInitialSoln();
-        double initCost = initsol.getCost();
-        GiantRoute bestSolution = new GiantRoute();
-        System.out.println("Initial Solution : " + initsol + " cost " + initCost);
-
-        // Use initsol to develop the further solutions here.
-        int numUselessIterations = Main.numCustomers/10; // Hyper-Parameter
-        int iterations = 0;
-        Solution bestFoundSoln = initsol;
-        while (true) {
-            boolean improvement = bestFoundSoln.updateBestNeighbor();
-            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
-            GiantRoute bfs = bestFoundSoln.getGiantRoute();
-            if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
-                bestSolution = bfs;
-                improvement = true;
-            } else improvement = false;
-            // Find the best solution of the generated neighborhood, and proceed with it further 
-            bestFoundSoln = bestFoundSoln.perturb();
-            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
-            System.out.println("--------------------------------------------------"); // Debug
-            
-            if (improvement) {
-                iterations = 0;
-            } else {
-                iterations++;
-                if (iterations == numUselessIterations) break;
-            }
-        }
+        GiantRoute bestSolution = solve();
+        double initCost = bestSolution.cost;
         long endTime = System.currentTimeMillis();
         Solution finalSolution = bestSolution.getSolution();
-        System.out.println("Final Solution : " + finalSolution + " cost " + bestSolution.cost);
+        System.out.println("Final Solution : " + finalSolution + " cost " + bestSolution.cost);        
         System.out.println("Running time : " + (endTime-startTime));
         sc.close();
 
@@ -77,6 +50,7 @@ class Main {
 
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
 
+        bestSolution = recluster();
         // Call the Python script
         // String[] cmd = {
         //     "py",
@@ -160,31 +134,33 @@ class Main {
         carparks = new Carpark[numCarpark];
 
         // Creation of distances matrix from the input file
-        x_coord = new int[numNodes];
-        y_coord = new int[numNodes];
+        x_coord = new Vector<Integer>();
+        y_coord = new Vector<Integer>();
         for (int i = 0; i <= numCustomers; i++) {
             sc.nextInt(); // Node Number
             if (i == 0) {
-                x_coord[i] = sc.nextInt();
-                y_coord[i] = sc.nextInt();
+                x_coord.add(sc.nextInt());
+                y_coord.add(sc.nextInt());
             } else {
-                x_coord[i+numCarpark] = sc.nextInt();
-                y_coord[i+numCarpark] = sc.nextInt();                
+                x_coord.add(i+numCarpark, sc.nextInt());
+                y_coord.add(i+numCarpark, sc.nextInt());                
             }
         }
         sc.nextLine(); // Empty Line
         sc.nextLine(); // Satellite Section
         for (int i = 0; i < numCarpark; i++) {
             sc.nextInt(); // Node Number
-            x_coord[i+1] = sc.nextInt();
-            y_coord[i+1] = sc.nextInt();
+            x_coord.add(i+1, sc.nextInt());
+            y_coord.add(i+1, sc.nextInt());
             carparks[i] = new Carpark();
             carparks[i].setId(i+1);
         }
         sc.nextLine(); // Empty Line
         for (int i = 0; i < numNodes; i++) {
             for (int j = i+1; j < numNodes; j++) {
-                nodesDistance[i][j] = Math.sqrt((x_coord[i]-x_coord[j])*(x_coord[i]-x_coord[j]) + (y_coord[i]-y_coord[j])*(y_coord[i]-y_coord[j]));
+                int xcoordi = x_coord.elementAt(i), xcoordj = x_coord.elementAt(j);
+                int ycoordi = y_coord.elementAt(i), ycoordj = y_coord.elementAt(j);
+                nodesDistance[i][j] = Math.sqrt((xcoordi-xcoordj)*(xcoordi-xcoordj) + (ycoordi-ycoordj)*(ycoordi-ycoordj));
                 nodesDistance[j][i] = nodesDistance[i][j];
             }
         }
@@ -199,6 +175,78 @@ class Main {
             int demand = Integer.parseInt(sc.nextLine().split(" ")[1]);
             customers[i-1].setDemand(demand);            
         }
+    }
+    public static GiantRoute solve() {
+        Solution initsol = getInitialSoln();
+        double initCost = initsol.getCost();
+        GiantRoute bestSolution = new GiantRoute();
+        System.out.println("Initial Solution : " + initsol + " cost " + initCost);
+
+        // Use initsol to develop the further solutions here.
+        int numUselessIterations = Main.numCustomers/10; // Hyper-Parameter
+        int iterations = 0;
+        Solution bestFoundSoln = initsol;
+        while (true) {
+            boolean improvement = bestFoundSoln.updateBestNeighbor();
+            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
+            GiantRoute bfs = bestFoundSoln.getGiantRoute();
+            if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
+                bestSolution = bfs;
+                improvement = true;
+            } else improvement = false;
+            // Find the best solution of the generated neighborhood, and proceed with it further 
+            bestFoundSoln = bestFoundSoln.perturb();
+            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
+            System.out.println("--------------------------------------------------"); // Debug
+            
+            if (improvement) {
+                iterations = 0;
+            } else {
+                iterations++;
+                if (iterations == numUselessIterations) break;
+            }
+        }
+        return bestSolution;
+    }
+    public static GiantRoute recluster() throws FileNotFoundException {
+        File file = new File("files/interface/output.txt");
+        Scanner intermediate = new Scanner(file);
+        intermediate.nextLine();
+        int prevNumCarpark = numCarpark;
+        numCarpark = intermediate.nextInt();
+        numNodes = numCarpark + numCustomers + 1;
+        carparks = new Carpark[numCarpark];
+        Vector<Integer> cpx_coord = new Vector<Integer>();
+        Vector<Integer> cpy_coord = new Vector<Integer>();
+        for (int i = 0; i < numCarpark; i++) {
+            cpx_coord.add(intermediate.nextInt());
+            cpy_coord.add(intermediate.nextInt());
+        }
+        intermediate.close();
+
+        Vector<Integer> xcoord_temp = new Vector<Integer>();
+        xcoord_temp.addAll(x_coord);
+        Vector<Integer> ycoord_temp = new Vector<Integer>();
+        ycoord_temp.addAll(y_coord);
+        x_coord = new Vector<Integer>();
+        y_coord = new Vector<Integer>();
+        x_coord.add(xcoord_temp.elementAt(0));
+        y_coord.add(ycoord_temp.elementAt(0));
+        x_coord.addAll(cpx_coord);
+        y_coord.addAll(cpy_coord);
+        for (int i = prevNumCarpark+1; i < xcoord_temp.size(); i++) {
+            x_coord.add(xcoord_temp.elementAt(i));
+            y_coord.add(ycoord_temp.elementAt(i));
+        }
+        for (int i = 0; i < numNodes; i++) {
+            for (int j = i+1; j < numNodes; j++) {
+                int xcoordi = x_coord.elementAt(i), xcoordj = x_coord.elementAt(j);
+                int ycoordi = y_coord.elementAt(i), ycoordj = y_coord.elementAt(j);
+                nodesDistance[i][j] = Math.sqrt((xcoordi-xcoordj)*(xcoordi-xcoordj) + (ycoordi-ycoordj)*(ycoordi-ycoordj));
+                nodesDistance[j][i] = nodesDistance[i][j];
+            }
+        }
+        return solve();
     }
     public static Solution getInitialSoln() {
         // Finds the initial solution and places it in the static variable route.

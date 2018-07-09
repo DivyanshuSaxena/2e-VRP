@@ -19,7 +19,9 @@ def main():
     for node in range(NUM_CUSTOMERS+1):
         coord.append([random.randint(0, MAX_RANGE), random.randint(0, MAX_RANGE)])
 
-    cluster_centers = nodecluster.cluster(coord, NUM_CUSTOMERS, MAX_RANGE)
+    density = NUM_CUSTOMERS/MAX_RANGE
+    bandwidth_ = 0.2 * math.pow(1.414, -(density*density)) * MAX_RANGE
+    cluster_centers = nodecluster.cluster(coord, bandwidth_)
     n_clusters_ = len(cluster_centers)
     num_carparks = n_clusters_
     num_nodes = NUM_CUSTOMERS + num_carparks + 1
