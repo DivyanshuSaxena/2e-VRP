@@ -49,14 +49,12 @@ class Main {
         pWriter.close();
 
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
-
-        bestSolution = recluster();
-        // Call the Python script
-        // String[] cmd = {
-        //     "py",
-        //     "./files/display.py",
-        // };
-        // Runtime.getRuntime().exec(cmd);
+        Vector<Integer> allCustomers = new Vector<Integer>();
+        for (Customer customer : customers) {
+            allCustomers.add(customer.id);
+        }
+        bestSolution = recluster(allCustomers);
+        System.out.println(bestSolution.cost);
     }
     public static void setOneInput() {
         // Input parameters form the input file
@@ -134,32 +132,36 @@ class Main {
         carparks = new Carpark[numCarpark];
 
         // Creation of distances matrix from the input file
-        x_coord = new Vector<Integer>();
-        y_coord = new Vector<Integer>();
+        x_coord = new Vector<Integer>(numNodes);
+        y_coord = new Vector<Integer>(numNodes);
+        x_coord.setSize(numNodes);
+        y_coord.setSize(numNodes);
         for (int i = 0; i <= numCustomers; i++) {
             sc.nextInt(); // Node Number
             if (i == 0) {
-                x_coord.add(sc.nextInt());
-                y_coord.add(sc.nextInt());
+                x_coord.set(0, sc.nextInt());
+                y_coord.set(0, sc.nextInt());
             } else {
-                x_coord.add(i+numCarpark, sc.nextInt());
-                y_coord.add(i+numCarpark, sc.nextInt());                
+                x_coord.set(i+numCarpark, sc.nextInt());
+                y_coord.set(i+numCarpark, sc.nextInt());                
             }
         }
         sc.nextLine(); // Empty Line
         sc.nextLine(); // Satellite Section
         for (int i = 0; i < numCarpark; i++) {
             sc.nextInt(); // Node Number
-            x_coord.add(i+1, sc.nextInt());
-            y_coord.add(i+1, sc.nextInt());
+            x_coord.set(i+1, sc.nextInt());
+            y_coord.set(i+1, sc.nextInt());
             carparks[i] = new Carpark();
             carparks[i].setId(i+1);
         }
         sc.nextLine(); // Empty Line
         for (int i = 0; i < numNodes; i++) {
             for (int j = i+1; j < numNodes; j++) {
-                int xcoordi = x_coord.elementAt(i), xcoordj = x_coord.elementAt(j);
-                int ycoordi = y_coord.elementAt(i), ycoordj = y_coord.elementAt(j);
+                int xcoordi = x_coord.elementAt(i);
+                int xcoordj = x_coord.elementAt(j);
+                int ycoordi = y_coord.elementAt(i);
+                int ycoordj = y_coord.elementAt(j);
                 nodesDistance[i][j] = Math.sqrt((xcoordi-xcoordj)*(xcoordi-xcoordj) + (ycoordi-ycoordj)*(ycoordi-ycoordj));
                 nodesDistance[j][i] = nodesDistance[i][j];
             }
@@ -208,7 +210,38 @@ class Main {
         }
         return bestSolution;
     }
-    public static GiantRoute recluster() throws FileNotFoundException {
+    public static GiantRoute recluster(Vector<Integer> customers) throws IOException {
+        double bandwidth = 100;
+        PrintWriter pWriter = new PrintWriter("./files/interface/input.txt", "UTF-8");
+        pWriter.println(bandwidth);
+        for (int cust : customers) {
+            pWriter.println(x_coord.elementAt(cust-numCarpark-1) + " " + y_coord.elementAt(cust-numCarpark-1));
+        }
+        pWriter.close();
+
+        // Run Node Cluster
+		String command = "cmd /c py ./files/nodecluster.py";
+	    Process p = Runtime.getRuntime().exec(command);
+	    try {
+			p.waitFor();
+			BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			BufferedReader bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+			String line;
+			while ((line = bri.readLine()) != null) {
+				System.out.println(line);
+			}
+			bri.close();
+			while ((line = bre.readLine()) != null) {
+				System.out.println(line);
+			}
+			bre.close();
+			p.waitFor();
+			System.out.println("Done.");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    p.destroy();
+
         File file = new File("files/interface/output.txt");
         Scanner intermediate = new Scanner(file);
         intermediate.nextLine();
@@ -221,15 +254,22 @@ class Main {
         for (int i = 0; i < numCarpark; i++) {
             cpx_coord.add(intermediate.nextInt());
             cpy_coord.add(intermediate.nextInt());
+            carparks[i] = new Carpark();
+            carparks[i].setId(i+1);
         }
         intermediate.close();
 
+        // Add temporary vectors
         Vector<Integer> xcoord_temp = new Vector<Integer>();
-        xcoord_temp.addAll(x_coord);
         Vector<Integer> ycoord_temp = new Vector<Integer>();
+        xcoord_temp.addAll(x_coord);
         ycoord_temp.addAll(y_coord);
+        
+        // Re-initialize global vectors
         x_coord = new Vector<Integer>();
         y_coord = new Vector<Integer>();
+        nodesDistance = new double[numNodes][numNodes];
+        
         x_coord.add(xcoord_temp.elementAt(0));
         y_coord.add(ycoord_temp.elementAt(0));
         x_coord.addAll(cpx_coord);
@@ -239,6 +279,9 @@ class Main {
             y_coord.add(ycoord_temp.elementAt(i));
         }
         for (int i = 0; i < numNodes; i++) {
+        	if (i > numCarpark) {
+        		Main.customers[i-numCarpark-1].setId(i);
+        	}
             for (int j = i+1; j < numNodes; j++) {
                 int xcoordi = x_coord.elementAt(i), xcoordj = x_coord.elementAt(j);
                 int ycoordi = y_coord.elementAt(i), ycoordj = y_coord.elementAt(j);
