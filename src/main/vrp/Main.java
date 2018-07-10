@@ -211,7 +211,7 @@ class Main {
         return bestSolution;
     }
     public static GiantRoute recluster(Vector<Integer> customers) throws IOException {
-        double bandwidth = 100;
+        double bandwidth = 300;
         PrintWriter pWriter = new PrintWriter("./files/interface/input.txt", "UTF-8");
         pWriter.println(bandwidth);
         for (int cust : customers) {
@@ -220,7 +220,7 @@ class Main {
         pWriter.close();
 
         // Run Node Cluster
-		String command = "cmd /c py ./files/nodecluster.py";
+		String command = "cmd /c py ./files/nodecluster.py --eclipse";
 	    Process p = Runtime.getRuntime().exec(command);
 	    try {
 			p.waitFor();

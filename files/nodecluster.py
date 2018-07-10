@@ -4,6 +4,9 @@ from sklearn.cluster import MeanShift
 import numpy as np
 import matplotlib.pyplot as plt
 import re
+import argparse
+
+ENV = "cmd"
 
 def cluster(coord, bandwidth):
     """
@@ -35,7 +38,11 @@ def cluster(coord, bandwidth):
     ## ###   #############################################################   ### ##
 
     # Write to a file
-    file = open("./files/interface/output.txt", "w")
+    if ENV is "eclipse":
+        file = open("./files/interface/output.txt", "w")
+    else:
+        file = open("./interface/output.txt", "w")
+        
     file.write("CARPARK_SECTION\n")
     file.write("%d\n" % n_clusters_)
     i = 0
@@ -50,7 +57,16 @@ def main():
     """
     The main function that reads from the input file and calls cluster over it.
     """
-    file = open("./files/interface/input.txt","r")
+    parser = argparse.ArgumentParser(description='Relative or Absolute Path')
+    parser.add_argument('--eclipse', action='store_true', help='calling environment')
+    args = parser.parse_args()
+    print(args)
+    if args.eclipse:
+        file = open("./files/interface/input.txt","r")
+        ENV = "eclipse"
+    else:
+        file = open("./interface/input.txt","r")
+        
     get_bandwidth = False
     bandwidth_ = 0
     coord = []
