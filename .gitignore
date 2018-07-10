@@ -30,9 +30,7 @@ hs_err_pid*
 output/*
 
 # Test Data
-Set1/
-Set2/
-Set3/
-files/output/solution.txt
-files/input/custom/generated.dat
+*.txt
+*.dat
+*.pdf
 __pycache__/

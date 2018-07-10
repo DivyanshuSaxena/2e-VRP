@@ -21,6 +21,7 @@ def main():
 
     density = NUM_CUSTOMERS/MAX_RANGE
     bandwidth_ = 0.2 * math.pow(1.414, -(density*density)) * MAX_RANGE
+    print (bandwidth_)
     cluster_centers = nodecluster.cluster(coord, bandwidth_)
     n_clusters_ = len(cluster_centers)
     num_carparks = n_clusters_

@@ -48,7 +48,7 @@ class Main {
         pWriter.println(finalSolution);
         pWriter.close();
 
-        System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
+        System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost));
         Vector<Integer> allCustomers = new Vector<Integer>();
         for (Customer customer : customers) {
             allCustomers.add(customer.id);
@@ -211,7 +211,7 @@ class Main {
         return bestSolution;
     }
     public static GiantRoute recluster(Vector<Integer> customers) throws IOException {
-        double bandwidth = 300;
+        double bandwidth = 180;
         PrintWriter pWriter = new PrintWriter("./files/interface/input.txt", "UTF-8");
         pWriter.println(bandwidth);
         for (int cust : customers) {

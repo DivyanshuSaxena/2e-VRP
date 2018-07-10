@@ -12,6 +12,7 @@ def cluster(coord, bandwidth):
     """
     cluster function clusters the elements in the array coord using the other two as parameters
     """
+    global ENV
     ms = MeanShift(bandwidth=bandwidth)
     ms.fit(coord)
     labels = ms.labels_
@@ -57,6 +58,7 @@ def main():
     """
     The main function that reads from the input file and calls cluster over it.
     """
+    global ENV
     parser = argparse.ArgumentParser(description='Relative or Absolute Path')
     parser.add_argument('--eclipse', action='store_true', help='calling environment')
     args = parser.parse_args()
