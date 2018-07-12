@@ -78,11 +78,27 @@ class Main {
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
 
         // Call the Python script
-        // String[] cmd = {
-        //     "py",
-        //     "./files/display.py",
-        // };
-        // Runtime.getRuntime().exec(cmd);
+        String command = "cmd /c py ./files/display.py --eclipse";
+        Process p = Runtime.getRuntime().exec(command);
+        try {
+            p.waitFor();
+            BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            BufferedReader bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            String line;
+            while ((line = bri.readLine()) != null) {
+                System.out.println(line);
+            }
+            bri.close();
+            while ((line = bre.readLine()) != null) {
+                System.out.println(line);
+            }
+            bre.close();
+            p.waitFor();
+            System.out.println("Done.");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        p.destroy();
     }
     public static void setOneInput() {
         // Input parameters form the input file
