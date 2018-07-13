@@ -24,7 +24,6 @@ class Server {
  
             String line = "";
  
-            // reads message from client until "Over" is sent
             while (!line.equals("EOF"))
             {
                 try
