@@ -15,23 +15,26 @@ This process of improvement and perturbation is iterated several times, so as to
 ## Structure
 The directory provides a Java package for running the code.  
 The package is placed inside the src/main folder. The directory structure is as follows:  
-Network-Design:  
-├───bin  
-│   ├───test  
-│   └───vrp  
-├───files  
-|   ├───input  
-|   ├───output  
-└───src  
-    ├───main  
-    │   └───vrp  
-    └───test  
+Network-Design
+├───.vscode
+├───bin
+│   ├───test
+│   └───vrp
+├───files
+│   ├───input
+│   ├───interface
+│   ├───output
+└───src
+    ├───main
+    │   └───vrp
+    └───test
 
 The source code is placed in main/vrp/ and the compiled .CLASS files are placed in bin/vrp/.  
 
 ## Dependencies
 The package uses Java as the primary language for algorithms, and Python 3 as a secondary language for data visualization and test case generation.  
-The python library dependencies are mentioned in the requirements.txt file.
+The python library dependencies are mentioned in the requirements.txt file.  
+Also the project makes use of making a server side application that can be called from a http call using a JSON object. For the integration of JSON with Java, [JSON Simple][1] has been used. The jar file can be downloaded from [here][2] and added in the external JARs option in Eclipse.  
 
 ## Usage
 1. A random test case can be generated using the following command:
@@ -62,3 +65,6 @@ The python library dependencies are mentioned in the requirements.txt file.
 - [ ] Implement restrictions on the number of vehicles available in a carparks.
 - [ ] Separate out the test case files in a separate src/test/ folder 
 - [ ] Code clean-up for private and public access modifiers of functions.
+
+[1]: https://code.google.com/archive/p/json-simple/
+[2]: https://code.google.com/archive/p/json-simple/downloads
