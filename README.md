@@ -17,16 +17,16 @@ The directory provides a Java package for running the code.
 The package is placed inside the src/main folder. The directory structure is as follows:  
 Network-Design  
 ├───bin  
-│   ├───test  
-│   └───vrp  
+│       ├───test  
+│       └───vrp  
 ├───files  
-│   ├───input  
-│   ├───interface  
-│   ├───output  
+│       ├───input  
+│       ├───interface  
+│       ├───output  
 └───src  
-    ├───main  
-    │   └───vrp  
-    └───test  
+        ├───main  
+        │       └───vrp  
+        └───test  
 
 The source code is placed in main/vrp/ and the compiled .CLASS files are placed in bin/vrp/.  
 
