@@ -36,15 +36,37 @@ The python library dependencies are mentioned in the requirements.txt file.
 Also the project makes use of making a server side application that can be called from a http call using a JSON object. For the integration of JSON with Java, [JSON Simple][1] has been used. The jar file can be downloaded from [here][2] and added in the external JARs option in Eclipse.  
 
 ## Usage
-1. A random test case can be generated using the following command:
+1. A random test case can be generated using the following command:  
 ```py generate.py``` [On Windows]  
 ```python generate.py``` [On Linux]  
 2. The generated input file is located at ./files/input/custom/generated.dat by default.  
 3. Providing this filename as an argument to the main() method of the Main Class, the project is run on Eclipse IDE.
 4. The output solution is sent to ./files/output/solution.txt by default.
-5. The resulting final solution can be visualaized using the following command:
+5. The resulting final solution can be visualized using the following command:  
 ```py display.py``` [On Windows]  
 ```python display.py``` [On Linux]  
+  
+### JSON Format Structure
+The input JSON object to the java code must be in the following format:  
+```
+{
+        "coordinates" : [
+                // Array of coordinate objects
+                {
+                        "x" : 1, "y" : 2,
+                },
+                ...
+        ],
+        "customers" : [
+                // Array of customer objects
+                {
+                        "id" : 2,
+                        "demand" : 100,
+                },
+                ...
+        ],
+}
+```
 
 ## Assumptions
 1. The goods are to be delivered in a to tier hierarchy. First, the level 1 vehicles shall take the goods to certain carparks, where the goods shall be transferred into the smaller vehicles. These smaller vehicles shall deliver the goods to the customers.
