@@ -15,6 +15,7 @@ This process of improvement and perturbation is iterated several times, so as to
 ## Structure
 The directory provides a Java package for running the code.  
 The package is placed inside the src/main folder. The directory structure is as follows:  
+```
 Network-Design  
 ├───bin  
 │       ├───test  
@@ -27,7 +28,7 @@ Network-Design
         ├───main  
         │       └───vrp  
         └───test  
-
+```
 The source code is placed in main/vrp/ and the compiled .CLASS files are placed in bin/vrp/.  
 
 ## Dependencies
