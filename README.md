@@ -36,14 +36,20 @@ The package uses Java as the primary language for algorithms, and Python 3 as a 
 The python library dependencies are mentioned in the requirements.txt file.  
 Also the project makes use of making a server side application that can be called from a http call using a JSON object. For the integration of JSON with Java, [JSON Simple][1] has been used. The jar file can be downloaded from [here][2] and added in the external JARs option in Eclipse.  
 
-## Usage
-1. A random test case can be generated using the following command:  
+## Setup
+1. Install the required python 3 libraries using:  
+```py -m pip install -r requirements.txt```  
+2. Download the json-simple-1.1.1.jar from the source mentioned in the previous section and add the path of JAR file to the Build Path of the Eclpise Project. 
+3. A random test case can be generated using the following command:
 ```py generate.py``` [On Windows]  
 ```python generate.py``` [On Linux]  
-2. The generated input file is located at ./files/input/custom/generated.dat by default.  
-3. Providing this filename as an argument to the main() method of the Main Class, the project is run on Eclipse IDE.
-4. The output solution is sent to ./files/output/solution.txt by default.
-5. The resulting final solution can be visualized using the following command:  
+4. The generated input file is located at ./files/input/custom/generated.dat by default.  
+
+
+## Usage
+1. Providing the filename of the input file as an argument to the main() method of the Main Class, the project is run on Eclipse IDE.
+2. The output solution is sent to ./files/output/solution.txt by default.
+3. The resulting final solution can be visualaized using the following command:
 ```py display.py``` [On Windows]  
 ```python display.py``` [On Linux]  
   
