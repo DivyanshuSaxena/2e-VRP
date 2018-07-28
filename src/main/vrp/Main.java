@@ -14,7 +14,7 @@ class Main {
     static Vector<Vehicle> routedCarparks;
     static Scanner sc;
 
-    public static void initiate(String args[]) throws IOException {
+    public static void main(String args[]) throws IOException {
         // The Method reads the inputs from a file and initializes the data structures
         String filename = args[0];
         File file = new File(filename);

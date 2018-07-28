@@ -37,13 +37,15 @@ The python library dependencies are mentioned in the requirements.txt file.
 Also the project makes use of making a server side application that can be called from a http call using a JSON object. For the integration of JSON with Java, [JSON Simple][1] has been used. The jar file can be downloaded from [here][2] and added in the external JARs option in Eclipse.  
 
 ## Usage
-1. A random test case can be generated using the following command:
+1. Install the required python 3 libraries using:  
+```py -m pip install -r requirements.txt```  
+2. A random test case can be generated using the following command:
 ```py generate.py``` [On Windows]  
 ```python generate.py``` [On Linux]  
-2. The generated input file is located at ./files/input/custom/generated.dat by default.  
-3. Providing this filename as an argument to the main() method of the Main Class, the project is run on Eclipse IDE.
-4. The output solution is sent to ./files/output/solution.txt by default.
-5. The resulting final solution can be visualaized using the following command:
+3. The generated input file is located at ./files/input/custom/generated.dat by default.  
+4. Providing this filename as an argument to the main() method of the Main Class, the project is run on Eclipse IDE.
+5. The output solution is sent to ./files/output/solution.txt by default.
+6. The resulting final solution can be visualaized using the following command:
 ```py display.py``` [On Windows]  
 ```python display.py``` [On Linux]  
 
