@@ -57,6 +57,9 @@ Also the project makes use of making a server side application that can be calle
 The input JSON object to the java code must be in the following format:  
 ```
 {
+        "l1cap" : 1000,
+        "l2cap" : 200,
+        "numVehicles1" : 10
         "coordinates" : [
                 // Array of coordinate objects
                 {
@@ -87,12 +90,14 @@ The input JSON object to the java code must be in the following format:
 - [X] Check for larger test cases - Appropriate input format for the test cases of set 2, set 3, etc.
 - [X] Change nodesDistances[][] to double[][].
 - [X] Python Code to generate random test cases and plot them for visualization.
-- [ ] Implement Route Removal and Route Redistribution for perturbation.
+- [X] Implement Route Removal and Route Redistribution for perturbation.
 - [ ] Local Search for first level vehicles.
 - [ ] Making new choices for the location of first level vehicles.
+- [ ] Separate the functionalities of generate.py and nodecluster.py
 - [ ] Implement restrictions on the number of vehicles available in a carparks.
 - [ ] Separate out the test case files in a separate src/test/ folder 
-- [ ] Code clean-up for private and public access modifiers of functions.
+- [ ] Code clean-up for private and public access modifiers of functions.  
+- [ ] Java-Python Integration for calling cluster functions OR Use clustering methods from Java.
 
 [1]: https://code.google.com/archive/p/json-simple/
 [2]: https://code.google.com/archive/p/json-simple/downloads

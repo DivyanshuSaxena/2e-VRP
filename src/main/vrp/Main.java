@@ -11,7 +11,7 @@ class Main {
     static int numCustomers, numNodes, numCarpark;
     static int numVehicles1, numVehicles2;
     static int l1cap, l2cap;
-    static int x_coord[], y_coord[];
+    static Vector<Integer> x_coord, y_coord;
     static double nodesDistance[][];
     static Customer customers[];
     static Carpark carparks[];
@@ -33,14 +33,27 @@ class Main {
     public static void parseJSON(JSONObject json) throws IOException {
         JSONParser parser = new JSONParser();
         try {
+            // Constants
+            l1cap = Integer.parseInt(json.get("l1cap").toString());
+            l2cap = Integer.parseInt(json.get("l2cap").toString());
+            numVehicles1 = Integer.parseInt(json.get("numVehicles1").toString());
+            numVehicles2 = Integer.parseInt(json.get("numVehicles2").toString());
+
             // Get coordinates
             JSONArray coordinates = (JSONArray) parser.parse(json.get("coordinates").toString());
             Iterator<JSONObject> coordIterator = coordinates.iterator();
             while (coordIterator.hasNext()) {
                 JSONObject coord = (JSONObject) coordIterator.next();
                 int index = Integer.parseInt(coord.get("id").toString());
-                x_coord[index] = Integer.parseInt(coord.get("x").toString());
-                y_coord[index] = Integer.parseInt(coord.get("y").toString());
+                int x = Integer.parseInt(coord.get("x").toString());
+                int y = Integer.parseInt(coord.get("y").toString());
+                if (index <= x_coord.size()) {
+                    x_coord.add(index, x);
+                    y_coord.add(index, y);
+                } else {
+                    x_coord.add(x);
+                    y_coord.add(y);
+                }
             }
 
             // Get Customers
@@ -56,6 +69,7 @@ class Main {
             }
 
             // Miscellaneous Constants and call Python file
+            numCustomers = Main.customers.length;
             
             solve();
         } catch (ParseException e) {
@@ -95,7 +109,7 @@ class Main {
         }
         long endTime = System.currentTimeMillis();
         Solution finalSolution = bestSolution.getSolution();
-        System.out.println("Final Solution : " + finalSolution + " cost " + bestSolution.cost);
+        System.out.println("Final Solution : " + finalSolution + " cost " + bestSolution.cost);        
         System.out.println("Running time : " + (endTime-startTime));
         sc.close();
 
@@ -214,31 +228,37 @@ class Main {
         carparks = new Carpark[numCarpark];
 
         // Creation of distances matrix from the input file
-        x_coord = new int[numNodes];
-        y_coord = new int[numNodes];
+        x_coord = new Vector<Integer>(numNodes);
+        y_coord = new Vector<Integer>(numNodes);
+        x_coord.setSize(numNodes);
+        y_coord.setSize(numNodes);
         for (int i = 0; i <= numCustomers; i++) {
             sc.nextInt(); // Node Number
             if (i == 0) {
-                x_coord[i] = sc.nextInt();
-                y_coord[i] = sc.nextInt();
+                x_coord.set(0, sc.nextInt());
+                y_coord.set(0, sc.nextInt());
             } else {
-                x_coord[i+numCarpark] = sc.nextInt();
-                y_coord[i+numCarpark] = sc.nextInt();                
+                x_coord.set(i+numCarpark, sc.nextInt());
+                y_coord.set(i+numCarpark, sc.nextInt());                
             }
         }
         sc.nextLine(); // Empty Line
         sc.nextLine(); // Satellite Section
         for (int i = 0; i < numCarpark; i++) {
             sc.nextInt(); // Node Number
-            x_coord[i+1] = sc.nextInt();
-            y_coord[i+1] = sc.nextInt();
+            x_coord.set(i+1, sc.nextInt());
+            y_coord.set(i+1, sc.nextInt());
             carparks[i] = new Carpark();
             carparks[i].setId(i+1);
         }
         sc.nextLine(); // Empty Line
         for (int i = 0; i < numNodes; i++) {
             for (int j = i+1; j < numNodes; j++) {
-                nodesDistance[i][j] = Math.sqrt((x_coord[i]-x_coord[j])*(x_coord[i]-x_coord[j]) + (y_coord[i]-y_coord[j])*(y_coord[i]-y_coord[j]));
+                int xcoordi = x_coord.elementAt(i);
+                int xcoordj = x_coord.elementAt(j);
+                int ycoordi = y_coord.elementAt(i);
+                int ycoordj = y_coord.elementAt(j);
+                nodesDistance[i][j] = Math.sqrt((xcoordi-xcoordj)*(xcoordi-xcoordj) + (ycoordi-ycoordj)*(ycoordi-ycoordj));
                 nodesDistance[j][i] = nodesDistance[i][j];
             }
         }
@@ -252,6 +272,86 @@ class Main {
             customers[i-1].setId(i+numCarpark);
             int demand = Integer.parseInt(sc.nextLine().split(" ")[1]);
             customers[i-1].setDemand(demand);            
+        }
+    }
+    public static void recluster(Vector<Integer> customers) throws IOException {
+        double bandwidth = 180;
+        PrintWriter pWriter = new PrintWriter("./files/interface/input.txt", "UTF-8");
+        pWriter.println(bandwidth);
+        for (int cust : customers) {
+            pWriter.println(x_coord.elementAt(cust-numCarpark-1) + " " + y_coord.elementAt(cust-numCarpark-1));
+        }
+        pWriter.close();
+
+        // Run Node Cluster
+		String command = "cmd /c py ./files/nodecluster.py --eclipse";
+	    Process p = Runtime.getRuntime().exec(command);
+	    try {
+			p.waitFor();
+			BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			BufferedReader bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+			String line;
+			while ((line = bri.readLine()) != null) {
+				System.out.println(line);
+			}
+			bri.close();
+			while ((line = bre.readLine()) != null) {
+				System.out.println(line);
+			}
+			bre.close();
+			p.waitFor();
+			System.out.println("Done.");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	    p.destroy();
+
+        File file = new File("files/interface/output.txt");
+        Scanner intermediate = new Scanner(file);
+        intermediate.nextLine();
+        int prevNumCarpark = numCarpark;
+        numCarpark = intermediate.nextInt();
+        numNodes = numCarpark + numCustomers + 1;
+        carparks = new Carpark[numCarpark];
+        Vector<Integer> cpx_coord = new Vector<Integer>();
+        Vector<Integer> cpy_coord = new Vector<Integer>();
+        for (int i = 0; i < numCarpark; i++) {
+            cpx_coord.add(intermediate.nextInt());
+            cpy_coord.add(intermediate.nextInt());
+            carparks[i] = new Carpark();
+            carparks[i].setId(i+1);
+        }
+        intermediate.close();
+
+        // Add temporary vectors
+        Vector<Integer> xcoord_temp = new Vector<Integer>();
+        Vector<Integer> ycoord_temp = new Vector<Integer>();
+        xcoord_temp.addAll(x_coord);
+        ycoord_temp.addAll(y_coord);
+        
+        // Re-initialize global vectors
+        x_coord = new Vector<Integer>();
+        y_coord = new Vector<Integer>();
+        nodesDistance = new double[numNodes][numNodes];
+        
+        x_coord.add(xcoord_temp.elementAt(0));
+        y_coord.add(ycoord_temp.elementAt(0));
+        x_coord.addAll(cpx_coord);
+        y_coord.addAll(cpy_coord);
+        for (int i = prevNumCarpark+1; i < xcoord_temp.size(); i++) {
+            x_coord.add(xcoord_temp.elementAt(i));
+            y_coord.add(ycoord_temp.elementAt(i));
+        }
+        for (int i = 0; i < numNodes; i++) {
+        	if (i > numCarpark) {
+        		Main.customers[i-numCarpark-1].setId(i);
+        	}
+            for (int j = i+1; j < numNodes; j++) {
+                int xcoordi = x_coord.elementAt(i), xcoordj = x_coord.elementAt(j);
+                int ycoordi = y_coord.elementAt(i), ycoordj = y_coord.elementAt(j);
+                nodesDistance[i][j] = Math.sqrt((xcoordi-xcoordj)*(xcoordi-xcoordj) + (ycoordi-ycoordj)*(ycoordi-ycoordj));
+                nodesDistance[j][i] = nodesDistance[i][j];
+            }
         }
     }
     public static Solution getInitialSoln() {
