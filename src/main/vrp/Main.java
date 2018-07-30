@@ -57,6 +57,7 @@ class Main {
             }
 
             // Get Customers
+            Vector<Integer> customerPool = new Vector<Integer>();
             JSONArray customers = (JSONArray) parser.parse(json.get("customers").toString());
             Iterator<JSONObject> custIterator = customers.iterator();
             while (custIterator.hasNext()) {
@@ -64,14 +65,15 @@ class Main {
                 Customer cust = new Customer();
                 int id = Integer.parseInt(customer.get("id").toString());
                 cust.setId(id);
+                customerPool.add(id);
                 cust.setDemand(Integer.parseInt(customer.get("demand").toString()));
                 Main.customers[id] = cust;
             }
 
             // Miscellaneous Constants and call Python file
             numCustomers = Main.customers.length;
-            
-            solve();
+            Main.cluster(customerPool);
+            Main.solve();
         } catch (ParseException e) {
             // Send response of trying again
         }
@@ -129,7 +131,7 @@ class Main {
 
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
 
-        // Call the Python script
+        // Call the Python script to display the results
         String command = "cmd /c py ./files/display.py --eclipse";
         Process p = Runtime.getRuntime().exec(command);
         try {
@@ -274,12 +276,11 @@ class Main {
             customers[i-1].setDemand(demand);            
         }
     }
-    public static void recluster(Vector<Integer> customers) throws IOException {
-        double bandwidth = 180;
+    public static void cluster(Vector<Integer> customers) throws IOException {
         PrintWriter pWriter = new PrintWriter("./files/interface/input.txt", "UTF-8");
-        pWriter.println(bandwidth);
+        // pWriter.println(bandwidth);
         for (int cust : customers) {
-            pWriter.println(x_coord.elementAt(cust-numCarpark-1) + " " + y_coord.elementAt(cust-numCarpark-1));
+            pWriter.println(x_coord.elementAt(cust-1) + " " + y_coord.elementAt(cust-1));
         }
         pWriter.close();
 
@@ -309,7 +310,6 @@ class Main {
         File file = new File("files/interface/output.txt");
         Scanner intermediate = new Scanner(file);
         intermediate.nextLine();
-        int prevNumCarpark = numCarpark;
         numCarpark = intermediate.nextInt();
         numNodes = numCarpark + numCustomers + 1;
         carparks = new Carpark[numCarpark];
@@ -338,7 +338,7 @@ class Main {
         y_coord.add(ycoord_temp.elementAt(0));
         x_coord.addAll(cpx_coord);
         y_coord.addAll(cpy_coord);
-        for (int i = prevNumCarpark+1; i < xcoord_temp.size(); i++) {
+        for (int i = 1; i < xcoord_temp.size(); i++) {
             x_coord.add(xcoord_temp.elementAt(i));
             y_coord.add(ycoord_temp.elementAt(i));
         }
