@@ -60,7 +60,7 @@ The input JSON object to the java code must be in the following format:
         "coordinates" : [
                 // Array of coordinate objects
                 {
-                        "x" : 1, "y" : 2,
+                        "x" : 1, "y" : 2, "id" : 1,
                 },
                 ...
         ],

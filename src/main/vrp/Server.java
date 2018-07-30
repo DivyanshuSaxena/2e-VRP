@@ -3,7 +3,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
@@ -28,14 +27,13 @@ class Server {
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(datain));
                 String inputString = in.readLine();
-                JSONArray array = (JSONArray) parser.parse(inputString);
-                
-
+                JSONObject json = (JSONObject) parser.parse(inputString);
+                // Call the parseJSON method in main method
                 datain.close();
                     
             } catch (IOException e) {
                 e.printStackTrace();			
-            } catch (JSONException e) {
+            } catch (ParseException e) {
                 System.out.println("Error in parsing JSON object.");
                 e.printStackTrace();
             }

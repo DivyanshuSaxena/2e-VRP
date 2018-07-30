@@ -3,6 +3,10 @@ package vrp;
 import java.util.*;
 import java.io.*;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.*;
+
 class Main {
     static int numCustomers, numNodes, numCarpark;
     static int numVehicles1, numVehicles2;
@@ -14,6 +18,7 @@ class Main {
     static Vector<Vehicle> routedCarparks;
     static Scanner sc;
 
+    // Change the name of this method suitably
     public static void main(String args[]) throws IOException {
         // The Method reads the inputs from a file and initializes the data structures
         String filename = args[0];
@@ -24,7 +29,40 @@ class Main {
         } else {
             setTwoInput();
         }
+    }
+    public static void parseJSON(JSONObject json) throws IOException {
+        JSONParser parser = new JSONParser();
+        try {
+            // Get coordinates
+            JSONArray coordinates = (JSONArray) parser.parse(json.get("coordinates").toString());
+            Iterator<JSONObject> coordIterator = coordinates.iterator();
+            while (coordIterator.hasNext()) {
+                JSONObject coord = (JSONObject) coordIterator.next();
+                int index = Integer.parseInt(coord.get("id").toString());
+                x_coord[index] = Integer.parseInt(coord.get("x").toString());
+                y_coord[index] = Integer.parseInt(coord.get("y").toString());
+            }
 
+            // Get Customers
+            JSONArray customers = (JSONArray) parser.parse(json.get("customers").toString());
+            Iterator<JSONObject> custIterator = customers.iterator();
+            while (custIterator.hasNext()) {
+                JSONObject customer = (JSONObject) custIterator.next();
+                Customer cust = new Customer();
+                int id = Integer.parseInt(customer.get("id").toString());
+                cust.setId(id);
+                cust.setDemand(Integer.parseInt(customer.get("demand").toString()));
+                Main.customers[id] = cust;
+            }
+
+            // Miscellaneous Constants and call Python file
+            
+            solve();
+        } catch (ParseException e) {
+
+        }
+    }
+    public static void solve() throws IOException {
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
         double initCost = initsol.getCost();
