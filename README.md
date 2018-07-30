@@ -40,7 +40,7 @@ Also the project makes use of making a server side application that can be calle
 1. Install the required python 3 libraries using:  
 ```py -m pip install -r requirements.txt```  
 2. Download the json-simple-1.1.1.jar from the source mentioned in the previous section and add the path of JAR file to the Build Path of the Eclpise Project. 
-3. A random test case can be generated using the following command:
+3. A random test case can be generated using the following command:  
 ```py generate.py``` [On Windows]  
 ```python generate.py``` [On Linux]  
 4. The generated input file is located at ./files/input/custom/generated.dat by default.  
@@ -49,7 +49,7 @@ Also the project makes use of making a server side application that can be calle
 ## Usage
 1. Providing the filename of the input file as an argument to the main() method of the Main Class, the project is run on Eclipse IDE.
 2. The output solution is sent to ./files/output/solution.txt by default.
-3. The resulting final solution can be visualaized using the following command:
+3. The resulting final solution can be visualaized using the following command:  
 ```py display.py``` [On Windows]  
 ```python display.py``` [On Linux]  
   
