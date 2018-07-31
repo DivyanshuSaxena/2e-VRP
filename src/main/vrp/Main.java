@@ -27,6 +27,7 @@ public class Main {
         } else {
             fileio.setTwoInput();
         }
+        solve();
     }
     public static void solve() throws IOException {
         long startTime = System.currentTimeMillis();
@@ -181,6 +182,8 @@ public class Main {
                 nodesDistance[j][i] = nodesDistance[i][j];
             }
         }
+
+        Main.solve();
     }
     public static Solution getInitialSoln() {
         // Finds the initial solution and places it in the static variable route.
