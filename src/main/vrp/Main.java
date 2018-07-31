@@ -113,7 +113,7 @@ public class Main {
         pWriter.close();
 
         // Run Node Cluster
-		String command = "cmd /c py ./files/nodecluster.py --eclipse";
+		String command = "cmd /c py ./files/nodecluster.py 1000 --eclipse";
 	    Process p = Runtime.getRuntime().exec(command);
 	    try {
 			p.waitFor();

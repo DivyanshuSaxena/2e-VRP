@@ -60,7 +60,9 @@ def main():
     """
     global ENV
     parser = argparse.ArgumentParser(description='Relative or Absolute Path')
+    parser.add_argument('max_range', type=int, help='maximum range of data points')
     parser.add_argument('--eclipse', action='store_true', help='calling environment')
+    parser.add_argument('--bandwidth', action='store_true', help='input file has custom bandwidth')
     args = parser.parse_args()
     print(args)
     if args.eclipse:
@@ -69,8 +71,13 @@ def main():
     else:
         file = open("./interface/input.txt","r")
         
-    get_bandwidth = False
-    bandwidth_ = 0
+    get_bandwidth = True
+    if args.bandwidth:
+        get_bandwidth = False
+        bandwidth_ = 0
+    else:
+        bandwidth_ = 0.2 * math.pow(1.414, -(density*density)) * args.max_range
+        
     coord = []
     for line in file:
         listLine = re.findall(r'[0-9]+', line)
