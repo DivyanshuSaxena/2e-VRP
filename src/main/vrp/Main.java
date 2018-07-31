@@ -1,20 +1,17 @@
-// File to take input from a text file, and run the algorithm
+// Entry Point for the Routing Problem
 package vrp;
 import java.util.*;
 import java.io.*;
+import io.*;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.*;
-
-class Main {
-    static int numCustomers, numNodes, numCarpark;
-    static int numVehicles1, numVehicles2;
-    static int l1cap, l2cap;
-    static Vector<Integer> x_coord, y_coord;
-    static double nodesDistance[][];
-    static Customer customers[];
-    static Carpark carparks[];
+public class Main {
+    public static int numCustomers, numNodes, numCarpark;
+    public static int numVehicles1, numVehicles2;
+    public static int l1cap, l2cap;
+    public static Vector<Integer> x_coord, y_coord;
+    public static double nodesDistance[][];
+    public static Customer customers[];
+    public static Carpark carparks[];
     static Vector<Vehicle> routedCarparks;
     static Scanner sc;
 
@@ -24,58 +21,11 @@ class Main {
         String filename = args[0];
         File file = new File(filename);
         sc = new Scanner(file);
+        Fileio fileio = new Fileio(sc);
         if (filename.contains("E-n13")) {
-            setOneInput();
+            fileio.setOneInput();
         } else {
-            setTwoInput();
-        }
-    }
-    public static void parseJSON(JSONObject json) throws IOException {
-        JSONParser parser = new JSONParser();
-        try {
-            // Constants
-            l1cap = Integer.parseInt(json.get("l1cap").toString());
-            l2cap = Integer.parseInt(json.get("l2cap").toString());
-            numVehicles1 = Integer.parseInt(json.get("numVehicles1").toString());
-            numVehicles2 = Integer.parseInt(json.get("numVehicles2").toString());
-
-            // Get coordinates
-            JSONArray coordinates = (JSONArray) parser.parse(json.get("coordinates").toString());
-            Iterator<JSONObject> coordIterator = coordinates.iterator();
-            while (coordIterator.hasNext()) {
-                JSONObject coord = (JSONObject) coordIterator.next();
-                int index = Integer.parseInt(coord.get("id").toString());
-                int x = Integer.parseInt(coord.get("x").toString());
-                int y = Integer.parseInt(coord.get("y").toString());
-                if (index <= x_coord.size()) {
-                    x_coord.add(index, x);
-                    y_coord.add(index, y);
-                } else {
-                    x_coord.add(x);
-                    y_coord.add(y);
-                }
-            }
-
-            // Get Customers
-            Vector<Integer> customerPool = new Vector<Integer>();
-            JSONArray customers = (JSONArray) parser.parse(json.get("customers").toString());
-            Iterator<JSONObject> custIterator = customers.iterator();
-            while (custIterator.hasNext()) {
-                JSONObject customer = (JSONObject) custIterator.next();
-                Customer cust = new Customer();
-                int id = Integer.parseInt(customer.get("id").toString());
-                cust.setId(id);
-                customerPool.add(id);
-                cust.setDemand(Integer.parseInt(customer.get("demand").toString()));
-                Main.customers[id] = cust;
-            }
-
-            // Miscellaneous Constants and call Python file
-            numCustomers = Main.customers.length;
-            Main.cluster(customerPool);
-            Main.solve();
-        } catch (ParseException e) {
-            // Send response of trying again
+            fileio.setTwoInput();
         }
     }
     public static void solve() throws IOException {
@@ -153,128 +103,6 @@ class Main {
             e.printStackTrace();
         }
         p.destroy();
-    }
-    public static void setOneInput() {
-        // Input parameters form the input file
-        sc.nextLine(); // Name
-        sc.nextLine(); // Comment
-        sc.nextLine(); // Type
-        numNodes = Integer.parseInt(sc.nextLine().split(" ")[2]); //Dimension 
-        numCarpark = Integer.parseInt(sc.nextLine().split(" ")[2]); // Satellites
-        numCustomers = Integer.parseInt(sc.nextLine().split(" ")[2]); // Customers
-
-        sc.nextLine(); // Edge Weight Type
-        sc.nextLine(); // Fleet Section
-        l1cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L1 Cap
-        l2cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L2 Cap
-
-        numVehicles1 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L1 Fleet
-        numVehicles2 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L2 Fleet
-        
-        sc.nextLine(); // Edge Weight Section
-        nodesDistance = new double[numNodes][numNodes];
-        customers = new Customer[numCustomers];
-        carparks = new Carpark[numCarpark];
-
-        // Creation of distances matrix from the input file
-        for (int i = 0; i < numNodes; i++) {
-            for (int j = 0; j < numNodes; j++) {
-                if (i != j) nodesDistance[i][j] = sc.nextInt();
-                else {
-                    sc.nextInt();
-                    nodesDistance[i][j] = 0;
-                }
-            }
-        }
-        // Empty Lines
-        sc.nextLine();
-        sc.nextLine();
-        // Initialization of the customer array 
-        sc.nextLine(); // Demand Section
-        sc.nextLine(); // Demand of Main Depot	
-        for(int i = 1; i < numNodes; i++) {
-            // i = 0 is reserved for the main depot
-            if (i <= numCarpark) {
-            	sc.nextLine(); // Demand of ith carpark 
-                carparks[i-1] = new Carpark();
-                carparks[i-1].setId(i);
-            } else {
-                int offset = numCarpark + 1;
-                customers[i-offset] = new Customer();
-                customers[i-offset].setId(i);
-                int demand = Integer.parseInt(sc.nextLine().split(" ")[1]);
-                customers[i-offset].setDemand(demand);            
-            }
-        }
-    }
-    public static void setTwoInput() {
-        // Input parameters form the input file
-        sc.nextLine(); // Name
-        sc.nextLine(); // Comment
-        sc.nextLine(); // Type
-        numNodes = Integer.parseInt(sc.nextLine().split(" ")[2]); //Dimension 
-        numCarpark = Integer.parseInt(sc.nextLine().split(" ")[2]); // Satellites
-        numCustomers = Integer.parseInt(sc.nextLine().split(" ")[2]); // Customers
-
-        sc.nextLine(); // Edge Weight Type
-        sc.nextLine(); // Fleet Section
-        l1cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L1 Cap
-        l2cap = Integer.parseInt(sc.nextLine().split(" ")[2]); // L2 Cap
-
-        numVehicles1 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L1 Fleet
-        numVehicles2 = Integer.parseInt(sc.nextLine().split(" ")[1]); // L2 Fleet
-        
-        sc.nextLine(); // Node Coord Section
-        nodesDistance = new double[numNodes][numNodes];
-        customers = new Customer[numCustomers];
-        carparks = new Carpark[numCarpark];
-
-        // Creation of distances matrix from the input file
-        x_coord = new Vector<Integer>(numNodes);
-        y_coord = new Vector<Integer>(numNodes);
-        x_coord.setSize(numNodes);
-        y_coord.setSize(numNodes);
-        for (int i = 0; i <= numCustomers; i++) {
-            sc.nextInt(); // Node Number
-            if (i == 0) {
-                x_coord.set(0, sc.nextInt());
-                y_coord.set(0, sc.nextInt());
-            } else {
-                x_coord.set(i+numCarpark, sc.nextInt());
-                y_coord.set(i+numCarpark, sc.nextInt());                
-            }
-        }
-        sc.nextLine(); // Empty Line
-        sc.nextLine(); // Satellite Section
-        for (int i = 0; i < numCarpark; i++) {
-            sc.nextInt(); // Node Number
-            x_coord.set(i+1, sc.nextInt());
-            y_coord.set(i+1, sc.nextInt());
-            carparks[i] = new Carpark();
-            carparks[i].setId(i+1);
-        }
-        sc.nextLine(); // Empty Line
-        for (int i = 0; i < numNodes; i++) {
-            for (int j = i+1; j < numNodes; j++) {
-                int xcoordi = x_coord.elementAt(i);
-                int xcoordj = x_coord.elementAt(j);
-                int ycoordi = y_coord.elementAt(i);
-                int ycoordj = y_coord.elementAt(j);
-                nodesDistance[i][j] = Math.sqrt((xcoordi-xcoordj)*(xcoordi-xcoordj) + (ycoordi-ycoordj)*(ycoordi-ycoordj));
-                nodesDistance[j][i] = nodesDistance[i][j];
-            }
-        }
-
-        // Initialization of the customer array 
-        sc.nextLine(); // Demand Section
-        sc.nextLine(); // Demand of Main Depot	
-        for(int i = 1; i <= numCustomers; i++) {
-            // i = 0 is reserved for the main depot
-            customers[i-1] = new Customer();
-            customers[i-1].setId(i+numCarpark);
-            int demand = Integer.parseInt(sc.nextLine().split(" ")[1]);
-            customers[i-1].setDemand(demand);            
-        }
     }
     public static void cluster(Vector<Integer> customers) throws IOException {
         PrintWriter pWriter = new PrintWriter("./files/interface/input.txt", "UTF-8");

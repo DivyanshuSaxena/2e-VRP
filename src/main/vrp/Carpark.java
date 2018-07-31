@@ -5,21 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Stack;
 import java.util.Vector;
 
-// Class for the representation of the customers
-class Customer {
-    int id; // This id is the id of the customer as in the overall nodes (This must be used for getting the distances).        
-    int demand;
-    int assignedPark; // This is the id of the carpark object that is assigned to this customer.
-    boolean hasCar;  // Has not been used yet
-    public void setId(int id) {
-        this.id = id;
-    }
-    public void setDemand(int demand) {
-        this.demand = demand;
-    }
-}
-
-class Carpark {
+public class Carpark {
     // This id is the id of the car park as in the overall nodes (This must be used for getting the distances)
     int id; 
     Vector<Customer> customers;
