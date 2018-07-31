@@ -52,7 +52,7 @@ public class Server {
             System.out.println(i);
         }
     }
-    public static void parseJSON(JSONObject json) throws IOException {
+    public void parseJSON(JSONObject json) throws IOException {
         JSONParser parser = new JSONParser();
         try {
             // Constants
@@ -99,6 +99,14 @@ public class Server {
             Main.constructJSON(Main.solve());
         } catch (ParseException e) {
             // Send response of trying again
+        }
+    }
+    public void sendJSON(JSONObject json) {
+        try {
+            OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
+            out.write(json.toString());
+        } catch (IOException e) {
+            // Try again to send the data
         }
     }
 }
