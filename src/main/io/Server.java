@@ -32,7 +32,7 @@ public class Server {
                 BufferedReader in = new BufferedReader(new InputStreamReader(datain));
                 String inputString = in.readLine();
                 JSONObject json = (JSONObject) parser.parse(inputString);
-                // Call the parseJSON method in main method
+                // Call the parseJSON method 
                 parseJSON(json);
                 datain.close();
                     
@@ -94,8 +94,9 @@ public class Server {
 
             // Miscellaneous Constants and call Python file
             Main.numCustomers = Main.customers.length;
+            // Cluster and then solve the results
             Main.cluster(customerPool);
-            Main.solve();
+            Main.constructJSON(Main.solve());
         } catch (ParseException e) {
             // Send response of trying again
         }

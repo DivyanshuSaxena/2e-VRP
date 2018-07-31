@@ -1,8 +1,12 @@
 // Entry Point for the Routing Problem
 package vrp;
+
 import java.util.*;
 import java.io.*;
 import io.*;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class Main {
     public static int numCustomers, numNodes, numCarpark;
@@ -12,7 +16,7 @@ public class Main {
     public static double nodesDistance[][];
     public static Customer customers[];
     public static Carpark carparks[];
-    static Vector<Vehicle> routedCarparks;
+    static Vector<Vehicle> vehicles;
     static Scanner sc;
 
     // Change the name of this method suitably
@@ -29,7 +33,54 @@ public class Main {
         }
         solve();
     }
-    public static void solve() throws IOException {
+    public static JSONObject constructJSON(Solution solution) {
+        JSONObject object = new JSONObject();
+        JSONArray vehicles = new JSONArray();
+        Vector<Integer> vehicleIndices = new Vector<Integer>();
+
+        for (Route firstLevel : solution.routes) {
+            JSONObject level1vehicle = new JSONObject();
+            JSONArray level1route = new JSONArray();
+            for (int node : firstLevel.route) {
+                if (node == 0) {
+                    level1route.add(node);
+                } else {
+                    int cp = Main.vehicles.elementAt(node-Main.numNodes).cpindex;
+                    vehicleIndices.add(node-Main.numNodes);
+                    level1route.add(cp);
+                }
+            }
+            level1vehicle.put("route", level1route);
+            level1vehicle.put("type", new Integer(1));
+            level1vehicle.put("cost", new Double(firstLevel.routeCost));
+
+            vehicles.add(level1vehicle);
+        }
+
+        for (int i : vehicleIndices) {
+            Vehicle vehicle = Main.vehicles.elementAt(i);
+            JSONObject level2vehicle = new JSONObject();
+            JSONArray level2route = new JSONArray();
+            for (int node : vehicle.route.route) {
+                if (node <= Main.numCarpark) {
+                    int cp = Main.vehicles.elementAt(node-Main.numNodes).cpindex;
+                    level2route.add(cp);
+                } else {
+                    level2route.add(node-Main.numCarpark);
+                }
+            }
+            level2vehicle.put("route", level2route);
+            level2vehicle.put("type", new Integer(2));
+            level2vehicle.put("cost", new Double(vehicle.route.routeCost));
+
+            vehicles.add(level2vehicle);
+        }
+
+        object.put("vehicles", vehicles);
+        object.put("cost", new Double(solution.getCost()));
+        return object;
+    }
+    public static Solution solve() throws IOException {
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
         double initCost = initsol.getCost();
@@ -104,6 +155,8 @@ public class Main {
             e.printStackTrace();
         }
         p.destroy();
+
+        return finalSolution;
     }
     public static void cluster(Vector<Integer> customers) throws IOException {
         PrintWriter pWriter = new PrintWriter("./files/interface/input.txt", "UTF-8");
@@ -267,13 +320,13 @@ public class Main {
 
         // Decompose the carparks into Vehicles for each route
         Vector<Integer> vehicles = new Vector<Integer>();
-        Main.routedCarparks = new Vector<Vehicle>();
+        Main.vehicles = new Vector<Vehicle>();
         int temp = Main.numNodes;
         for (int id : carparksLevel1) {
             for (Route route : carparks[id-1].routes) {
                 Vehicle rc = new Vehicle(id, route);
                 vehicles.add(temp);
-                Main.routedCarparks.add(rc);
+                Main.vehicles.add(rc);
                 temp++;
             }
         }
@@ -307,10 +360,10 @@ public class Main {
                 int secondo1 = o1.route.elementAt(2);
                 int secondo2 = o2.route.elementAt(2);
                 // Watch out for temporary carparks
-                if (firsto1 >= Main.numNodes) firsto1 = Main.routedCarparks.elementAt(firsto1-Main.numNodes).cpindex;
-                if (secondo1 >= Main.numNodes) secondo1 = Main.routedCarparks.elementAt(secondo1-Main.numNodes).cpindex;
-                if (firsto2 >= Main.numNodes) firsto2 = Main.routedCarparks.elementAt(firsto2-Main.numNodes).cpindex;
-                if (secondo2 >= Main.numNodes) secondo2 = Main.routedCarparks.elementAt(secondo2-Main.numNodes).cpindex;
+                if (firsto1 >= Main.numNodes) firsto1 = Main.vehicles.elementAt(firsto1-Main.numNodes).cpindex;
+                if (secondo1 >= Main.numNodes) secondo1 = Main.vehicles.elementAt(secondo1-Main.numNodes).cpindex;
+                if (firsto2 >= Main.numNodes) firsto2 = Main.vehicles.elementAt(firsto2-Main.numNodes).cpindex;
+                if (secondo2 >= Main.numNodes) secondo2 = Main.vehicles.elementAt(secondo2-Main.numNodes).cpindex;
                 double savings1 = nodesDistance[depot][firsto1] + nodesDistance[depot][secondo1] - nodesDistance[firsto1][secondo1];
                 double savings2 = nodesDistance[depot][firsto2] + nodesDistance[depot][secondo2] - nodesDistance[firsto2][secondo2];
                 if (savings1 > savings2 ) {
@@ -351,9 +404,9 @@ public class Main {
                 	// Remove the demand of the common customer
                     int commonDemand = 0;
                     if (positionOfStart == -2) {
-                        commonDemand = ((bestStart >= Main.numNodes)? Main.routedCarparks.elementAt(bestStart-Main.numNodes).route.demand : Main.customers[bestStart-numCarpark-1].demand);
+                        commonDemand = ((bestStart >= Main.numNodes)? Main.vehicles.elementAt(bestStart-Main.numNodes).route.demand : Main.customers[bestStart-numCarpark-1].demand);
                     } else {
-                        commonDemand = ((bestEnd >= Main.numNodes)? Main.routedCarparks.elementAt(bestEnd-Main.numNodes).route.demand : Main.customers[bestEnd-numCarpark-1].demand);                        
+                        commonDemand = ((bestEnd >= Main.numNodes)? Main.vehicles.elementAt(bestEnd-Main.numNodes).route.demand : Main.customers[bestEnd-numCarpark-1].demand);                        
                     }
                 	if (newRoute.route.size() == 0) {
                 		if ((bestSavings.demand + currRoute.demand - commonDemand) <= capacity) {
