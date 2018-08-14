@@ -27,7 +27,10 @@ class Route {
         Route clonedRoute = new Route();
         clonedRoute.routeCost = this.routeCost;
         clonedRoute.demand = this.demand;
-        clonedRoute.route = (Vector<Integer>) this.route.clone();
+        
+        @SuppressWarnings("unchecked")
+		Vector<Integer> clone = (Vector<Integer>) this.route.clone();
+		clonedRoute.route = clone;
         return clonedRoute;
     }
     public void addCustomer(int id) {
@@ -156,7 +159,10 @@ class Route {
         Route merged = new Route();
         int startCust = this.route.elementAt(1);
         int endCust = this.route.elementAt(this.route.size()-2);
-        Vector<Integer> thisRoute = (Vector<Integer>) this.route.clone();
+        
+        @SuppressWarnings("unchecked")
+		Vector<Integer> clone = (Vector<Integer>) this.route.clone();
+		Vector<Integer> thisRoute = clone;
         if (endCust == r.route.elementAt(1)) {
             thisRoute.remove(thisRoute.size()-1);
             merged.addAllCustomers(thisRoute, 0); // Add the current route

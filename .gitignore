@@ -25,6 +25,7 @@ hs_err_pid*
 
 # vscode
 .vscode/*
+.metadata/
 
 # output
 output/*

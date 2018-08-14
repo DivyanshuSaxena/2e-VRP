@@ -39,6 +39,8 @@ public class Solution implements Iterable<CustomerIndex> {
     public Iterator<CustomerIndex> iterator() {
         return new SolutionIterator(this);
     }
+
+    // Access Methods
     public GiantRoute getGiantRoute() {
         GiantRoute gr = new GiantRoute();
         Vector<Integer> giantRoute = new Vector<Integer>();
@@ -136,6 +138,10 @@ public class Solution implements Iterable<CustomerIndex> {
         if (index == Main.vehicles.size())  return 0;
         return index;
     }
+
+    // First Level Methods
+    
+    // Second Level Methods
     private boolean moveOperator(CustomerIndex ci) {
         boolean improvement = false;
         Route clonedRoute = Main.vehicles.elementAt(ci.routecp-Main.numNodes).route; // Index of the selected vehicle
@@ -177,7 +183,6 @@ public class Solution implements Iterable<CustomerIndex> {
         boolean improvement = false;
         SwapCostType swapCostType = getSwapCost(ci1,ci2);
         double swapCost = swapCostType.swapCost;
-        int type = swapCostType.type;
         if (this.solutionCost > swapCost) {
             // Swap the two customers
             // System.out.println("Found lower cost : " + swapCost + " and type : " + type); // Debug

@@ -3,6 +3,7 @@ package vrp;
 
 import java.util.*;
 import java.io.*;
+
 import io.*;
 
 import org.json.simple.JSONArray;
@@ -33,7 +34,8 @@ public class Main {
         }
         solve();
     }
-    public static JSONObject constructJSON(Solution solution) {
+    @SuppressWarnings("unchecked")
+	public static JSONObject constructJSON(Solution solution) {
         JSONObject object = new JSONObject();
         JSONArray vehicles = new JSONArray();
         Vector<Integer> vehicleIndices = new Vector<Integer>();

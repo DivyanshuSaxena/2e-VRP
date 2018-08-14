@@ -52,7 +52,8 @@ public class Server {
             System.out.println(i);
         }
     }
-    public void parseJSON(JSONObject json) throws IOException {
+    @SuppressWarnings("unchecked")
+	public void parseJSON(JSONObject json) throws IOException {
         JSONParser parser = new JSONParser();
         try {
             // Constants

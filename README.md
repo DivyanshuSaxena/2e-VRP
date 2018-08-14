@@ -93,10 +93,10 @@ The input JSON object to the java code must be in the following format:
 - [X] Implement Route Removal and Route Redistribution for perturbation.
 - [ ] Local Search for first level vehicles.
 - [ ] Making new choices for the location of first level vehicles.
-- [ ] Separate the functionalities of generate.py and nodecluster.py
-- [ ] Implement restrictions on the number of vehicles available in a carparks.
-- [ ] Separate out the test case files in a separate src/test/ folder 
-- [ ] Code clean-up for private and public access modifiers of functions.  
+- [X] Separate the functionalities of generate.py and nodecluster.py
+- [X] Implement restrictions on the number of vehicles available in a carparks.
+- [X] Separate out the test case files in a separate src/test/ folder 
+- [X] Code clean-up for private and public access modifiers of functions.  
 - [ ] Java-Python Integration for calling cluster functions OR Use clustering methods from Java.
 
 [1]: https://code.google.com/archive/p/json-simple/
