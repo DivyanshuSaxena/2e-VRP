@@ -96,7 +96,7 @@ public class Server {
             // Miscellaneous Constants and call Python file
             Main.numCustomers = Main.customers.length;
             // Cluster and then solve the results
-            Main.cluster(customerPool);
+            Cluster.cluster(customerPool);
             Main.constructJSON(Main.solve());
         } catch (ParseException e) {
             // Send response of trying again
