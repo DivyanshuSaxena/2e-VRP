@@ -1,3 +1,7 @@
+"""
+The generate module randomly generates a new test case.
+And then writes the data points along with the carparks location in an output file.
+"""
 import random
 import math
 import nodecluster
@@ -21,7 +25,7 @@ def main():
 
     density = NUM_CUSTOMERS/MAX_RANGE
     bandwidth_ = 0.2 * math.pow(1.414, -(density*density)) * MAX_RANGE
-    print (bandwidth_)
+    print(bandwidth_)
     cluster_centers = nodecluster.cluster(coord, bandwidth_)
     n_clusters_ = len(cluster_centers)
     num_carparks = n_clusters_
@@ -51,7 +55,7 @@ def main():
     file.write("%d %d\n" % (0, 0))
     i = 1
     for cust in range(NUM_CUSTOMERS):
-        file.write("%d %d\n" % (cust, random.randint(2,40)*10))
+        file.write("%d %d\n" % (cust, random.randint(2, 40)*10))
         i = i+1
 
     file.write("EOF")

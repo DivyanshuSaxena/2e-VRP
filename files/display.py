@@ -1,7 +1,8 @@
-import matplotlib.pyplot as plt
+"""The display module reads from a file and accordingly displays the routes using matplotlib"""
 import re
 import random
 import argparse
+import matplotlib.pyplot as plt
 
 def main():
     parser = argparse.ArgumentParser(description='Relative or Absolute Path')
@@ -9,9 +10,9 @@ def main():
     args = parser.parse_args()
     # print(args)
     if args.eclipse:
-        file = open("./files/output/solution.txt","r")
+        file = open("./files/output/solution.txt", "r")
     else:
-        file = open("./output/solution.txt","r")
+        file = open("./output/solution.txt", "r")
 
     numNodes, lastCarpark, routeEnd = 0, 0, 0
     x_coord, y_coord = [], []
@@ -20,7 +21,7 @@ def main():
     x_coord_filled, y_coord_filled, num_nodes = False, False, False
     first_level_color = (random.random(), random.random(), random.random(),)
 
-    for line in file :
+    for line in file:
         listLine = re.findall(r'[0-9]+', line)
         # print (listLine)
         if x_coord_filled and y_coord_filled and num_nodes:
