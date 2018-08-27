@@ -366,4 +366,29 @@ public class Solution implements Iterable<CustomerIndex> {
         perturbSoln = gr.getSolution();
         return perturbSoln;        
     }
+    public boolean checkFeasibility() {
+        for (Route route : this.routes) {
+            int firstLevelDemand = 0;
+            for (int vehicle : route.route) {
+                if (vehicle != 0) {
+                    Route secondLevel = Main.vehicles.elementAt(vehicle-Main.numNodes).route;
+                    int secondLevelDemand = 0;
+                    for (int cust : secondLevel.route) {
+                        if (cust > Main.numCarpark)
+                            secondLevelDemand += Main.customers[cust-Main.numCarpark-1].demand;
+                    }
+                    if (secondLevel.demand != secondLevelDemand) {
+                        System.out.println("Demand inconsistent at II route " + vehicle);
+                    }
+                    if (secondLevelDemand > Main.l2cap) return false;
+                    firstLevelDemand += secondLevelDemand;
+                }
+            }
+            if (firstLevelDemand != route.demand) {
+                System.out.println("Demand inconsistent at I route ");
+            }
+            if (firstLevelDemand > Main.l1cap) return false;
+        }
+        return true;
+    }
 }

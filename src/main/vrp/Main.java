@@ -133,7 +133,13 @@ public class Main {
         pWriter.println(finalSolution);
         pWriter.close();
 
+        // Report Percentage Improvement
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
+        // Check Feasibility
+        if (finalSolution.checkFeasibility())
+            System.out.println("The solution is feasible");
+        else
+            System.out.println("The solution is not feasible");
 
         // Call the Python script to display the results
         String command = "cmd /c py ./files/display.py --eclipse";
