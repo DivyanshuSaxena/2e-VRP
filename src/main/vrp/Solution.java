@@ -336,7 +336,7 @@ public class Solution implements Iterable<CustomerIndex> {
                 return 1;
             }
         });
-        System.out.println("Customer Pool : " + customers); // Debug
+        // System.out.println("Customer Pool : " + customers); // Debug
         int count = 0;
         while (count < customers.size()) {
             int customer = customers.elementAt(count);
@@ -352,7 +352,7 @@ public class Solution implements Iterable<CustomerIndex> {
 
         double p = Math.random();
         Vector<Integer> customerPool = new Vector<Integer>(); 
-        if (p <= 0.5) {
+        if (p <= 0.2) {
             customerPool = this.worstRemoval(gr,q); // Worst Removal
         } else {
             int vehicleIndex = this.getRandomVehicle();

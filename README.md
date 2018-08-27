@@ -84,6 +84,7 @@ The input JSON object to the java code must be in the following format:
 3. The number of vehicles available at level 1 and level 2 are known beforehand. 
 
 ## To-do
+- [ ] Improve perturbation functionn so as to explore the solution space.
 - [X] Check Iterated Swap Procedure, without the dynamically changing solution with every iteration.
 - [X] Perturbation Algorithm :- Satellite Swap and Worst Removal Operations to be implemented first. Regret Insertion also done.
 - [X] Modify the current problem such that the constraints match the classical Two Echelon VRP, and check the results. 

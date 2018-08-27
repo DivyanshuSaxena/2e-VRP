@@ -95,12 +95,14 @@ public class Main {
         Solution bestFoundSoln = initsol;
         while (true) {
             boolean improvement = bestFoundSoln.updateBestNeighbor();
-            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); 
+            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); // Debug
             GiantRoute bfs = bestFoundSoln.getGiantRoute();
             if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
                 bestSolution = bfs;
                 improvement = true;
+                System.out.println("Found better solution cost : " + bfs.cost);
             } else improvement = false;
+
             // Find the best solution of the generated neighborhood, and proceed with it further 
             bestFoundSoln = bestFoundSoln.perturb();
             System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
@@ -135,6 +137,7 @@ public class Main {
 
         // Report Percentage Improvement
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
+
         // Check Feasibility
         if (finalSolution.checkFeasibility())
             System.out.println("The solution is feasible");
@@ -266,7 +269,7 @@ public class Main {
     }
     public static Vector<Route> savingSolution(Vector<Integer> customers, final int depot, int capacity) {
         // This function implements the Clarke and Wright's Saving Algortihm
-    	System.out.println("Applying C&W for " + depot + " with customers: " + customers); // Debug
+    	// System.out.println("Applying C&W for " + depot + " with customers: " + customers); // Debug
         Vector<Route> routes = new Vector<Route>();
         Vector<Route> savingsList = new Vector<Route>(); //  To hold all the two location routes
         for(int i = 0; i < customers.size()-1; i++) {
