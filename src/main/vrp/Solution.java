@@ -21,11 +21,12 @@ public class Solution implements Iterable<CustomerIndex> {
             for (int cp : route.route) {                    
                 if (cp >= Main.numNodes) {
                     int originalcp = Main.vehicles.elementAt(cp-Main.numNodes).cpindex;
+                    Route vehicleRoute = Main.vehicles.elementAt(cp-Main.numNodes).route;
                     if (prevcp == originalcp) {
-                        sol += ("{" + Main.vehicles.elementAt(cp-Main.numNodes).route + "}, ");
+                        sol += ("{" + vehicleRoute + "}: " + (vehicleRoute.route.size()-2));
                     } else {
                         sol = sol + "\n\t" + originalcp + " : ";
-                        sol += ("{" + Main.vehicles.elementAt(cp-Main.numNodes).route + "}, ");
+                        sol += ("{" + vehicleRoute + "}: " + (vehicleRoute.route.size()-2));
                         prevcp = originalcp;                        
                     }
                 } else {
@@ -299,6 +300,7 @@ public class Solution implements Iterable<CustomerIndex> {
                 gr.removeCustomer(customer);
             }
         }
+        // System.out.println(customers); // Debug
         return customers;
     }
     private Vector<Integer> worstRemoval(GiantRoute gr, int q) {
@@ -363,13 +365,14 @@ public class Solution implements Iterable<CustomerIndex> {
             customerPool = this.worstRemoval(gr,q); // Worst Removal
         } else {
             int vehicleIndex1 = this.getRandomVehicle();
-            System.out.println("Randomly Removed Vehicle: " + vehicleIndex1); // Debug
+            int cp = Main.vehicles.elementAt(vehicleIndex1).cpindex;
+            System.out.println("Randomly Removed Vehicle: " + vehicleIndex1 + " " + cp); // Debug
             customerPool = this.routeRemoval(gr, vehicleIndex1); // Route Removal
-            int vehicleIndex2 = this.getRandomVehicle();
-            while(vehicleIndex2 == vehicleIndex1) {
-                vehicleIndex2 = this.getRandomVehicle();
-            }
-            customerPool.addAll(this.routeRemoval(gr, vehicleIndex2));
+            // int vehicleIndex2 = this.getRandomVehicle();
+            // while(vehicleIndex2 == vehicleIndex1) {
+            //     vehicleIndex2 = this.getRandomVehicle();
+            // }
+            // customerPool.addAll(this.routeRemoval(gr, vehicleIndex2));
         }
         System.out.println("Size of customer pool: " + customerPool.size());
         this.regretInsertion(gr, customerPool); // Regret Insertion
