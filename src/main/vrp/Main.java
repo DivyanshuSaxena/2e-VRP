@@ -94,8 +94,20 @@ public class Main {
         int iterations = 0;
         Solution bestFoundSoln = initsol;
         while (true) {
-            boolean improvement = bestFoundSoln.updateBestNeighbor();
+            boolean improvement = true;
+            int iter = 0;
+            while (true) {
+                improvement = bestFoundSoln.updateBestNeighbor();
+                if (improvement)
+                iter = 0;
+                else {
+                    iter++;
+                    if (iter == 10)
+                    break;
+                }
+            }
             System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); // Debug
+
             GiantRoute bfs = bestFoundSoln.getGiantRoute();
             if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
                 bestSolution = bfs;

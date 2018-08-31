@@ -74,11 +74,10 @@ public class Solution implements Iterable<CustomerIndex> {
         this.solutionCost = cost;
         return cost;
     }
-    private SwapCostType getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
-        // This function returns the best swap neighbour obtained on swapping customers at ci1 and ci2.
+    private double getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
+        // This function returns the swap cost obtained on swapping customers at ci1 and ci2.
         Route swapRoute1 = Main.vehicles.elementAt(ci1.routecp-Main.numNodes).route;
         Route swapRoute2 = Main.vehicles.elementAt(ci2.routecp-Main.numNodes).route;
-        int type = 1;
         double swapCost = 0.0;
         
         int customer1 = swapRoute1.route.elementAt(ci1.index);
@@ -100,10 +99,7 @@ public class Solution implements Iterable<CustomerIndex> {
         	swapCost = swapCost + 2*Main.nodesDistance[customer1][customer2];
         }
         // System.out.println("Cost of swapping " + customer1 + " and " + customer2 + " : " + swapCost); // Debug
-        SwapCostType sct = new SwapCostType();
-        sct.swapCost = swapCost;
-        sct.type = type;
-        return sct;
+        return swapCost;
     }
     public CustomerIndex getRandomCustomer() {
         // Function to get a random customer from the solution.
@@ -159,7 +155,7 @@ public class Solution implements Iterable<CustomerIndex> {
             int prev = clonedRoute.route.elementAt(i-1);
             int next = clonedRoute.route.elementAt(i);
             double newCost = sameCost + Main.nodesDistance[prev][customer] + Main.nodesDistance[customer][next] - Main.nodesDistance[prev][next];
-            if (bestCost > newCost) {
+            if (bestCost - newCost > 2) {
                 // System.out.println(bestCost + " " + newCost); // Debug
                 bestCost = newCost;
                 bestIndex = i;
@@ -181,11 +177,11 @@ public class Solution implements Iterable<CustomerIndex> {
     }
     private boolean iteratedSwapOperator(CustomerIndex ci1, CustomerIndex ci2) {
         boolean improvement = false;
-        SwapCostType swapCostType = getSwapCost(ci1,ci2);
-        double swapCost = swapCostType.swapCost;
-        if (this.solutionCost > swapCost) {
+        double swapCost  = getSwapCost(ci1,ci2);
+        
+        if (this.solutionCost - swapCost > 2) {
+            double prevCost = this.solutionCost;
             // Swap the two customers
-            // System.out.println("Found lower cost : " + swapCost + " and type : " + type); // Debug
             Route swapRoute1 = Main.vehicles.elementAt(ci1.routecp-Main.numNodes).route;
             Route swapRoute2 = Main.vehicles.elementAt(ci2.routecp-Main.numNodes).route;
             int customer1 = swapRoute1.route.elementAt(ci1.index);
@@ -195,6 +191,7 @@ public class Solution implements Iterable<CustomerIndex> {
                 swapRoute2.setCustomer(customer1, ci2.index);
                 improvement = true;
                 this.updateCost();
+                if (prevCost <= solutionCost) System.out.println("Swapping " + customer1 + " and " + customer2 + " in " + swapRoute1); // Debug
             } else {
                 // All infeasible but good quality solutions are received here
                 // System.out.println("Infeasible Solution");
@@ -225,28 +222,34 @@ public class Solution implements Iterable<CustomerIndex> {
     public boolean updateBestNeighbor() {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
-        boolean improvement = false;
+        // System.out.println("Before Local Search " + this.getCost()); // Debug
+        boolean improvement = false, localImp = false;
         SolutionIterator iter = new SolutionIterator(this);
         while (iter.hasNext()) {
             CustomerIndex ci = iter.next();
-            improvement = this.moveOperator(ci);
+            localImp = localImp || this.moveOperator(ci);
         }
-        // if (improvement) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
+        // if (localImp) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
+        improvement = improvement || localImp;
 
         // Iterated Swap Procedure
         iter.reset();
+        localImp = false;
         while (iter.hasNext()) {
             CustomerIndex ci1 = iter.next();
             SolutionIterator innerIterator = new SolutionIterator(this);
             while (innerIterator.hasNext()) {
                 CustomerIndex ci2 = innerIterator.next();
-                improvement = improvement || this.iteratedSwapOperator(ci1, ci2);
+                if (ci1.isSameRoute(ci2)) continue;
+                localImp = localImp || this.iteratedSwapOperator(ci1, ci2);
             }
         }
-        // if (improvement) System.out.println("After iterated swap procedure, solution cost: " + this.getCost());
-        
+        // if (localImp) System.out.println("After iterated swap procedure, solution cost: " + this.getCost()); // Debug
+        improvement = improvement || localImp;
+
         // Segment Exchange Operator
         iter.reset();
+        localImp = false;
         CustomerIndex bestPair1 = new CustomerIndex();
         CustomerIndex bestPair2 = new CustomerIndex();
         double bestCost = 0;
@@ -255,8 +258,9 @@ public class Solution implements Iterable<CustomerIndex> {
             SolutionIterator innerIterator = new SolutionIterator(this);
             while (innerIterator.hasNext()) {
                 CustomerIndex ci2 = innerIterator.next();
+                if (ci1.isSameRoute(ci2)) continue;
                 double cost = this.exchangeOperator(ci1, ci2);
-                if (cost < bestCost) {
+                if (cost - bestCost > 2) {
                     bestCost = cost;
                     bestPair1 = ci1;
                     bestPair2 = ci2;
@@ -275,12 +279,15 @@ public class Solution implements Iterable<CustomerIndex> {
                 exchangeRoute1.removeAllCustomers(bestPair1.index+seg2.size(), exchangeRoute1.route.size()-2);
                 exchangeRoute2.removeAllCustomers(bestPair2.index+seg1.size(), exchangeRoute2.route.size()-2);    
                 // System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
-                improvement = true;
+                localImp = true;
                 this.updateCost();
                 // System.out.println("Updated Cost : " + this.solutionCost); // Debug
             }           
         }
-        // if (improvement) System.out.println("After exchange operator, solution cost: " + this.getCost());
+        // if (localImp) System.out.println("After exchange operator, solution cost: " + this.getCost()); // Debug
+        improvement = improvement || localImp;
+
+        // System.out.println("After Local Search " + this.getCost()); // Debug
         return improvement;
     }
     private Vector<Integer> routeRemoval(GiantRoute gr, int vehicleIndex) {
@@ -348,16 +355,23 @@ public class Solution implements Iterable<CustomerIndex> {
         // Perturb the local best found solution to get a new solution altogether
         final GiantRoute gr = this.getGiantRoute();
         Solution perturbSoln = new Solution();
-        int q = 10;
+        int q = Main.numCustomers/10;
 
         double p = Math.random();
         Vector<Integer> customerPool = new Vector<Integer>(); 
         if (p <= 0.2) {
             customerPool = this.worstRemoval(gr,q); // Worst Removal
         } else {
-            int vehicleIndex = this.getRandomVehicle();
-            customerPool = this.routeRemoval(gr, vehicleIndex); // Route Removal
+            int vehicleIndex1 = this.getRandomVehicle();
+            System.out.println("Randomly Removed Vehicle: " + vehicleIndex1); // Debug
+            customerPool = this.routeRemoval(gr, vehicleIndex1); // Route Removal
+            int vehicleIndex2 = this.getRandomVehicle();
+            while(vehicleIndex2 == vehicleIndex1) {
+                vehicleIndex2 = this.getRandomVehicle();
+            }
+            customerPool.addAll(this.routeRemoval(gr, vehicleIndex2));
         }
+        System.out.println("Size of customer pool: " + customerPool.size());
         this.regretInsertion(gr, customerPool); // Regret Insertion
         
         // Check the solution for any removed carparks

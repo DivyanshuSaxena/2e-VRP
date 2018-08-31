@@ -24,11 +24,6 @@ class CustomerIndex {
     }
 }
 
-class SwapCostType {
-    double swapCost;
-    int type;
-}
-
 class SolutionIterator implements Iterator<CustomerIndex> {
     int route = 0;
     int routecp = 1;
