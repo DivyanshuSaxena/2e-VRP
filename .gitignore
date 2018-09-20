@@ -35,3 +35,6 @@ output/*
 *.dat
 *.pdf
 __pycache__/
+
+# Eclipse
+.classpath
