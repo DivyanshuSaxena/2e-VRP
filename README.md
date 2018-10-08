@@ -40,10 +40,11 @@ Also the project makes use of making a server side application that can be calle
 1. Install the required python 3 libraries using:  
 ```py -m pip install -r requirements.txt```  
 2. Download the json-simple-1.1.1.jar from the source mentioned in the previous section and add the path of JAR file to the Build Path of the Eclpise Project. 
-3. A random test case can be generated using the following command:  
+3. Run the ```start.sh``` file in the top directory. 
+4. A random test case can be generated using the following command:  
 ```py generate.py``` [On Windows]  
 ```python generate.py``` [On Linux]  
-4. The generated input file is located at ./files/input/custom/generated.dat by default.  
+4. The generated input file is located at ```(workspace)/files/input/custom/generated.dat``` by default.  
 
 
 ## Usage
