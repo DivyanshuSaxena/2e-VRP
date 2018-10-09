@@ -55,7 +55,7 @@ public class Solution implements Iterable<CustomerIndex> {
                         giantRoute.add(customer);
                     }
                 }
-            }            
+            }
         }
         gr.giantRoute = giantRoute;
         gr.cost = this.solutionCost;
@@ -340,7 +340,7 @@ public class Solution implements Iterable<CustomerIndex> {
         }
         return customerPool;
     }
-    
+
     private void regretInsertion(final GiantRoute gr, Vector<Integer> customers) {
         customers.sort(new Comparator<Integer>() {
             @Override

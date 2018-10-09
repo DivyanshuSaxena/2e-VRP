@@ -68,10 +68,12 @@ class SolutionIterator implements Iterator<CustomerIndex> {
 class GiantRoute {
     Vector<Integer> giantRoute;
     double cost;
+
     public GiantRoute() {
         giantRoute = new Vector<Integer>();
         cost = 0;
     }
+
     public Solution getSolution() {
         Solution solution = new Solution();
         Stack<Integer> stack = new Stack<Integer>();
@@ -115,6 +117,7 @@ class GiantRoute {
         solution.updateCost();
         return solution;
     }
+
     public double getCustomerRemovalCost(int customer) {
         double rcost = 0;
         for (int i = 0; i < this.giantRoute.size(); i++) {
@@ -125,22 +128,48 @@ class GiantRoute {
         }
         return rcost;
     }
+
     public boolean isInsertionFeasible(int customer, int index) {
         int vehicleDemand = Main.customers[customer-Main.numCarpark-1].demand;
+        int routeDemand = vehicleDemand;
+        boolean level2 = false; 
         for (int i = index-1; i > 0; i--) {
-            int node = giantRoute.elementAt(i); 
-            if (node > Main.numCarpark) {
-                vehicleDemand += Main.customers[node-Main.numCarpark-1].demand;
+            int node = giantRoute.elementAt(i);
+            if (!level2) {
+                if (node > Main.numCarpark) {
+                    vehicleDemand += Main.customers[node-Main.numCarpark-1].demand;
+                } else {
+                    level2 = true;
+                } 
+            } 
+
+            if (node != 0) {
+                if (node > Main.numCarpark)
+                    routeDemand += Main.customers[node-Main.numCarpark-1].demand;
             } else break;
         }
+        level2 = false;
         for (int i = index; i < giantRoute.size(); i++) {
             int node = giantRoute.elementAt(i); 
-            if (node > Main.numCarpark) {
-                vehicleDemand += Main.customers[node-Main.numCarpark-1].demand;
+
+            if (!level2) {
+                if (node > Main.numCarpark) {
+                    vehicleDemand += Main.customers[node-Main.numCarpark-1].demand;
+                } else {
+                    level2 = true;
+                } 
+            } 
+
+            if (node != 0) {
+                if (node > Main.numCarpark)
+                    routeDemand += Main.customers[node-Main.numCarpark-1].demand;
             } else break;
         }
-        return (vehicleDemand <= Main.l2cap);
+        boolean l2feasibility = vehicleDemand <= Main.l2cap;
+        boolean l1feasibility = routeDemand <= Main.l1cap;
+        return l1feasibility && l2feasibility;
     }
+
     public void insertAtBestLocation(int customer) {
         int lastCarpark = 0, bestIndex = -1;
         double bestCost = 0.0;
@@ -163,6 +192,7 @@ class GiantRoute {
         if (bestIndex != -1) {
             this.addCustomer(customer, bestIndex);
         } else {
+            System.out.println("ALLOT A NEW VEHICLE");
             // No Suitable vehicle found, where the customer can be assigned. Allot to a new vehicle.
         }
     }
@@ -198,7 +228,7 @@ class GiantRoute {
             currNode = giantRoute.elementAt(i);
             if (currNode <= Main.numCarpark && currNode != 0) {
                 if (lastCarpark == currNode) {
-                    lastCarpark = 0; 
+                    lastCarpark = 0;
                     if (currNode == prevNode) {
                         giantRoute.remove(i);
                         giantRoute.remove(i-1);
@@ -206,12 +236,12 @@ class GiantRoute {
                     if (giantRoute.elementAt(i-2) == giantRoute.elementAt(i-1)) {
                         giantRoute.remove(i-1);
                         giantRoute.remove(i-2);
-                    }                
+                    }
                 } else {
                     lastCarpark = currNode;
                 }
             }
-            prevNode = giantRoute.elementAt(i);
+            prevNode = currNode;
         }
     }
 }

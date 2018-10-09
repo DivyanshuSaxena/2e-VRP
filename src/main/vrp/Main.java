@@ -95,7 +95,7 @@ public class Main {
         System.out.println("Initial Solution : " + initsol + " cost " + initCost);
 
         // Use initial solution to develop the further solutions.
-        int numUselessIterations = Main.numCustomers > 10 ? Main.numCustomers : 5; // Hyper-Parameter
+        int numUselessIterations = Main.numCustomers > 100 ? Main.numCustomers : 2*Main.numCustomers; // Hyper-Parameter
         int iterations = 0;
         Solution bestFoundSoln = initsol;
         while (true) {
@@ -112,11 +112,6 @@ public class Main {
                 }
             }
             System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); // Debug
-            if (!bestFoundSoln.checkFeasibility()) {
-                System.out.println("Feasibility disrupted.");
-                System.out.println(bestFoundSoln);
-                break;
-            }
 
             GiantRoute bfs = bestFoundSoln.getGiantRoute();
             if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
