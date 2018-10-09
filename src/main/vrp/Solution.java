@@ -12,6 +12,7 @@ public class Solution implements Iterable<CustomerIndex> {
         routes = new Vector<Route>();
         solutionCost = 0.0;
     }
+
     public String toString() {
         // Change this function
         String sol = "";
@@ -37,6 +38,7 @@ public class Solution implements Iterable<CustomerIndex> {
         }
         return sol;
     }
+
     public Iterator<CustomerIndex> iterator() {
         return new SolutionIterator(this);
     }
@@ -59,9 +61,11 @@ public class Solution implements Iterable<CustomerIndex> {
         gr.cost = this.solutionCost;
         return gr;
     }
+
     public double getCost() {
         return this.solutionCost;
     }
+
     public double updateCost() {
         // Function to evaluate the total costs of the solution.
         double cost = 0;
@@ -75,6 +79,7 @@ public class Solution implements Iterable<CustomerIndex> {
         this.solutionCost = cost;
         return cost;
     }
+
     private double getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
         // This function returns the swap cost obtained on swapping customers at ci1 and ci2.
         Route swapRoute1 = Main.vehicles.elementAt(ci1.routecp-Main.numNodes).route;
@@ -102,6 +107,7 @@ public class Solution implements Iterable<CustomerIndex> {
         // System.out.println("Cost of swapping " + customer1 + " and " + customer2 + " : " + swapCost); // Debug
         return swapCost;
     }
+
     public CustomerIndex getRandomCustomer() {
         // Function to get a random customer from the solution.
         CustomerIndex cIndex = new CustomerIndex();
@@ -130,6 +136,7 @@ public class Solution implements Iterable<CustomerIndex> {
         // System.out.println(in + " at " + chosenCarpark.route); // Debug
         return cIndex; 
     }
+
     public int getRandomVehicle() {
         int index = (int)((Main.vehicles.size()) * Math.random());
         if (index == Main.vehicles.size())  return 0;
@@ -333,6 +340,7 @@ public class Solution implements Iterable<CustomerIndex> {
         }
         return customerPool;
     }
+    
     private void regretInsertion(final GiantRoute gr, Vector<Integer> customers) {
         customers.sort(new Comparator<Integer>() {
             @Override
@@ -353,6 +361,7 @@ public class Solution implements Iterable<CustomerIndex> {
             count++;
         }
     }
+
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether
         final GiantRoute gr = this.getGiantRoute();
@@ -383,7 +392,13 @@ public class Solution implements Iterable<CustomerIndex> {
         perturbSoln = gr.getSolution();
         return perturbSoln;        
     }
+    
     public boolean checkFeasibility() {
+        System.out.println("\n---------------------------------------------------");
+        System.out.println("---------------Checking Feasibility----------------");
+        System.out.println("Level 1 Capacity: " + Main.l1cap);
+        System.out.println("Level 2 Capacity: " + Main.l2cap);
+        
         for (Route route : this.routes) {
             int firstLevelDemand = 0;
             for (int vehicle : route.route) {
@@ -395,16 +410,22 @@ public class Solution implements Iterable<CustomerIndex> {
                             secondLevelDemand += Main.customers[cust-Main.numCarpark-1].demand;
                     }
                     if (secondLevel.demand != secondLevelDemand) {
-                        System.out.println("Demand inconsistent at II route " + vehicle);
+                        System.out.println("Demand inconsistent at II route(1) " + vehicle);
                     }
-                    if (secondLevelDemand > Main.l2cap) return false;
+                    if (secondLevelDemand > Main.l2cap) {
+                        System.out.println("Demand inconsistent at II route(2) " + vehicle);
+                        return false;
+                    } 
                     firstLevelDemand += secondLevelDemand;
                 }
             }
             if (firstLevelDemand != route.demand) {
-                System.out.println("Demand inconsistent at I route ");
+                System.out.println("Demand inconsistent at I route(1)");
             }
-            if (firstLevelDemand > Main.l1cap) return false;
+            if (firstLevelDemand > Main.l1cap) {
+                System.out.println("Demand inconsistent at I route(2)");
+                return false;
+            }
         }
         return true;
     }

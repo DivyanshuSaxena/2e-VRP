@@ -1,4 +1,3 @@
-"""The display module reads from a file and accordingly displays the routes using matplotlib"""
 import re
 import random
 import argparse

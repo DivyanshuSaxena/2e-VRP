@@ -17,6 +17,7 @@ public class Main {
     public static double nodesDistance[][];
     public static Customer customers[];
     public static Carpark carparks[];
+    public static int inputType;
     static Vector<Vehicle> vehicles;
     static Scanner sc;
 
@@ -28,12 +29,15 @@ public class Main {
         sc = new Scanner(file);
         Fileio fileio = new Fileio(sc);
         if (filename.contains("E-n13")) {
+            inputType = 1;
             fileio.setOneInput();
         } else {
+            inputType = 2;
             fileio.setTwoInput();
         }
         solve();
     }
+
     @SuppressWarnings("unchecked")
 	public static JSONObject constructJSON(Solution solution) {
         JSONObject object = new JSONObject();
@@ -82,6 +86,7 @@ public class Main {
         object.put("cost", new Double(solution.getCost()));
         return object;
     }
+
     public static Solution solve() throws IOException {
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
@@ -89,8 +94,8 @@ public class Main {
         GiantRoute bestSolution = new GiantRoute();
         System.out.println("Initial Solution : " + initsol + " cost " + initCost);
 
-        // Use initsol to develop the further solutions here.
-        int numUselessIterations = Main.numCustomers/10; // Hyper-Parameter
+        // Use initial solution to develop the further solutions.
+        int numUselessIterations = Main.numCustomers > 10 ? Main.numCustomers : 5; // Hyper-Parameter
         int iterations = 0;
         Solution bestFoundSoln = initsol;
         while (true) {
@@ -99,7 +104,7 @@ public class Main {
             while (true) {
                 improvement = bestFoundSoln.updateBestNeighbor();
                 if (improvement)
-                iter = 0;
+                    iter = 0;
                 else {
                     iter++;
                     if (iter == 10)
@@ -107,6 +112,11 @@ public class Main {
                 }
             }
             System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); // Debug
+            if (!bestFoundSoln.checkFeasibility()) {
+                System.out.println("Feasibility disrupted.");
+                System.out.println(bestFoundSoln);
+                break;
+            }
 
             GiantRoute bfs = bestFoundSoln.getGiantRoute();
             if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
@@ -133,19 +143,25 @@ public class Main {
         System.out.println("Running time : " + (endTime-startTime));
         sc.close();
 
-        // Write the solution in solution.txt
-        PrintWriter pWriter = new PrintWriter("./files/output/solution.txt", "UTF-8");
-        for (int x : x_coord) {
-            pWriter.print(x + " ");
+        /*
+         * Write the solution in solution.txt
+         * The solution can be written only when the data of individual coordinates is given.
+         * Hence, only for test data type 2, the data can be visualized.
+         */
+        if (inputType == 2) {
+            PrintWriter pWriter = new PrintWriter("./files/output/solution.txt", "UTF-8");
+            for (int x : x_coord) {
+                pWriter.print(x + " ");
+            }
+            pWriter.println();
+            for (int y : y_coord) {
+                pWriter.print(y + " ");
+            }
+            pWriter.println();
+            pWriter.println(numNodes);
+            pWriter.println(finalSolution);
+            pWriter.close();
         }
-        pWriter.println();
-        for (int y : y_coord) {
-            pWriter.print(y + " ");
-        }
-        pWriter.println();
-        pWriter.println(numNodes);
-        pWriter.println(finalSolution);
-        pWriter.close();
 
         // Report Percentage Improvement
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
@@ -156,33 +172,40 @@ public class Main {
         else
             System.out.println("The solution is not feasible");
 
-        // Call the Python script to display the results
-        String command = "cmd /c py ./files/display.py --eclipse";
-        Process p = Runtime.getRuntime().exec(command);
-        try {
-            p.waitFor();
-            BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            BufferedReader bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-            String line;
-            while ((line = bri.readLine()) != null) {
-                System.out.println(line);
-            }
-            bri.close();
-            while ((line = bre.readLine()) != null) {
-                System.out.println(line);
-            }
-            bre.close();
-            p.waitFor();
-            System.out.println("Done.");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        p.destroy();
+        /*
+         * Call the Python script to display the results
+         * Uncomment the code below (as per the System Specifications) for viewing the results
+         */
+        // String command = "cmd /c py ./files/display.py --eclipse"; // Windows
+        // String command = "python ./files/display.py --eclipse"; // Linux
+        // Process p = Runtime.getRuntime().exec(command);
+        // try {
+        //     p.waitFor();
+        //     BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        //     BufferedReader bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        //     String line;
+        //     while ((line = bri.readLine()) != null) {
+        //         System.out.println(line);
+        //     }
+        //     bri.close();
+        //     while ((line = bre.readLine()) != null) {
+        //         System.out.println(line);
+        //     }
+        //     bre.close();
+        //     p.waitFor();
+        //     System.out.println("Done.");
+        // } catch (InterruptedException e) {
+        //     e.printStackTrace();
+        // }
+        // p.destroy();
 
         return finalSolution;
     }
+
+    /*
+     * Finds the initial solution and places it in the static variable route.
+     */ 
     public static Solution getInitialSoln() {
-        // Finds the initial solution and places it in the static variable route.
         Solution initial = new Solution();
         
         // Assign each customer to the nearest carpark.
@@ -197,7 +220,8 @@ public class Main {
                 }
             }
             // System.out.println("Carpark assigned to " + customers[i].id + " is " + assigned); // Debug
-            customers[i].assignedPark = assigned; // Customer at index i in customers array is assigned the carpark at index 'assigned' in nodes numbering 
+            // Customer at index i in customers array is assigned the carpark at index 'assigned' in nodes numbering 
+            customers[i].assignedPark = assigned; 
             carparks[assigned-1].addCustomer(customers[i]); // The carpark also holds the customer now.
         }
 
@@ -279,6 +303,7 @@ public class Main {
         initial.updateCost();
         return initial;
     }
+
     public static Vector<Route> savingSolution(Vector<Integer> customers, final int depot, int capacity) {
         // This function implements the Clarke and Wright's Saving Algortihm
     	// System.out.println("Applying C&W for " + depot + " with customers: " + customers); // Debug
