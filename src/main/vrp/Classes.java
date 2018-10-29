@@ -186,16 +186,31 @@ class GiantRoute {
                     bestIndex = i+1;
                 }
             } 
-            if (node <= Main.numCarpark && node != 0)   lastCarpark = lastCarpark==0?node:0;                
+            if (node <= Main.numCarpark && node != 0)   
+                lastCarpark = lastCarpark==0 ? node : 0;                
         }
         // System.out.println("Found best location for " + customer + " at " + bestIndex); // Debug
         if (bestIndex != -1) {
             this.addCustomer(customer, bestIndex);
         } else {
-            System.out.println("ALLOT A NEW VEHICLE");
             // No Suitable vehicle found, where the customer can be assigned. Allot to a new vehicle.
+            System.out.println("ALLOT A NEW VEHICLE");
+            int minDistanceCarpark = 0;
+            double minDistance = 0;
+            for (Carpark cp : Main.carparks) {
+                if (Main.nodesDistance[customer][cp.id] < minDistance || minDistance == 0) {
+                    minDistance = Main.nodesDistance[customer][cp.id];
+                    minDistanceCarpark = cp.id;
+                }
+            }
+            this.addNewVehicle(customer, minDistanceCarpark);
         }
     }
+
+    public void addNewVehicle(int customer, int carpark) {
+        // Add a new vehicle in a route which has the carpark as a location. Add the customer to the vehicle.
+    }
+
     public double getRegretCost(int customer) {
         int lastCarpark = 0;
         double best = 0.0, secondBest = 0.0;
@@ -212,15 +227,18 @@ class GiantRoute {
         }
         return (best - secondBest);
     }
+
     public void removeCustomer(int customer) {
         int index = this.giantRoute.indexOf(customer);
         this.cost -= (Main.nodesDistance[giantRoute.elementAt(index-1)][giantRoute.elementAt(index)] + Main.nodesDistance[giantRoute.elementAt(index)][giantRoute.elementAt(index+1)]);
         this.giantRoute.remove((Integer)customer);
     }
+
     public void addCustomer(int customer, int index) {
         this.cost += (Main.nodesDistance[giantRoute.elementAt(index-1)][customer] + Main.nodesDistance[customer][giantRoute.elementAt(index)]);
         this.giantRoute.add(index, customer);
     }
+
     public void removeUnusedCarparks() {
         int prevNode = -1, lastCarpark = 0;
         int currNode = giantRoute.elementAt(0);
