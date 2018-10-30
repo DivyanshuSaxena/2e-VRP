@@ -22,7 +22,7 @@ public class Main {
 
     // Solution Hyper Parameters
     public static int numUselessIterations;
-    public static int numRestarts = 10;
+    public static int numRestarts = 2;
 
     static Vector<Vehicle> vehicles;
     static Scanner sc;
