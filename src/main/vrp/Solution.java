@@ -68,21 +68,22 @@ public class Solution implements Iterable<CustomerIndex> {
 
     public double updateCost() {
         // Function to evaluate the total costs of the solution.
-        // double cost = 0;
-        // for (Route route : this.routes) {
-        //     cost += route.getCost();
-        // }
-        // for (Vehicle cp : Main.vehicles) {
-        //     cost += cp.route.getCost();
-        // }
-        double cost = 0.0;
+        double cost = this.getActualCost();
+        // Add the infeasibility costs here.
+        this.solutionCost = cost;
+        return cost;
+    }
+
+    public double getActualCost() {
+        double totalCost = 0.0;
         for (Route firstLevel : routes) {
+            double firstLevelCost = 0.0;
             for (int cp = 0; cp < firstLevel.route.size()-1; cp++) {
                 int vehicle = firstLevel.route.elementAt(cp);
                 int vehicleNext = firstLevel.route.elementAt(cp+1);
                 int originalcp = vehicle == 0 ? 0 : Main.vehicles.elementAt(vehicle-Main.numNodes).cpindex;
                 int originalcpNext = vehicleNext == 0 ? 0 : Main.vehicles.elementAt(vehicleNext-Main.numNodes).cpindex;
-                cost += Main.nodesDistance[originalcp][originalcpNext];
+                firstLevelCost += Main.nodesDistance[originalcp][originalcpNext];
                 double secondLevelCost = 0.0;
                 if (cp != 0) {
                     Vehicle v = Main.vehicles.elementAt(vehicle-Main.numNodes);
@@ -91,14 +92,19 @@ public class Solution implements Iterable<CustomerIndex> {
                         int cust2 = v.route.route.elementAt(cust+1);
                         secondLevelCost += Main.nodesDistance[cust1][cust2];
                     }
-                    cost += secondLevelCost;
+                    if (v.route.getCost() != secondLevelCost) {
+                        System.out.println("Problem at vehicle with route " + v.route.route); // Debug
+                    }
+                    totalCost += secondLevelCost;
                 }
             }
+            if (firstLevel.getCost() != firstLevelCost) {
+                System.out.println("Problem at I Level route " + firstLevel.route); // Debug
+            }
+            totalCost += firstLevelCost;
         }
-        
-        // Add the infeasibility costs here.
-        this.solutionCost = cost;
-        return cost;
+
+        return totalCost;   
     }
 
     private double getSwapCost(CustomerIndex ci1, CustomerIndex ci2) {
@@ -398,52 +404,39 @@ public class Solution implements Iterable<CustomerIndex> {
             int cp = Main.vehicles.elementAt(vehicleIndex1).cpindex;
             System.out.println("Randomly Removed Vehicle: " + vehicleIndex1 + " " + cp); // Debug
             customerPool = this.routeRemoval(gr, vehicleIndex1); // Route Removal
-            // int vehicleIndex2 = this.getRandomVehicle();
-            // while(vehicleIndex2 == vehicleIndex1) {
-            //     vehicleIndex2 = this.getRandomVehicle();
-            // }
-            // customerPool.addAll(this.routeRemoval(gr, vehicleIndex2));
         }
         System.out.println("Size of customer pool: " + customerPool.size());
         this.regretInsertion(gr, customerPool); // Regret Insertion
-        
+
         // Check the solution for any removed carparks
         gr.removeUnusedCarparks();
+        
         // System.out.println("Giant Route after regret insertion : " + gr.giantRoute); // Debug
         perturbSoln = gr.getSolution();
+        if (gr.cost - perturbSoln.solutionCost > 0.0001) {
+            System.out.println(gr.cost + " " + perturbSoln.solutionCost); // Debug
+            System.out.println("COST INCONSISTENT 2"); // Debug
+        }
         return perturbSoln;        
     }
 
     public boolean checkCostConsistency() {
-        // double updateCost = 0;
-        // for (Route route : this.routes) {
-        //     updateCost += route.getCost();
-        // }
-        // for (Vehicle cp : Main.vehicles) {
-        //     updateCost += cp.route.getCost();
-        // }
-
-        double firstLevelCost = 0.0;
-        for (Route firstLevel : routes) {
-            for (int cp = 0; cp < firstLevel.route.size()-1; cp++) {
-                int vehicle = firstLevel.route.elementAt(cp);
-                int vehicleNext = firstLevel.route.elementAt(cp+1);
-                int originalcp = vehicle == 0 ? 0 : Main.vehicles.elementAt(vehicle-Main.numNodes).cpindex;
-                int originalcpNext = vehicleNext == 0 ? 0 : Main.vehicles.elementAt(vehicleNext-Main.numNodes).cpindex;
-                firstLevelCost += Main.nodesDistance[originalcp][originalcpNext];
-                double secondLevelCost = 0.0;
-                if (cp != 0) {
-                    Vehicle v = Main.vehicles.elementAt(vehicle-Main.numNodes);
-                    for (int cust = 0; cust < v.route.route.size()-1; cust++) {
-                        int cust1 = v.route.route.elementAt(cust);
-                        int cust2 = v.route.route.elementAt(cust+1);
-                        secondLevelCost += Main.nodesDistance[cust1][cust2];
-                    }
-                    firstLevelCost += secondLevelCost;
-                }
-            }
+        double updateCost = 0;
+        for (Route route : this.routes) {
+            updateCost += route.getCost();
         }
-        if (firstLevelCost == this.solutionCost)
+        for (Vehicle cp : Main.vehicles) {
+            updateCost += cp.route.getCost();
+        }
+
+        double totalCost = this.getActualCost();
+
+        if (totalCost-updateCost < -0.0001) {
+            System.out.println("INCONSISTENT UPDATE COST");
+            return false;
+        }
+
+        if (totalCost-this.solutionCost < 0.0001)
             return true;
         return false;
     }

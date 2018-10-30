@@ -22,7 +22,7 @@ public class Main {
 
     // Solution Hyper Parameters
     public static int numUselessIterations;
-    public static int numRestarts = 2;
+    public static int numRestarts = 0;
 
     static Vector<Vehicle> vehicles;
     static Scanner sc;
@@ -115,9 +115,6 @@ public class Main {
                     break;
             }
             System.out.println("Cost after local search : " + currBestSoln.solutionCost); // Debug
-            // if (!currBestSoln.checkCostConsistency()) {
-            //     System.out.println("COST INCONSISTENCY 1");
-            // }
 
             GiantRoute bfs = currBestSoln.getGiantRoute();
             if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
@@ -128,12 +125,9 @@ public class Main {
 
             // Find the best solution of the generated neighborhood, and proceed with it further 
             currBestSoln = currBestSoln.perturb();
-            // if (!currBestSoln.checkCostConsistency()) {
-            //     System.out.println("COST INCONSISTENCY 2");
-            // }
             System.out.println("Cost after perturb : " + currBestSoln.solutionCost);
             System.out.println("--------------------------------------------------"); // Debug
-            
+
             if (improvement) {
                 iterations = 0;
             } else {
@@ -176,7 +170,7 @@ public class Main {
         }
 
         // Report Percentage Improvement
-        System.out.println(initCost + " " + finalSolution.getCost()); // Debug
+        System.out.println(finalSolution.solutionCost + " " + finalSolution.getCost() + " " + finalSolution.getActualCost()); // Debug
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
 
         // Check Feasibility

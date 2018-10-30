@@ -115,7 +115,13 @@ class GiantRoute {
         }
         // System.out.println(solution); // Debug
         solution.updateCost();
+        this.cost = solution.solutionCost;
         return solution;
+    }
+
+    public double updateCost() {
+        this.getSolution();
+        return this.cost;
     }
 
     public double getCustomerRemovalCost(int customer) {
@@ -129,7 +135,7 @@ class GiantRoute {
         return rcost;
     }
 
-    public boolean isInsertionFeasible(int customer, int index) {
+    private boolean isInsertionFeasible(int customer, int index) {
         int vehicleDemand = Main.customers[customer-Main.numCarpark-1].demand;
         int routeDemand = vehicleDemand;
         boolean level2 = false; 
@@ -177,7 +183,8 @@ class GiantRoute {
             int node = giantRoute.elementAt(i);
             if (node != 0 && lastCarpark == 0) {
                 // Insertion is possible at index (i+1)
-                double addCost = Main.nodesDistance[node][customer] + Main.nodesDistance[customer][giantRoute.elementAt(i+1)];
+                int nextNode = giantRoute.elementAt(i+1);
+                double addCost = Main.nodesDistance[node][customer] + Main.nodesDistance[customer][nextNode] - Main.nodesDistance[node][nextNode];
                 if (bestCost == 0 && this.isInsertionFeasible(customer, i+1))  {
                     bestCost = addCost;
                     bestIndex = i+1;
@@ -207,7 +214,7 @@ class GiantRoute {
         }
     }
 
-    public void addNewVehicle(int customer, int carpark) {
+    private void addNewVehicle(int customer, int carpark) {
         // Add a new vehicle in a route which has the carpark as a location. Add the customer to the vehicle.
         System.out.println("Before adding vehicle containing " + customer + " at " + carpark + " : " + this.giantRoute); // Debug
         Vector<Integer> route = new Vector<Integer>();
@@ -252,8 +259,7 @@ class GiantRoute {
         }
         if (flag) {
             System.out.println("Found a valid insertion point at " + index); // Debug
-            this.cost += (2*Main.nodesDistance[carpark-1][customer-Main.numCarpark-1]);
-            this.giantRoute.addAll(index+1, route);
+            this.giantRoute.addAll(index+1, route);  
         } else {
             System.out.println("ADD FIRST LEVEL ROUTE");
         }
@@ -278,13 +284,10 @@ class GiantRoute {
     }
 
     public void removeCustomer(int customer) {
-        int index = this.giantRoute.indexOf(customer);
-        this.cost -= (Main.nodesDistance[giantRoute.elementAt(index-1)][giantRoute.elementAt(index)] + Main.nodesDistance[giantRoute.elementAt(index)][giantRoute.elementAt(index+1)]);
         this.giantRoute.remove((Integer)customer);
     }
 
-    public void addCustomer(int customer, int index) {
-        this.cost += (Main.nodesDistance[giantRoute.elementAt(index-1)][customer] + Main.nodesDistance[customer][giantRoute.elementAt(index)]);
+    private void addCustomer(int customer, int index) {
         this.giantRoute.add(index, customer);
     }
 
