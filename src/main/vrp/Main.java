@@ -22,7 +22,7 @@ public class Main {
 
     // Solution Hyper Parameters
     public static int numUselessIterations;
-    public static int numRestarts = 0;
+    public static int numRestarts = 5;
 
     static Vector<Vehicle> vehicles;
     static Scanner sc;
@@ -170,7 +170,6 @@ public class Main {
         }
 
         // Report Percentage Improvement
-        System.out.println(finalSolution.solutionCost + " " + finalSolution.getCost() + " " + finalSolution.getActualCost()); // Debug
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
 
         // Check Feasibility
