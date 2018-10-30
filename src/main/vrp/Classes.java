@@ -214,6 +214,11 @@ class GiantRoute {
         route.add(carpark);
         route.add(customer);
         route.add(carpark);
+        Route r = new Route();
+        r.addAllCustomers(route, 0);
+        Vehicle newVehicle = new Vehicle(carpark, r);
+        Main.vehicles.add(newVehicle);
+
         // Route constructed for the customer at the given carpark. Now, add the route at a suitable position.
         int vehicleDemand = Main.customers[customer-Main.numCarpark-1].demand;
         int routeDemand = Main.l1cap+1;

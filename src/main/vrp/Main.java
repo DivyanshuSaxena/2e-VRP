@@ -10,6 +10,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class Main {
+    // Problem Static Constants
     public static int numCustomers, numNodes, numCarpark;
     public static int numVehicles1, numVehicles2;
     public static int l1cap, l2cap;
@@ -18,6 +19,11 @@ public class Main {
     public static Customer customers[];
     public static Carpark carparks[];
     public static int inputType;
+
+    // Solution Hyper Parameters
+    public static int numUselessIterations;
+    public static int numRestarts = 10;
+
     static Vector<Vehicle> vehicles;
     static Scanner sc;
 
@@ -88,32 +94,28 @@ public class Main {
     }
 
     public static Solution solve() throws IOException {
+        numUselessIterations = Main.numCustomers > 100 ? Main.numCustomers : 2*Main.numCustomers;
+
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
         double initCost = initsol.getCost();
+        GiantRoute initSolution = initsol.getGiantRoute();
         GiantRoute bestSolution = new GiantRoute();
         System.out.println("Initial Solution : " + initsol + " cost " + initCost);
 
         // Use initial solution to develop the further solutions.
-        int numUselessIterations = Main.numCustomers > 100 ? Main.numCustomers : 2*Main.numCustomers; // Hyper-Parameter
-        int iterations = 0;
-        Solution bestFoundSoln = initsol;
+        int iterations = 0, restarts = 0;
+        Solution currBestSoln = initsol;
         while (true) {
             boolean improvement = true;
-            int iter = 0;
             while (true) {
-                improvement = bestFoundSoln.updateBestNeighbor();
-                if (improvement)
-                    iter = 0;
-                else {
-                    iter++;
-                    if (iter == 10)
+                improvement = currBestSoln.updateBestNeighbor();
+                if (!improvement)
                     break;
-                }
             }
-            System.out.println("Cost after local search : " + bestFoundSoln.solutionCost); // Debug
+            System.out.println("Cost after local search : " + currBestSoln.solutionCost); // Debug
 
-            GiantRoute bfs = bestFoundSoln.getGiantRoute();
+            GiantRoute bfs = currBestSoln.getGiantRoute();
             if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
                 bestSolution = bfs;
                 improvement = true;
@@ -121,15 +123,23 @@ public class Main {
             } else improvement = false;
 
             // Find the best solution of the generated neighborhood, and proceed with it further 
-            bestFoundSoln = bestFoundSoln.perturb();
-            System.out.println("Cost after perturb : " + bestFoundSoln.solutionCost);
+            currBestSoln = currBestSoln.perturb();
+            System.out.println("Cost after perturb : " + currBestSoln.solutionCost);
             System.out.println("--------------------------------------------------"); // Debug
             
             if (improvement) {
                 iterations = 0;
             } else {
                 iterations++;
-                if (iterations == numUselessIterations) break;
+                if (iterations == numUselessIterations) {
+                    System.out.println("NO IMPROVEMENT. RESTART.");
+                    if (restarts <= numRestarts) {
+                        currBestSoln = initSolution.getSolution();
+                        System.out.println(currBestSoln.getCost()); // Debug
+                        iterations = 0;
+                        restarts++;
+                    } else break;
+                }
             }
         }
         long endTime = System.currentTimeMillis();
@@ -159,6 +169,7 @@ public class Main {
         }
 
         // Report Percentage Improvement
+        System.out.println(initCost + " " + finalSolution.getCost()); // Debug
         System.out.println("Percentage Improvement : " + ((initCost-finalSolution.getCost())/initCost*100));
 
         // Check Feasibility
