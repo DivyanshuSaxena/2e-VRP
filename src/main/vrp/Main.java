@@ -98,6 +98,7 @@ public class Main {
 
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
+        System.out.println(initsol.checkCostConsistency()); // Debug
         double initCost = initsol.getCost();
         GiantRoute initSolution = initsol.getGiantRoute();
         GiantRoute bestSolution = new GiantRoute();
@@ -114,6 +115,9 @@ public class Main {
                     break;
             }
             System.out.println("Cost after local search : " + currBestSoln.solutionCost); // Debug
+            // if (!currBestSoln.checkCostConsistency()) {
+            //     System.out.println("COST INCONSISTENCY 1");
+            // }
 
             GiantRoute bfs = currBestSoln.getGiantRoute();
             if (bfs.cost < bestSolution.cost || bestSolution.cost == 0) {
@@ -124,6 +128,9 @@ public class Main {
 
             // Find the best solution of the generated neighborhood, and proceed with it further 
             currBestSoln = currBestSoln.perturb();
+            // if (!currBestSoln.checkCostConsistency()) {
+            //     System.out.println("COST INCONSISTENCY 2");
+            // }
             System.out.println("Cost after perturb : " + currBestSoln.solutionCost);
             System.out.println("--------------------------------------------------"); // Debug
             

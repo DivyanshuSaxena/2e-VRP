@@ -68,13 +68,34 @@ public class Solution implements Iterable<CustomerIndex> {
 
     public double updateCost() {
         // Function to evaluate the total costs of the solution.
-        double cost = 0;
-        for (Route route : this.routes) {
-            cost += route.getCost();
+        // double cost = 0;
+        // for (Route route : this.routes) {
+        //     cost += route.getCost();
+        // }
+        // for (Vehicle cp : Main.vehicles) {
+        //     cost += cp.route.getCost();
+        // }
+        double cost = 0.0;
+        for (Route firstLevel : routes) {
+            for (int cp = 0; cp < firstLevel.route.size()-1; cp++) {
+                int vehicle = firstLevel.route.elementAt(cp);
+                int vehicleNext = firstLevel.route.elementAt(cp+1);
+                int originalcp = vehicle == 0 ? 0 : Main.vehicles.elementAt(vehicle-Main.numNodes).cpindex;
+                int originalcpNext = vehicleNext == 0 ? 0 : Main.vehicles.elementAt(vehicleNext-Main.numNodes).cpindex;
+                cost += Main.nodesDistance[originalcp][originalcpNext];
+                double secondLevelCost = 0.0;
+                if (cp != 0) {
+                    Vehicle v = Main.vehicles.elementAt(vehicle-Main.numNodes);
+                    for (int cust = 0; cust < v.route.route.size()-1; cust++) {
+                        int cust1 = v.route.route.elementAt(cust);
+                        int cust2 = v.route.route.elementAt(cust+1);
+                        secondLevelCost += Main.nodesDistance[cust1][cust2];
+                    }
+                    cost += secondLevelCost;
+                }
+            }
         }
-        for (Vehicle cp : Main.vehicles) {
-            cost += cp.route.getCost();
-        }
+        
         // Add the infeasibility costs here.
         this.solutionCost = cost;
         return cost;
@@ -392,6 +413,40 @@ public class Solution implements Iterable<CustomerIndex> {
         perturbSoln = gr.getSolution();
         return perturbSoln;        
     }
+
+    public boolean checkCostConsistency() {
+        // double updateCost = 0;
+        // for (Route route : this.routes) {
+        //     updateCost += route.getCost();
+        // }
+        // for (Vehicle cp : Main.vehicles) {
+        //     updateCost += cp.route.getCost();
+        // }
+
+        double firstLevelCost = 0.0;
+        for (Route firstLevel : routes) {
+            for (int cp = 0; cp < firstLevel.route.size()-1; cp++) {
+                int vehicle = firstLevel.route.elementAt(cp);
+                int vehicleNext = firstLevel.route.elementAt(cp+1);
+                int originalcp = vehicle == 0 ? 0 : Main.vehicles.elementAt(vehicle-Main.numNodes).cpindex;
+                int originalcpNext = vehicleNext == 0 ? 0 : Main.vehicles.elementAt(vehicleNext-Main.numNodes).cpindex;
+                firstLevelCost += Main.nodesDistance[originalcp][originalcpNext];
+                double secondLevelCost = 0.0;
+                if (cp != 0) {
+                    Vehicle v = Main.vehicles.elementAt(vehicle-Main.numNodes);
+                    for (int cust = 0; cust < v.route.route.size()-1; cust++) {
+                        int cust1 = v.route.route.elementAt(cust);
+                        int cust2 = v.route.route.elementAt(cust+1);
+                        secondLevelCost += Main.nodesDistance[cust1][cust2];
+                    }
+                    firstLevelCost += secondLevelCost;
+                }
+            }
+        }
+        if (firstLevelCost == this.solutionCost)
+            return true;
+        return false;
+    }
     
     public boolean checkFeasibility() {
         System.out.println("\n---------------------------------------------------");
@@ -399,6 +454,7 @@ public class Solution implements Iterable<CustomerIndex> {
         System.out.println("Level 1 Capacity: " + Main.l1cap);
         System.out.println("Level 2 Capacity: " + Main.l2cap);
         
+        int customers = 0;
         for (Route route : this.routes) {
             int firstLevelDemand = 0;
             for (int vehicle : route.route) {
@@ -406,8 +462,10 @@ public class Solution implements Iterable<CustomerIndex> {
                     Route secondLevel = Main.vehicles.elementAt(vehicle-Main.numNodes).route;
                     int secondLevelDemand = 0;
                     for (int cust : secondLevel.route) {
-                        if (cust > Main.numCarpark)
+                        if (cust > Main.numCarpark) {
+                            customers++;
                             secondLevelDemand += Main.customers[cust-Main.numCarpark-1].demand;
+                        }
                     }
                     if (secondLevel.demand != secondLevelDemand) {
                         System.out.println("Demand inconsistent at II route(1) " + vehicle);
@@ -427,6 +485,8 @@ public class Solution implements Iterable<CustomerIndex> {
                 return false;
             }
         }
-        return true;
+        if (customers == Main.numCustomers) 
+            return true;
+        return false;
     }
 }
