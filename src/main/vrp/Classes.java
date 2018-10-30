@@ -209,12 +209,50 @@ class GiantRoute {
 
     public void addNewVehicle(int customer, int carpark) {
         // Add a new vehicle in a route which has the carpark as a location. Add the customer to the vehicle.
-        Route newRoute = new Route();
-        newRoute.setStart(carpark);
-        newRoute.setEnd(carpark);
-        newRoute.addCustomer(customer);
-        Vehicle vehicle = new Vehicle(carpark, newRoute);
-        Main.vehicles.add(vehicle);
+        System.out.println("Before adding vehicle containing " + customer + " at " + carpark + " : " + this.giantRoute); // Debug
+        Vector<Integer> route = new Vector<Integer>();
+        route.add(carpark);
+        route.add(customer);
+        route.add(carpark);
+        // Route constructed for the customer at the given carpark. Now, add the route at a suitable position.
+        int vehicleDemand = Main.customers[customer-Main.numCarpark-1].demand;
+        int routeDemand = Main.l1cap+1;
+        int cpNumber = 0;
+        int index = -1;
+        boolean flag = false;
+        for (int i = 0; i < this.giantRoute.size(); i++) {
+            int node = giantRoute.elementAt(i);
+            if (node != 0) {
+                if (node > Main.numCarpark) {
+                    // Node is a customer. Add its demand in the route demand.
+                    routeDemand += Main.customers[node-Main.numCarpark-1].demand;
+                } else {
+                    // Node is a carpark. Check if it is the desired carpark. 
+                    cpNumber++;
+                    if (cpNumber%2 == 0) {
+                        if (node == carpark) {
+                            index = i;
+                            routeDemand += vehicleDemand;
+                        }
+                    }
+                }
+            } else {
+                if (index != -1 && routeDemand <= Main.l1cap) {
+                    System.out.println(routeDemand + " " + index);
+                    flag = true;
+                    break;
+                }
+                routeDemand = 0;
+            }
+        }
+        if (flag) {
+            System.out.println("Found a valid insertion point at " + index); // Debug
+            this.cost += (2*Main.nodesDistance[carpark-1][customer-Main.numCarpark-1]);
+            this.giantRoute.addAll(index+1, route);
+        } else {
+            System.out.println("ADD FIRST LEVEL ROUTE");
+        }
+        System.out.println("After adding "+ this.giantRoute); // Debug
     }
 
     public double getRegretCost(int customer) {
