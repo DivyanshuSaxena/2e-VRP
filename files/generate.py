@@ -6,8 +6,8 @@ import random
 import math
 import nodecluster
 
-NUM_CUSTOMERS = 500
-MAX_RANGE = 1000
+NUM_CUSTOMERS = 100
+MAX_RANGE = 250
 
 def main():
     """
