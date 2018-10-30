@@ -209,6 +209,12 @@ class GiantRoute {
 
     public void addNewVehicle(int customer, int carpark) {
         // Add a new vehicle in a route which has the carpark as a location. Add the customer to the vehicle.
+        Route newRoute = new Route();
+        newRoute.setStart(carpark);
+        newRoute.setEnd(carpark);
+        newRoute.addCustomer(customer);
+        Vehicle vehicle = new Vehicle(carpark, newRoute);
+        Main.vehicles.add(vehicle);
     }
 
     public double getRegretCost(int customer) {
