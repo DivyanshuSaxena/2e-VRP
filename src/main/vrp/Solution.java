@@ -201,8 +201,8 @@ public class Solution implements Iterable<CustomerIndex> {
             // System.out.println("Found a better solution, relocate customer " + customer + " in route " + clonedRoute + " at " + bestIndex); // Debug
             int vehicleIndex = ci.routecp;
             clonedRoute.addCustomer(customer,bestIndex);
-            if (bestIndex < ci.index)   clonedRoute.removeCustomer(ci.index+1);
-            else    clonedRoute.removeCustomer(ci.index);
+            if (bestIndex < ci.index) clonedRoute.removeCustomer(ci.index+1);
+            else clonedRoute.removeCustomer(ci.index);
             Main.vehicles.elementAt(vehicleIndex-Main.numNodes).route = clonedRoute;
             improvement = true;
             this.updateCost();
@@ -222,11 +222,12 @@ public class Solution implements Iterable<CustomerIndex> {
             int customer1 = swapRoute1.route.elementAt(ci1.index);
             int customer2 = swapRoute2.route.elementAt(ci2.index);
             if (swapRoute1.isSwapFeasible(customer1, customer2) && swapRoute2.isSwapFeasible(customer2, customer1)) {
+                System.out.println("Swapping " + customer1 + " and " + customer2 + " in " + swapRoute1); // Debug
                 swapRoute1.setCustomer(customer2, ci1.index);
                 swapRoute2.setCustomer(customer1, ci2.index);
                 improvement = true;
                 this.updateCost();
-                if (prevCost <= solutionCost) System.out.println("Swapping " + customer1 + " and " + customer2 + " in " + swapRoute1); // Debug
+                if (Math.abs(swapCost-this.solutionCost) > 0.1) System.out.println("PROBLEM IN SWAPPING HERE"); // Debug
             } else {
                 // All infeasible but good quality solutions are received here
                 // System.out.println("Infeasible Solution");
@@ -266,6 +267,9 @@ public class Solution implements Iterable<CustomerIndex> {
         }
         // if (localImp) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
         improvement = improvement || localImp;
+        if (!this.checkFeasibility()) {
+            System.out.println("Move Operator Problem"); // Debug
+        }
 
         // Iterated Swap Procedure
         iter.reset();
@@ -281,6 +285,9 @@ public class Solution implements Iterable<CustomerIndex> {
         }
         // if (localImp) System.out.println("After iterated swap procedure, solution cost: " + this.getCost()); // Debug
         improvement = improvement || localImp;
+        if (!this.checkFeasibility()) {
+            System.out.println("ISP Operator Problem"); // Debug
+        }
 
         // Segment Exchange Operator
         iter.reset();
@@ -321,6 +328,9 @@ public class Solution implements Iterable<CustomerIndex> {
         }
         // if (localImp) System.out.println("After exchange operator, solution cost: " + this.getCost()); // Debug
         improvement = improvement || localImp;
+        if (!this.checkFeasibility()) {
+            System.out.println("Exchange Operator Problem"); // Debug
+        }
 
         // System.out.println("After Local Search " + this.getCost()); // Debug
         return improvement;
@@ -442,14 +452,15 @@ public class Solution implements Iterable<CustomerIndex> {
     }
     
     public boolean checkFeasibility() {
-        System.out.println("\n---------------------------------------------------");
-        System.out.println("---------------Checking Feasibility----------------");
-        System.out.println("Level 1 Capacity: " + Main.l1cap);
-        System.out.println("Level 2 Capacity: " + Main.l2cap);
+        // System.out.println("\n---------------------------------------------------");
+        // System.out.println("---------------Checking Feasibility----------------");
+        // System.out.println("Level 1 Capacity: " + Main.l1cap);
+        // System.out.println("Level 2 Capacity: " + Main.l2cap);
         
         int customers = 0;
         for (Route route : this.routes) {
             int firstLevelDemand = 0;
+            // System.out.println("----------------------------------------");
             for (int vehicle : route.route) {
                 if (vehicle != 0) {
                     Route secondLevel = Main.vehicles.elementAt(vehicle-Main.numNodes).route;
@@ -460,21 +471,24 @@ public class Solution implements Iterable<CustomerIndex> {
                             secondLevelDemand += Main.customers[cust-Main.numCarpark-1].demand;
                         }
                     }
-                    if (secondLevel.demand != secondLevelDemand) {
-                        System.out.println("Demand inconsistent at II route(1) " + vehicle);
-                    }
+                    // if (secondLevel.demand != secondLevelDemand) {
+                    //     System.out.println("Demand inconsistent at II route(1) " + vehicle);
+                    // }
                     if (secondLevelDemand > Main.l2cap) {
-                        System.out.println("Demand inconsistent at II route(2) " + vehicle);
+                        System.out.println("Demand inconsistent at II route(2) " + secondLevel.route);
+                        System.out.println(secondLevelDemand + " " + secondLevel.demand);
                         return false;
                     } 
+                    // System.out.println("Adding " + secondLevelDemand + " for " + secondLevel);
                     firstLevelDemand += secondLevelDemand;
                 }
-            }
-            if (firstLevelDemand != route.demand) {
-                System.out.println("Demand inconsistent at I route(1)");
-            }
+            }   
+            // if (firstLevelDemand != route.demand) {
+            //     System.out.println("Demand inconsistent at I route(1)");
+            // }
             if (firstLevelDemand > Main.l1cap) {
                 System.out.println("Demand inconsistent at I route(2)");
+                System.out.println(firstLevelDemand + " " + route.demand);
                 return false;
             }
         }

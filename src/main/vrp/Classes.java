@@ -257,11 +257,17 @@ class GiantRoute {
                 routeDemand = 0;
             }
         }
+
         if (flag) {
             System.out.println("Found a valid insertion point at " + index); // Debug
             this.giantRoute.addAll(index+1, route);  
         } else {
             System.out.println("ADD FIRST LEVEL ROUTE");
+            Vector<Integer> firstLevel = new Vector<Integer>();
+            firstLevel.add(0);
+            firstLevel.addAll(route);
+            firstLevel.add(0);
+            this.giantRoute.addAll(firstLevel);
         }
         System.out.println("After adding "+ this.giantRoute); // Debug
     }

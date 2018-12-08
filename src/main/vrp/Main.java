@@ -107,13 +107,21 @@ public class Main {
         // Use initial solution to develop the further solutions.
         int iterations = 0, restarts = 0;
         Solution currBestSoln = initsol;
+        boolean problem = false;
         while (true) {
             boolean improvement = true;
             while (true) {
                 improvement = currBestSoln.updateBestNeighbor();
+                if (!currBestSoln.checkFeasibility()) {
+                    System.out.println("Local Search Problem Here."); // Debug
+                    problem = true;
+                    break;
+                }
                 if (!improvement)
                     break;
             }
+            if (problem)
+                break;
             System.out.println("Cost after local search : " + currBestSoln.solutionCost); // Debug
 
             GiantRoute bfs = currBestSoln.getGiantRoute();
