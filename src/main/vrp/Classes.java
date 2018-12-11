@@ -303,20 +303,17 @@ class GiantRoute {
         int prevPrevNode = giantRoute.elementAt(0);
         for (int i = 2; i < giantRoute.size(); i++) {
             currNode = giantRoute.elementAt(i);
-            if (currNode == prevNode && prevPrevNode == 0) {
-                giantRoute.remove(i);
-                giantRoute.remove(--i);
-                if (i < giantRoute.size() && giantRoute.elementAt(i) == 0) {
+            if (currNode == prevNode && currNode == prevPrevNode) {
+                if (prevPrevNode <= Main.numCarpark) {
                     giantRoute.remove(i);
                     giantRoute.remove(--i);
+                    if (prevPrevNode == 0 && giantRoute.elementAt(i) == 0) {
+                        giantRoute.remove(i);
+                        giantRoute.remove(--i);
+                    }
                 }
-                i--;
-            } else if (currNode == prevNode && currNode == prevPrevNode) {
-                giantRoute.remove(i);
-                giantRoute.remove(--i);
-                i--;
             }
-            prevPrevNode = i > 0? giantRoute.elementAt(i-1) : 0;
+            prevPrevNode = giantRoute.elementAt(i-1);
             prevNode = giantRoute.elementAt(i);
         }
     }
