@@ -298,26 +298,26 @@ class GiantRoute {
     }
 
     public void removeUnusedCarparks() {
-        int prevNode = -1, lastCarpark = 0;
-        int currNode = giantRoute.elementAt(0);
-        for (int i = 1; i < giantRoute.size(); i++) {
+        int currNode = giantRoute.elementAt(2);
+        int prevNode = giantRoute.elementAt(1);
+        int prevPrevNode = giantRoute.elementAt(0);
+        for (int i = 2; i < giantRoute.size(); i++) {
             currNode = giantRoute.elementAt(i);
-            if (currNode <= Main.numCarpark && currNode != 0) {
-                if (lastCarpark == currNode) {
-                    lastCarpark = 0;
-                    if (currNode == prevNode) {
-                        giantRoute.remove(i);
-                        giantRoute.remove(i-1);
-                    }
-                    if (giantRoute.elementAt(i-2) == giantRoute.elementAt(i-1)) {
-                        giantRoute.remove(i-1);
-                        giantRoute.remove(i-2);
-                    }
-                } else {
-                    lastCarpark = currNode;
+            if (currNode == prevNode && prevPrevNode == 0) {
+                giantRoute.remove(i);
+                giantRoute.remove(--i);
+                if (i < giantRoute.size() && giantRoute.elementAt(i) == 0) {
+                    giantRoute.remove(i);
+                    giantRoute.remove(--i);
                 }
+                i--;
+            } else if (currNode == prevNode && currNode == prevPrevNode) {
+                giantRoute.remove(i);
+                giantRoute.remove(--i);
+                i--;
             }
-            prevNode = currNode;
+            prevPrevNode = giantRoute.elementAt(i-1);
+            prevNode = giantRoute.elementAt(i);
         }
     }
 }

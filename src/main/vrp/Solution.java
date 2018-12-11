@@ -66,6 +66,54 @@ public class Solution implements Iterable<CustomerIndex> {
         return this.solutionCost;
     }
 
+    public void updateFirstLevelDemands() {
+        for (Route route : this.routes) {
+            int firstLevelDemand = 0;
+            for (int vehicle : route.route) {
+                if (vehicle != 0) {
+                    Route secondLevel = Main.vehicles.elementAt(vehicle-Main.numNodes).route;
+                    int secondLevelDemand = 0;
+                    for (int cust : secondLevel.route) {
+                        if (cust > Main.numCarpark) {
+                            secondLevelDemand += Main.customers[cust-Main.numCarpark-1].demand;
+                        }
+                    } 
+                    firstLevelDemand += secondLevelDemand;
+                }
+            }
+            route.demand = firstLevelDemand;
+        }
+    }
+
+    public boolean isSwapFeasible(CustomerIndex ci1, CustomerIndex ci2) {
+        int cp1 = ci1.routecp;
+        int cp2 = ci2.routecp;
+        Route swapRoute1 = Main.vehicles.elementAt(cp1-Main.numNodes).route;
+        Route swapRoute2 = Main.vehicles.elementAt(cp2-Main.numNodes).route;
+        Customer customer1 = Main.customers[swapRoute1.route.elementAt(ci1.index)-Main.numCarpark-1];
+        Customer customer2 = Main.customers[swapRoute2.route.elementAt(ci2.index)-Main.numCarpark-1];
+
+        int flag = 0;
+        for (Route route : routes) {
+            int firstLevelDemand = route.getDemand();
+            if (route.route.contains(cp1)) {
+                firstLevelDemand += (customer2.demand - customer1.demand);
+                if (firstLevelDemand <= Main.l1cap) {
+                    flag++;
+                } else break;
+            }
+            if (route.route.contains(cp2)) {
+                firstLevelDemand += (customer1.demand - customer2.demand);
+                if (firstLevelDemand <= Main.l1cap) {
+                    flag++;
+                } else break;
+            }
+            if (flag == 2) break;
+        }
+        if (flag == 2) return true;
+        return false;
+    }
+
     public double updateCost() {
         // Function to evaluate the total costs of the solution.
         double cost = this.getActualCost();
@@ -206,6 +254,7 @@ public class Solution implements Iterable<CustomerIndex> {
             Main.vehicles.elementAt(vehicleIndex-Main.numNodes).route = clonedRoute;
             improvement = true;
             this.updateCost();
+            this.updateFirstLevelDemands();
         }
         // Random customer relocated to the best location in the route
         return improvement;
@@ -222,12 +271,16 @@ public class Solution implements Iterable<CustomerIndex> {
             int customer1 = swapRoute1.route.elementAt(ci1.index);
             int customer2 = swapRoute2.route.elementAt(ci2.index);
             if (swapRoute1.isSwapFeasible(customer1, customer2) && swapRoute2.isSwapFeasible(customer2, customer1)) {
-                System.out.println("Swapping " + customer1 + " and " + customer2 + " in " + swapRoute1); // Debug
-                swapRoute1.setCustomer(customer2, ci1.index);
-                swapRoute2.setCustomer(customer1, ci2.index);
-                improvement = true;
-                this.updateCost();
-                if (Math.abs(swapCost-this.solutionCost) > 0.1) System.out.println("PROBLEM IN SWAPPING HERE"); // Debug
+                // Check first level demands consistency
+                if (this.isSwapFeasible(ci1, ci2)) {
+                    System.out.println("Swapping " + customer1 + " and " + customer2 + " in " + swapRoute1); // Debug
+                    swapRoute1.setCustomer(customer2, ci1.index);
+                    swapRoute2.setCustomer(customer1, ci2.index);
+                    improvement = true;
+                    this.updateCost();
+                    this.updateFirstLevelDemands();
+                    if (Math.abs(swapCost-this.solutionCost) > 0.1) System.out.println("PROBLEM IN SWAPPING HERE"); // Debug
+                }
             } else {
                 // All infeasible but good quality solutions are received here
                 // System.out.println("Infeasible Solution");
@@ -258,7 +311,11 @@ public class Solution implements Iterable<CustomerIndex> {
     public boolean updateBestNeighbor() {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
-        // System.out.println("Before Local Search " + this.getCost()); // Debug
+        System.out.println("Before Local Search " + this.getCost()); // Debug
+        if (!this.checkFeasibility()) {
+            System.out.println("Perturb Operator Problem"); // Debug
+        }
+
         boolean improvement = false, localImp = false;
         SolutionIterator iter = new SolutionIterator(this);
         while (iter.hasNext()) {
@@ -323,6 +380,7 @@ public class Solution implements Iterable<CustomerIndex> {
                 // System.out.println("New Routes : " + exchangeRoute1 + " and " + exchangeRoute2); // Debug
                 localImp = true;
                 this.updateCost();
+                this.updateFirstLevelDemands();
                 // System.out.println("Updated Cost : " + this.solutionCost); // Debug
             }           
         }
@@ -402,6 +460,7 @@ public class Solution implements Iterable<CustomerIndex> {
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether
         final GiantRoute gr = this.getGiantRoute();
+        System.out.println(gr.giantRoute); // Debug
         Solution perturbSoln = new Solution();
         int q = Main.numCustomers/10;
 
@@ -416,14 +475,17 @@ public class Solution implements Iterable<CustomerIndex> {
             customerPool = this.routeRemoval(gr, vehicleIndex1); // Route Removal
         }
         System.out.println("Size of customer pool: " + customerPool.size());
+        System.out.println(gr.giantRoute); // Debug
         this.regretInsertion(gr, customerPool); // Regret Insertion
 
+        System.out.println(gr.giantRoute); // Debug
         // Check the solution for any removed carparks
         gr.removeUnusedCarparks();
         
         // System.out.println("Giant Route after regret insertion : " + gr.giantRoute); // Debug
+        System.out.println(gr.giantRoute); // Debug
         perturbSoln = gr.getSolution();
-        if (gr.cost - perturbSoln.solutionCost > 0.0001) {
+        if (Math.abs(gr.cost - perturbSoln.solutionCost) > 0.0001) {
             System.out.println(gr.cost + " " + perturbSoln.solutionCost); // Debug
             System.out.println("COST INCONSISTENT 2"); // Debug
         }

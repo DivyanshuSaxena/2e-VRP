@@ -98,10 +98,11 @@ public class Main {
 
         long startTime = System.currentTimeMillis();
         Solution initsol = getInitialSoln();
-        System.out.println(initsol.checkCostConsistency()); // Debug
         double initCost = initsol.getCost();
         GiantRoute initSolution = initsol.getGiantRoute();
         GiantRoute bestSolution = new GiantRoute();
+        System.out.println("Capacities: " + l1cap + " " + l2cap);
+        System.out.println("Customers: " + numCustomers);
         System.out.println("Initial Solution : " + initsol + " cost " + initCost);
 
         // Use initial solution to develop the further solutions.
@@ -132,7 +133,13 @@ public class Main {
             } else improvement = false;
 
             // Find the best solution of the generated neighborhood, and proceed with it further 
+            if (!currBestSoln.checkFeasibility()) {
+                System.out.println("Problem before perturb as well."); // Debug
+            }
             currBestSoln = currBestSoln.perturb();
+            if (!currBestSoln.checkFeasibility()) {
+                System.out.println("Perturb Problem Here."); // Debug
+            }
             System.out.println("Cost after perturb : " + currBestSoln.solutionCost);
             System.out.println("--------------------------------------------------"); // Debug
 

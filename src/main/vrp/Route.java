@@ -9,11 +9,13 @@ class Route {
     Vector<Integer> route;
     double routeCost;
     int demand;
+
     public Route() {
         route = new Vector<Integer>();
         routeCost = 0.0;
         demand = 0;
     }
+
     public String toString() {
         // Give the string representation for the Route object
         String route = "";
@@ -23,6 +25,7 @@ class Route {
         route += (": " + demand);
         return route;
     }
+    
     public Route clone() {
         Route clonedRoute = new Route();
         clonedRoute.routeCost = this.routeCost;
@@ -33,6 +36,7 @@ class Route {
 		clonedRoute.route = clone;
         return clonedRoute;
     }
+    
     public void addCustomer(int id) {
         route.add(id);
         // Add the demand accordingly, whether the added node is a customer or a carpark 
@@ -82,6 +86,7 @@ class Route {
             insertIndex++;
         }
     }
+    
     public void removeCustomer(int custIndex) {
         // This function shall be required only for customers and not for depots
         int cust = this.route.elementAt(custIndex);
@@ -96,6 +101,7 @@ class Route {
             i--;
         }
     }
+    
     public void setCustomer(int id, int index) {
     	// System.out.println("Setting customer " + id + " in " + this.toString() + " at " + index); // Debug
         int offset = Main.numCarpark+1;
@@ -119,6 +125,7 @@ class Route {
         this.routeCost = this.routeCost - removedCost + addedCost; 
         this.route.set(route.size()-1, id);
     }
+    
     public int positionOf(int customer) {
         // This function gives the position of the customer in the route.
         // It returns -2 if the customer is at the begin or end of the route
@@ -131,6 +138,7 @@ class Route {
         }
         return index;
     }
+    
     public Vector<Integer> getSubRoute(int startIndex, int endIndex) {
         Vector<Integer> v = new Vector<Integer>();
         for (int i = startIndex; i <= endIndex; i++) {
@@ -138,6 +146,7 @@ class Route {
         }
         return v;
     }
+    
     public boolean isSwapFeasible(int removeCustomer, int newCustomer) {
         int removeDemand = Main.customers[removeCustomer-Main.numCarpark-1].demand;
         int addDemand = Main.customers[newCustomer-Main.numCarpark-1].demand;
@@ -154,6 +163,7 @@ class Route {
         }
         return (this.demand+addDemand-removeDemand <= Main.l2cap);
     }
+    
     public Route mergeRoute(Route r) {
         // Function to return the merged rotue with the current route
         Route merged = new Route();
@@ -185,6 +195,7 @@ class Route {
         // System.out.println("Merged Route: " + merged); // Debug
         return merged;
     }
+    
     public double getCost() {
         // Function to evaluate the total costs of the solution, including the infeasibility costs
         // Presently, no infeasibility costs are taken into account
@@ -203,5 +214,19 @@ class Route {
         // Add the infeasibility costs here.
         // System.out.println(cost); // Debug
         return cost;
+    }
+
+    public int getDemand() {
+        int demand = 0;
+        for (int index : this.route) {
+            if (index > 0 && index < Main.numNodes) {
+                demand += Main.customers[index-Main.numCarpark-1].demand;
+            } else if (index >= Main.numNodes){
+                Vehicle v = Main.vehicles.elementAt(index-Main.numNodes);
+                demand += v.route.demand;
+            }
+        }
+        this.demand = demand;
+        return demand;
     }
 }
