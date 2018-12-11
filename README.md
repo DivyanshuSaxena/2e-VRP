@@ -53,8 +53,13 @@ Also the project makes use of making a server side application that can be calle
 3. The resulting final solution can be visualaized using the following command:  
 ```py display.py``` [On Windows]  
 ```python display.py``` [On Linux]  
-  
-### JSON Format Structure
+
+## Hyper Parameters
+1. `numUselessIterations` : Number of no-improvement iterations before a restart
+2. `numRestarts` : Number of random restarts 
+3. `probRemoval` : The probability of choosing either of perturb insertion operators
+
+## JSON Format Structure
 The input JSON object to the java code must be in the following format:  
 ```
 {

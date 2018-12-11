@@ -140,6 +140,8 @@ public class Main {
 
             // Find the best solution of the generated neighborhood, and proceed with it further 
             currBestSoln = currBestSoln.perturb();
+            // System.out.println(currBestSoln); // Debug
+
             if (checkFeasibility && !currBestSoln.checkFeasibility()) {
                 System.out.println("Perturb Problem Here."); // Debug
             }

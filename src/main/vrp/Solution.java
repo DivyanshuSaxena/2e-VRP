@@ -225,6 +225,11 @@ public class Solution implements Iterable<CustomerIndex> {
         boolean improvement = false;
         Route clonedRoute = Main.vehicles.elementAt(ci.routecp-Main.numNodes).route; // Index of the selected vehicle
         int customer = clonedRoute.route.elementAt(ci.index); // Index of the selected random customer
+        if (clonedRoute.route.size() == 2) {
+            System.out.println(this.toString());
+            System.out.println(this.getGiantRoute().giantRoute);
+        }
+        
         // This customer is to be placed in the best location, in the route of the given Vehicle
         int prevCustomer = clonedRoute.route.elementAt(ci.index-1);
         int nextCustomer = clonedRoute.route.elementAt(ci.index+1);
