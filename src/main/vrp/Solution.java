@@ -273,7 +273,7 @@ public class Solution implements Iterable<CustomerIndex> {
             if (swapRoute1.isSwapFeasible(customer1, customer2) && swapRoute2.isSwapFeasible(customer2, customer1)) {
                 // Check first level demands consistency
                 if (this.isSwapFeasible(ci1, ci2)) {
-                    System.out.println("Swapping " + customer1 + " and " + customer2 + " in " + swapRoute1); // Debug
+                    // System.out.println("Swapping " + customer1 + " and " + customer2 + " in " + swapRoute1 + " and " + swapRoute2); // Debug
                     swapRoute1.setCustomer(customer2, ci1.index);
                     swapRoute2.setCustomer(customer1, ci2.index);
                     improvement = true;
@@ -308,12 +308,15 @@ public class Solution implements Iterable<CustomerIndex> {
         return (addCost1-subtractCost1);
         // return improvement;
     }
+
     public boolean updateBestNeighbor() {
         // Generate Neighborhood logic here
         // Apply the move operator on the Solution to get to a better solution
-        System.out.println("Before Local Search " + this.getCost()); // Debug
-        if (!this.checkFeasibility()) {
-            System.out.println("Perturb Operator Problem"); // Debug
+        if (Main.checkFeasibility) {
+            System.out.println("Before Local Search " + this.getCost()); // Debug
+            if (!this.checkFeasibility()) {
+                System.out.println("Perturb Operator Problem"); // Debug
+            }
         }
 
         boolean improvement = false, localImp = false;
@@ -324,7 +327,7 @@ public class Solution implements Iterable<CustomerIndex> {
         }
         // if (localImp) System.out.println("After improved move, solution cost: " + this.getCost()); // Debug
         improvement = improvement || localImp;
-        if (!this.checkFeasibility()) {
+        if (Main.checkFeasibility && !this.checkFeasibility()) {
             System.out.println("Move Operator Problem"); // Debug
         }
 
@@ -342,7 +345,7 @@ public class Solution implements Iterable<CustomerIndex> {
         }
         // if (localImp) System.out.println("After iterated swap procedure, solution cost: " + this.getCost()); // Debug
         improvement = improvement || localImp;
-        if (!this.checkFeasibility()) {
+        if (Main.checkFeasibility && !this.checkFeasibility()) {
             System.out.println("ISP Operator Problem"); // Debug
         }
 
@@ -386,13 +389,14 @@ public class Solution implements Iterable<CustomerIndex> {
         }
         // if (localImp) System.out.println("After exchange operator, solution cost: " + this.getCost()); // Debug
         improvement = improvement || localImp;
-        if (!this.checkFeasibility()) {
+        if (Main.checkFeasibility && !this.checkFeasibility()) {
             System.out.println("Exchange Operator Problem"); // Debug
         }
 
         // System.out.println("After Local Search " + this.getCost()); // Debug
         return improvement;
     }
+
     private Vector<Integer> routeRemoval(GiantRoute gr, int vehicleIndex) {
         Vector<Integer> customers = new Vector<Integer>();
         Vector<Integer> selectedRoute = Main.vehicles.elementAt(vehicleIndex).route.route;
@@ -460,13 +464,12 @@ public class Solution implements Iterable<CustomerIndex> {
     public Solution perturb() {
         // Perturb the local best found solution to get a new solution altogether
         final GiantRoute gr = this.getGiantRoute();
-        System.out.println(gr.giantRoute); // Debug
         Solution perturbSoln = new Solution();
         int q = Main.numCustomers/10;
 
         double p = Math.random();
         Vector<Integer> customerPool = new Vector<Integer>(); 
-        if (p <= 0.2) {
+        if (p <= Main.probRemoval) {
             customerPool = this.worstRemoval(gr,q); // Worst Removal
         } else {
             int vehicleIndex1 = this.getRandomVehicle();
@@ -475,15 +478,12 @@ public class Solution implements Iterable<CustomerIndex> {
             customerPool = this.routeRemoval(gr, vehicleIndex1); // Route Removal
         }
         System.out.println("Size of customer pool: " + customerPool.size());
-        System.out.println(gr.giantRoute); // Debug
         this.regretInsertion(gr, customerPool); // Regret Insertion
 
-        System.out.println(gr.giantRoute); // Debug
         // Check the solution for any removed carparks
         gr.removeUnusedCarparks();
         
         // System.out.println("Giant Route after regret insertion : " + gr.giantRoute); // Debug
-        System.out.println(gr.giantRoute); // Debug
         perturbSoln = gr.getSolution();
         if (Math.abs(gr.cost - perturbSoln.solutionCost) > 0.0001) {
             System.out.println(gr.cost + " " + perturbSoln.solutionCost); // Debug
@@ -533,11 +533,8 @@ public class Solution implements Iterable<CustomerIndex> {
                             secondLevelDemand += Main.customers[cust-Main.numCarpark-1].demand;
                         }
                     }
-                    // if (secondLevel.demand != secondLevelDemand) {
-                    //     System.out.println("Demand inconsistent at II route(1) " + vehicle);
-                    // }
                     if (secondLevelDemand > Main.l2cap) {
-                        System.out.println("Demand inconsistent at II route(2) " + secondLevel.route);
+                        System.out.println("Demand inconsistent at II route " + secondLevel.route);
                         System.out.println(secondLevelDemand + " " + secondLevel.demand);
                         return false;
                     } 
@@ -545,11 +542,8 @@ public class Solution implements Iterable<CustomerIndex> {
                     firstLevelDemand += secondLevelDemand;
                 }
             }   
-            // if (firstLevelDemand != route.demand) {
-            //     System.out.println("Demand inconsistent at I route(1)");
-            // }
             if (firstLevelDemand > Main.l1cap) {
-                System.out.println("Demand inconsistent at I route(2)");
+                System.out.println("Demand inconsistent at I route");
                 System.out.println(firstLevelDemand + " " + route.demand);
                 return false;
             }

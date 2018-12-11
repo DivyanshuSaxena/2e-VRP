@@ -316,7 +316,7 @@ class GiantRoute {
                 giantRoute.remove(--i);
                 i--;
             }
-            prevPrevNode = giantRoute.elementAt(i-1);
+            prevPrevNode = i > 0? giantRoute.elementAt(i-1) : 0;
             prevNode = giantRoute.elementAt(i);
         }
     }

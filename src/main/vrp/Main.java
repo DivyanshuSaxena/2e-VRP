@@ -23,9 +23,13 @@ public class Main {
     // Solution Hyper Parameters
     public static int numUselessIterations;
     public static int numRestarts = 5;
+    public static double probRemoval = 0.4;
 
     static Vector<Vehicle> vehicles;
     static Scanner sc;
+
+    // Debug Parameters
+    public static boolean checkFeasibility;
 
     // Change the name of this method suitably
     public static void main(String args[]) throws IOException {
@@ -41,6 +45,8 @@ public class Main {
             inputType = 2;
             fileio.setTwoInput();
         }
+        checkFeasibility = false;
+
         solve();
     }
 
@@ -113,7 +119,7 @@ public class Main {
             boolean improvement = true;
             while (true) {
                 improvement = currBestSoln.updateBestNeighbor();
-                if (!currBestSoln.checkFeasibility()) {
+                if (checkFeasibility && !currBestSoln.checkFeasibility()) {
                     System.out.println("Local Search Problem Here."); // Debug
                     problem = true;
                     break;
@@ -133,11 +139,8 @@ public class Main {
             } else improvement = false;
 
             // Find the best solution of the generated neighborhood, and proceed with it further 
-            if (!currBestSoln.checkFeasibility()) {
-                System.out.println("Problem before perturb as well."); // Debug
-            }
             currBestSoln = currBestSoln.perturb();
-            if (!currBestSoln.checkFeasibility()) {
+            if (checkFeasibility && !currBestSoln.checkFeasibility()) {
                 System.out.println("Perturb Problem Here."); // Debug
             }
             System.out.println("Cost after perturb : " + currBestSoln.solutionCost);
