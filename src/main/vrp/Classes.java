@@ -298,13 +298,15 @@ class GiantRoute {
     }
 
     public void removeUnusedCarparks() {
+        // System.out.println(this.giantRoute); // Debug
         int currNode = giantRoute.elementAt(2);
         int prevNode = giantRoute.elementAt(1);
         int prevPrevNode = giantRoute.elementAt(0);
         for (int i = 2; i < giantRoute.size(); i++) {
             currNode = giantRoute.elementAt(i);
-            if (currNode == prevNode && currNode == prevPrevNode) {
+            if (currNode == prevNode && currNode != 0) {
                 if (prevPrevNode <= Main.numCarpark) {
+                    // System.out.println("Removing " + currNode + " " + prevNode); // Debug
                     giantRoute.remove(i);
                     giantRoute.remove(--i);
                     if (prevPrevNode == 0 && giantRoute.elementAt(i) == 0) {
@@ -316,5 +318,7 @@ class GiantRoute {
             prevPrevNode = giantRoute.elementAt(i-1);
             prevNode = giantRoute.elementAt(i);
         }
+
+        // System.out.println(this.giantRoute); // Debug
     }
 }
